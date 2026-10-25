@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="See what readers say about the books at The Reading Nook.">
+<title>Reader Love — Reviews | The Reading Nook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-page="reviews">
+<div class="top">A LITTLE SPACE FOR BIG IDEAS · WELCOME, BOOK LOVERS</div>
+<header class="nav"><div class="wrap">
+<a class="brand" href="index.html"><span class="mark">✦</span><span>The Reading Nook<small>Books · Ideas · Possibilities</small></span></a>
+<nav class="links" id="links"><a href="index.html" data-v="home">Home</a><a href="library.html" data-v="books">Library</a><a href="reviews.html" data-v="reviews">Reader Love</a><a href="story.html" data-v="story">Our Story</a><a href="contact.html" data-v="contact">Contact</a></nav>
+<div class="row" style="gap:10px"><button class="saved" id="savedBtn" title="Your saved books">♥ <span id="sc">0</span></button><button class="saved" id="cartBtn" title="Your bag">🛒 <span id="cc">0</span></button><button class="burger" id="burger" aria-label="Menu">☰</button></div>
+</div></header>
+
+<main>
+<section class="view" id="v-reviews"><div class="sec"><div class="wrap">
+<div class="head"><span class="eyebrow">Reader love</span><h2>Words from our readers</h2><p>Every review helps another reader find their next favourite book.</p></div>
+<div class="score"><div><big id="avg">0.0</big><div class="stars" id="avgStars"></div><p id="cnt"></p></div><div class="bars" id="bars"></div></div>
+<div class="two"><div class="cards" style="grid-template-columns:1fr" id="revList"></div>
+<form class="form" id="revForm"><h3>Loved a book? Tell us.</h3>
+<label>Your rating</label><div class="rate" id="rate"></div>
+<label for="rn">Your name</label><input id="rn" required maxlength="30" placeholder="e.g. Priya S.">
+<label for="rb">Book you read</label><select id="rb"></select>
+<label for="rt">Your review</label><textarea id="rt" required maxlength="280" rows="4" placeholder="What did you love about it?"></textarea>
+<button class="btn" type="submit">Share my review ♥</button><p style="font-size:11px;color:var(--muted);margin:10px 0 0">Reviews you add here show on your own device. To feature them for everyone, send them to us and we’ll add them to the site.</p></form></div>
+</div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap"><div><b>The Reading Nook</b><br>Curiosity, one page at a time.</div><div>Welcome from Tanuja Sharma · © <span id="yr"></span></div><div class="row" style="gap:16px"><a href="library.html">Books</a><a href="reviews.html">Reader Love</a><a href="contact.html">Contact</a></div></div></footer>
+<div class="drawer" id="drawer"><div class="dbk" data-close></div><aside class="dp"><div class="row" style="justify-content:space-between"><h3 style="margin:0">Your library bag</h3><button class="burger" style="display:block" data-close aria-label="Close">×</button></div><div id="items"></div><div class="li"><b>Total</b><b id="tot">₹0</b></div>
+<form id="co" style="margin-top:14px"><input id="on" required placeholder="Your name"><input id="op" required type="tel" placeholder="Phone / WhatsApp" style="margin-top:8px"><textarea id="oa" rows="2" placeholder="Delivery address (or write ‘pickup’)" style="margin-top:8px"></textarea><label style="font-size:12px;font-weight:700;margin:12px 0 6px;display:block">Pay with</label><div class="pm"><label><input type="radio" name="pm" value="upi" checked> UPI · scan or tap (GPay, PhonePe, Paytm)</label><label><input type="radio" name="pm" value="card"> Card / Net banking (secure link)</label><label><input type="radio" name="pm" value="store"> Pay at store / on delivery</label></div><button class="btn" style="width:100%;margin-top:14px" type="submit">Place order &amp; pay →</button></form><div id="done" style="display:none"></div></aside></div>
+<div class="toast" id="toast"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<script src="app.js"></script>
+</body></html>
