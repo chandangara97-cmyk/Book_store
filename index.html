@@ -88,6 +88,10 @@ dialog{border:2px solid var(--ink);border-radius:20px;padding:28px;max-width:440
 @media(max-width:720px){.menu{display:block}nav ul{display:none;position:absolute;left:0;right:0;top:70px;background:var(--bg);flex-direction:column;gap:0;padding:8px 24px 18px;border-bottom:1px solid var(--line)}nav ul.open{display:flex}nav li a{display:block;padding:12px 0}.nav>.btn{display:none}}
 @media(max-width:480px){.stair b{font-size:22px}.stair span{font-size:13px}.stg button{padding:7px 12px;font-size:15px}.ticks span:nth-child(even){visibility:hidden}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}html{scroll-behavior:auto}}
+
+/* Toys + book-and-play gifting */
+.toy-promo{background:#f1f8f3;padding:76px 0}.toy-promo-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:38px;align-items:center}.toy-kicker{display:inline-block;background:#d5f1df;color:#225b3c;padding:7px 13px;border-radius:99px;font-size:13px;font-weight:800;letter-spacing:.08em;margin-bottom:16px}.toy-promo h2{max-width:15ch}.toy-promo .intro{margin:18px 0 22px}.toy-promo-photo{min-height:390px;border-radius:28px;background:#dce8dd url('https://images.unsplash.com/photo-1560961911-ba7ef651a56c?auto=format&fit=crop&w=1200&q=85') center/cover no-repeat;box-shadow:0 18px 40px rgba(27,42,74,.14)}.reward-strip{display:grid;gap:7px;margin-top:28px;padding:18px 20px;border:1px solid #c9e4d0;border-radius:18px;background:#fff;font-size:15px}.reward-strip strong{font:700 20px var(--d)}.reward-strip span{color:#315c43}.reward-strip small{color:var(--mut);font-size:12px}@media(max-width:760px){.toy-promo-grid{grid-template-columns:1fr}.toy-promo-photo{min-height:260px;grid-row:1}.toy-promo{padding:54px 0}}
+
 </style>
 </head>
 <body>
@@ -131,6 +135,8 @@ dialog{border:2px solid var(--ink);border-radius:20px;padding:28px;max-width:440
 <div class="fmt" style="border-top:10px solid var(--sky)"><img src="img/format-digital.svg" alt="A tablet showing a digital book" loading="lazy"><h3>Digital copy</h3><ul><li>Read on a phone, tablet or computer</li><li>Lower price and no waiting for delivery</li><li>Easy to carry on trips and share across your devices</li></ul></div>
 </div></div></section>
 
+<section class="toy-promo" id="toys"><div class="wrap toy-promo-grid"><div><span class="toy-kicker">PLAY · CREATE · DISCOVER</span><h2>Stories are even better with a little play.</h2><p class="intro">Explore toys, puzzles and creative kits that turn reading time into hands-on adventures. Pair a book with a toy for a thoughtful gift.</p><div class="acts" style="padding-bottom:0"><a class="btn" href="toys.html">Explore toys & learning kits</a><a class="btn alt" href="library/gifts.html">Browse book gifts</a></div><div class="reward-strip"><strong>🎁 Little extras, unlocked</strong><span>Spend ₹999 on books and toys → choose a free colouring kit</span><span>Spend ₹1,499 → unlock a free mini toy too</span><small>Gift thresholds are based on merchandise subtotal before shipping. While stocks last.</small></div></div><div class="toy-promo-photo" role="img" aria-label="Colourful toys, puzzles and children's books arranged together"></div></div></section>
+
 <section class="visual-story" aria-labelledby="story-title"><div class="wrap">
 <h2 id="story-title">Little readers. Big possibilities.</h2>
 <p class="intro">A welcoming place for every kind of learner — from first picture books to the ideas that inspire tomorrow.</p>
@@ -159,7 +165,7 @@ dialog{border:2px solid var(--ink);border-radius:20px;padding:28px;max-width:440
 
 <div class="help"><div class="wrap"><img class="helpimg" src="img/help.svg" alt="A child reading on a stack of books" loading="lazy"><h2>Need help choosing?</h2><p>Tell us your child's age and interests, and we will suggest the right book.</p><button class="btn" id="ask">Ask us</button></div></div>
 </main>
-<footer><div class="wrap fi"><div>&copy; <span id="yr">2026</span> The Reading Nook. All rights reserved.</div><div><a href="library/all.html">All books</a> &nbsp; <a href="gift-finder.html">Gift Finder</a> &nbsp; <a href="wishlist.html">Wishlist</a> &nbsp; <a href="cart.html">Cart</a> &nbsp; <a href="auth.html">Account</a></div></div></footer>
+<footer><div class="wrap fi"><div>&copy; <span id="yr">2026</span> The Reading Nook. All rights reserved.</div><div><a href="library/all.html">All books</a> &nbsp; <a href="toys.html">Toys</a> &nbsp; <a href="gift-finder.html">Gift Finder</a> &nbsp; <a href="wishlist.html">Wishlist</a> &nbsp; <a href="cart.html">Cart</a> &nbsp; <a href="auth.html">Account</a></div></div></footer>
 <dialog id="dlg"><h3 id="dt"></h3><p id="dp"></p><button class="btn" id="dc">Close</button></dialog>
 <script>
 /* ===== EDIT THIS SECTION ===== */

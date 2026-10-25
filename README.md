@@ -54,3 +54,11 @@ the-reading-nook/
 
 © 2026 The Reading Nook
 ```
+## Premium storefront and Admin Studio
+
+- Admin workspace: `admin/index.html`
+- The admin workspace can create/update book records under `/books/{slug}` and toy/gift records under `/toys/{slug}` in Firebase Realtime Database.
+- Before using the admin workspace, replace `YOUR-ADMIN-EMAIL@example.com` with the same verified admin email in **both** `js/admin-guard.js` and `firebase-rules.json`.
+- Publish the updated `firebase-rules.json` rules to Firebase Realtime Database. Do not make database writes public. The admin email must be verified in Firebase Authentication.
+- The order count is read-only and depends on the current database rules and existing order structure. Payment status should be verified by the server-side payment functions.
+- GitHub Pages is static hosting, so creating a database product does not automatically generate a new standalone HTML file. Products are saved as catalogue data.

@@ -1,117 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin – The Reading Nook</title>
-  <link rel="stylesheet" href="../css/style.css" />
-</head>
-<body>
-  <header class="header">
-    <div class="header-inner">
-      <a href="../index.html" class="logo">
-        <div class="logo-icon">✦</div>
-        <div class="logo-text">
-          <h1>THE READING NOOK</h1>
-          <span>Admin Panel</span>
-        </div>
-      </a>
-    </div>
-  </header>
-
-  <div class="admin-container">
-    <h1 style="margin-bottom: 8px;">Add / Edit Book</h1>
-    <p style="color: var(--text-muted); margin-bottom: 28px; font-family: system-ui;">
-      Assign a category slug. The system will automatically create the book page and place it in the correct library.
-    </p>
-
-    <div class="admin-form">
-      <form id="bookForm">
-        <div class="form-group">
-          <label for="title">Book Title *</label>
-          <input type="text" id="title" name="title" required placeholder="e.g. Atomic Habits" />
-        </div>
-
-        <div class="form-group">
-          <label for="author">Author *</label>
-          <input type="text" id="author" name="author" required placeholder="e.g. James Clear" />
-        </div>
-
-        <div class="form-group">
-          <label for="category">Category (Master Library) *</label>
-          <select id="category" name="category" required>
-            <option value="">— Select Category —</option>
-            <option value="fiction">Fiction & Stories</option>
-            <option value="learning">Learning & Growth</option>
-            <option value="children-0-3">Children’s Books · Ages 0–3</option>
-            <option value="children-4-7">Children’s Books · Ages 4–7</option>
-            <option value="children-8-12">Children’s Books · Ages 8–12</option>
-            <option value="children-13-plus">Children’s Books · Ages 13+</option>
-            <option value="gifts">Gifts & Special Reads</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="slug">URL Slug (auto-generated, editable)</label>
-          <input type="text" id="slug" name="slug" placeholder="atomic-habits" />
-        </div>
-
-        <div class="form-group">
-          <label for="description">Short Description</label>
-          <textarea id="description" name="description" placeholder="A short blurb about the book..."></textarea>
-        </div>
-
-        <div class="form-group">
-          <label for="tags">Tags (comma separated)</label>
-          <input type="text" id="tags" name="tags" placeholder="Self-Help, Habits, Productivity" />
-        </div>
-
-        <button type="submit" class="btn">Save Book & Generate Page</button>
-        <a href="../index.html" class="btn btn-secondary">Cancel</a>
-      </form>
-
-      <div id="result" style="margin-top: 24px; display: none; padding: 16px; background: #e9f1ff; border-radius: 10px; font-family: system-ui;">
-        <strong>Book saved!</strong><br>
-        Page would be created at: <code id="generatedPath"></code><br>
-        Category library updated.
-      </div>
-    </div>
-
-    <div style="margin-top: 48px; font-family: system-ui; font-size: 0.95rem; color: var(--text-muted);">
-      <h3 style="color: var(--primary); margin-bottom: 12px;">How the linking works</h3>
-      <ul style="padding-left: 20px; line-height: 1.8;">
-        <li>Each book is assigned one <strong>category slug</strong> from the dropdown above.</li>
-        <li>The system automatically creates a clean HTML page: <code>/books/book-slug.html</code></li>
-        <li>The book appears in the correct master library page (Fiction, Learning, Children age group, or Gifts).</li>
-        <li>Homepage category cards always link to the master library of that category.</li>
-      </ul>
-    </div>
-  </div>
-
-  <footer class="footer"><p>© 2026 The Reading Nook · Admin</p></footer>
-
-  <script>
-    // Simple demo – in a real app this would call a backend
-    document.getElementById('bookForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const title = document.getElementById('title').value;
-      const slug = document.getElementById('slug').value || title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-      document.getElementById('generatedPath').textContent = `/books/${slug}.html`;
-      document.getElementById('result').style.display = 'block';
-    });
-
-    // Auto-generate slug from title
-    document.getElementById('title').addEventListener('input', function() {
-      const slugField = document.getElementById('slug');
-      if (!slugField.dataset.touched) {
-        slugField.value = this.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-      }
-    });
-    document.getElementById('slug').addEventListener('input', function() {
-      this.dataset.touched = true;
-    });
-  </script>
-  <script src="../js/analytics.js"></script>
-  <script src="../js/admin-guard.js"></script>
-</body>
-</html>
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#214c3d"><title>Studio Admin | The Reading Nook</title><link rel="stylesheet" href="../css/style.css"><style>
+:root{--adm-green:#214c3d;--adm-gold:#c49a52;--adm-ivory:#f8f4ec;--adm-sand:#e9dcc8}
+body.admin-page{background:var(--adm-ivory);color:#26372f;font-family:'Jost','Nunito',system-ui,sans-serif}.admin-shell{max-width:1240px;margin:0 auto;padding:34px 24px 70px}.admin-top{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:30px}.admin-kicker{color:#9a7336;text-transform:uppercase;letter-spacing:.18em;font-size:.72rem;font-weight:800}.admin-title{font:500 clamp(2.2rem,5vw,3.6rem)/1.05 'Cormorant Garamond',Georgia,serif;color:var(--adm-green);margin:7px 0 12px}.admin-sub{color:#66746b;max-width:660px}.admin-hero{background:linear-gradient(110deg,rgba(20,56,43,.96),rgba(33,76,61,.88)),url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=1600&q=80') center/cover;color:white;border-radius:28px;padding:34px;display:flex;align-items:center;justify-content:space-between;gap:24px;box-shadow:0 22px 55px #214c3d20}.admin-hero h2{font:500 clamp(1.8rem,3vw,2.5rem)/1.1 'Cormorant Garamond',Georgia,serif;margin:0 0 8px}.admin-hero p{color:#e5ede7;margin:0}.admin-status{border:1px solid #ffffff45;background:#ffffff12;border-radius:18px;padding:16px 20px;min-width:155px}.admin-status b{display:block;font-size:1.1rem}.admin-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:22px 0 30px}.stat,.admin-panel{background:#fffdf8;border:1px solid #e9dfd0;border-radius:22px;padding:22px;box-shadow:0 10px 28px #3c493b08}.stat small{display:block;color:#778278;text-transform:uppercase;letter-spacing:.1em;font-size:.72rem;font-weight:800}.stat strong{display:block;color:var(--adm-green);font:500 2.3rem 'Cormorant Garamond',Georgia,serif;margin-top:4px}.admin-layout{display:grid;grid-template-columns: minmax(0,1.15fr) minmax(300px,.85fr);gap:22px;align-items:start}.admin-panel h2{font:500 2rem 'Cormorant Garamond',Georgia,serif;color:var(--adm-green);margin:0 0 5px}.panel-intro{font-size:.9rem;color:#778278;margin-bottom:22px}.admin-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 24px}.admin-tabs button{border:1px solid #d9e0d8;background:#fff;color:#365044;border-radius:99px;padding:10px 17px;font-weight:800;cursor:pointer}.admin-tabs button.active{background:var(--adm-green);border-color:var(--adm-green);color:white}.admin-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.admin-field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}.admin-field.full{grid-column:1/-1}.admin-field label{font-size:.82rem;font-weight:800;color:#415448}.admin-field input,.admin-field select,.admin-field textarea{width:100%;border:1px solid #dcded4;border-radius:12px;padding:12px 13px;background:#fffefa;color:#24372d;font:inherit;min-width:0}.admin-field textarea{min-height:92px;resize:vertical}.admin-field input:focus,.admin-field select:focus,.admin-field textarea:focus{outline:3px solid #c49a5233;border-color:var(--adm-gold)}.admin-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:5px}.admin-btn{border:0;border-radius:99px;background:var(--adm-green);color:#fff;padding:13px 20px;font:700 .9rem inherit;cursor:pointer}.admin-btn.gold{background:var(--adm-gold);color:#23382d}.admin-btn.ghost{background:#f4eee2;color:#355144}.admin-message{display:none;padding:13px 15px;border-radius:12px;margin-top:15px;background:#e8f3e9;color:#24573a;font-size:.9rem}.admin-message.error{background:#fbe9e5;color:#8a3024}.admin-list{display:grid;gap:10px}.admin-list-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px;border:1px solid #eee5d8;border-radius:14px;background:#fff}.admin-list-item b{display:block;color:#304a3c}.admin-list-item small{color:#7a857d}.admin-list-item button{border:1px solid #d8e1d8;border-radius:99px;background:#f6f7f1;padding:7px 10px;cursor:pointer;color:#315542;font-weight:700}.admin-note{font-size:.82rem;color:#78847a;line-height:1.65;margin-top:18px}.admin-footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#7a857d;font-size:.8rem;margin-top:28px}.admin-page .header{background:#fffdf8;border-bottom-color:#e9dfd0}.admin-page .logo-icon{background:var(--adm-green)!important;color:#f3d9a4!important}.admin-page .logo-text h1{font-family:'Cormorant Garamond',Georgia,serif;letter-spacing:.08em}.admin-page .logo-text span{letter-spacing:.12em}@media(max-width:800px){.admin-layout{grid-template-columns:1fr}.admin-hero{align-items:flex-start;flex-direction:column}.admin-stats{grid-template-columns:1fr 1fr}}@media(max-width:520px){.admin-shell{padding:24px 15px 45px}.admin-stats{grid-template-columns:1fr}.admin-form-grid{grid-template-columns:1fr}.admin-field.full{grid-column:auto}.admin-panel{padding:18px}.admin-hero{padding:25px;border-radius:22px}}
+</style></head><body class="admin-page">
+<header class="header"><div class="header-inner"><a href="../index.html" class="logo"><div class="logo-icon">✦</div><div class="logo-text"><h1>THE READING NOOK</h1><span>Private Studio · Admin</span></div></a><div class="header-actions"><a class="icon-btn" href="../index.html" aria-label="View storefront">↗</a><button class="icon-btn" id="signOutBtn" type="button" aria-label="Sign out">⇥</button></div></div></header>
+<main class="admin-shell"><div class="admin-top"><div><div class="admin-kicker">Store management / 2026</div><h1 class="admin-title">Your little world of wonder.</h1><p class="admin-sub">A calm, considered space to manage the books, playful gifts and products that make The Reading Nook special.</p></div></div>
+<section class="admin-hero"><div><h2>Welcome to your studio.</h2><p>Curate the shelves. Keep every detail thoughtful.</p></div><div class="admin-status"><small>Access status</small><b id="adminStatus">Checking sign-in…</b><small id="adminEmail"></small></div></section>
+<section class="admin-stats"><div class="stat"><small>Books in catalogue</small><strong id="bookCount">—</strong></div><div class="stat"><small>Toys & gifts</small><strong id="toyCount">—</strong></div><div class="stat"><small>Recent orders</small><strong id="orderCount">—</strong></div></section>
+<div class="admin-layout"><section class="admin-panel"><h2>Product studio</h2><p class="panel-intro">Add or update products in your Firebase catalogue.</p><div class="admin-tabs" role="tablist"><button class="active" data-tab="book" type="button">📚 Books</button><button data-tab="toy" type="button">🧸 Toys & gifts</button></div>
+<form id="productForm"><input type="hidden" id="productType" value="book"><div class="admin-form-grid"><div class="admin-field"><label for="title">Product title *</label><input id="title" required maxlength="120" placeholder="e.g. The Secret Garden"></div><div class="admin-field"><label for="slug">Product ID / slug *</label><input id="slug" required pattern="[a-z0-9-]+" placeholder="the-secret-garden"></div><div class="admin-field"><label for="author">Author / maker</label><input id="author" placeholder="Author or brand"></div><div class="admin-field"><label for="price">Price (INR) *</label><input id="price" type="number" min="0" step="1" required placeholder="399"></div><div class="admin-field"><label for="category">Category *</label><select id="category" required><option value="fiction">Fiction & stories</option><option value="learning">Learning & growth</option><option value="children">Children's books</option><option value="gifts">Gifts & special reads</option><option value="toys">Toys & learning kits</option></select></div><div class="admin-field"><label for="cover">Cover / image URL</label><input id="cover" type="url" placeholder="https://…"></div><div class="admin-field full"><label for="description">Description</label><textarea id="description" placeholder="What makes this product special?"></textarea></div><div class="admin-field full"><label for="tags">Tags (comma-separated)</label><input id="tags" placeholder="ages 6+, creativity, bestseller"></div></div><div class="admin-actions"><button class="admin-btn" type="submit">Save product</button><button class="admin-btn ghost" id="resetForm" type="button">Clear form</button></div><div class="admin-message" id="formMessage" role="status"></div></form><p class="admin-note">Products are saved to Firebase Realtime Database. Make sure your database rules permit only your verified admin account to write. This static website cannot create new HTML pages on GitHub Pages automatically; catalogue entries are data-driven.</p></section>
+<aside class="admin-panel"><h2>Recently added</h2><p class="panel-intro">The latest products currently stored in your catalogue.</p><div class="admin-list" id="productList"><p class="admin-note">Waiting for secure database connection…</p></div><div class="admin-actions" style="margin-top:18px"><button class="admin-btn ghost" id="refreshBtn" type="button">Refresh catalogue</button><a class="admin-btn gold" href="seed.html" style="text-decoration:none;display:inline-flex;align-items:center">Seed tools</a></div><p class="admin-note">Orders summary is read-only. Payment status must be verified by the server-side payment functions, never by editing a browser value.</p></aside></div>
+<div class="admin-footer"><span>© 2026 The Reading Nook · Private admin workspace</span><a href="../index.html">Return to storefront →</a></div></main>
+<script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-database-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-analytics-compat.js"></script><script src="../js/firebase.js"></script><script>initFirebase();</script><script src="../js/analytics.js"></script><script src="../js/admin-guard.js"></script>
+<script>
+(function(){const $=id=>document.getElementById(id);let type='book',books={},toys={};const form=$('productForm');function message(text,error){const el=$('formMessage');el.textContent=text;el.className='admin-message'+(error?' error':'');el.style.display='block'}function slugify(s){return s.toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}
+$('title').addEventListener('input',()=>{if(!$('slug').dataset.edited)$('slug').value=slugify($('title').value)});$('slug').addEventListener('input',()=>{$('slug').dataset.edited='1'});
+document.querySelectorAll('[data-tab]').forEach(btn=>btn.addEventListener('click',()=>{type=btn.dataset.tab;$('productType').value=type;document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b===btn));$('category').value=type==='toy'?'toys':'fiction';$('author').placeholder=type==='toy'?'Brand or maker':'Author name';$('title').placeholder=type==='toy'?'e.g. Little Thinker Puzzle':'e.g. The Secret Garden';$('cover').placeholder='https://…';$('formMessage').style.display='none'}));
+function render(){const all=[...Object.entries(books).map(([id,p])=>({id,...p,_type:'book'})),...Object.entries(toys).map(([id,p])=>({id,...p,_type:'toy'}))];$('bookCount').textContent=Object.keys(books).length;$('toyCount').textContent=Object.keys(toys).length;$('productList').innerHTML='';if(!all.length){$('productList').innerHTML='<p class="admin-note">No products returned yet. Check your Firebase connection and rules.</p>';return}all.slice(-8).reverse().forEach(p=>{const row=document.createElement('div');row.className='admin-list-item';const info=document.createElement('div'),b=document.createElement('b'),small=document.createElement('small'),edit=document.createElement('button');b.textContent=p.title||p.name||p.id;small.textContent=(p._type==='toy'?'Toy / gift':'Book')+' · ₹'+(p.price||0);info.append(b,small);edit.textContent='Edit';edit.type='button';edit.addEventListener('click',()=>{type=p._type;$('productType').value=type;document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x.dataset.tab===type));$('title').value=p.title||p.name||'';$('slug').value=p.id;$('slug').dataset.edited='1';$('author').value=p.author||p.maker||'';$('price').value=p.price||0;$('category').value=p.category||(type==='toy'?'toys':'fiction');$('cover').value=p.cover||p.image||'';$('description').value=p.description||'';$('tags').value=Array.isArray(p.tags)?p.tags.join(', '):(p.tags||'');form.scrollIntoView({behavior:'smooth',block:'start'});});row.append(info,edit);$('productList').append(row)})}
+function load(){if(typeof database==='undefined'||!database){$('productList').innerHTML='<p class="admin-note">Firebase is not initialized. Reload after checking your connection.</p>';return}Promise.all([database.ref('books').once('value'),database.ref('toys').once('value'),database.ref('orders').limitToLast(100).once('value').catch(()=>null)]).then(([b,t,o])=>{books=b.val()||{};toys=t.val()||{};$('orderCount').textContent=o&&o.val()?Object.keys(o.val()).length:'—';render()}).catch(e=>{$('productList').innerHTML='<p class="admin-note">Could not load data. Check database rules and your admin email configuration.</p>';console.error(e)})}
+form.addEventListener('submit',e=>{e.preventDefault();if(typeof database==='undefined'||!database){message('Firebase is unavailable. Check your connection.',true);return}const id=slugify($('slug').value);if(!id){message('Please provide a valid product ID.',true);return}const product={title:$('title').value.trim(),price:Number($('price').value),category:$('category').value,description:$('description').value.trim(),tags:$('tags').value.split(',').map(x=>x.trim()).filter(Boolean),updatedAt:firebase.database.ServerValue.TIMESTAMP};const author=$('author').value.trim(),cover=$('cover').value.trim();if(author)product[type==='toy'?'maker':'author']=author;if(cover)product[type==='toy'?'image':'cover']=cover;const path=(type==='toy'?'toys/':'books/')+id;database.ref(path).update(product).then(()=>{message('Saved successfully to '+path+'.');$('slug').dataset.edited='';load()}).catch(err=>message('Save failed: '+(err.message||'check Firebase admin write rules'),true))});$('resetForm').addEventListener('click',()=>{form.reset();$('slug').dataset.edited='';$('productType').value=type;$('formMessage').style.display='none'});$('refreshBtn').addEventListener('click',load);$('signOutBtn').addEventListener('click',()=>{if(typeof auth!=='undefined'&&auth)auth.signOut().then(()=>location.href='../auth.html')});if(typeof auth!=='undefined'&&auth)auth.onAuthStateChanged(user=>{if(user){$('adminStatus').textContent='Signed in';$('adminEmail').textContent=user.email||'';load()}});setTimeout(()=>{if($('bookCount').textContent==='—')load()},900);
+})();
+</script></body></html>

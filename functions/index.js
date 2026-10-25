@@ -4,6 +4,8 @@ const admin = require('firebase-admin');
 const crypto = require('crypto');
 const Razorpay = require('razorpay');
 const PRICES = require('./catalog');
+const GIFT_THRESHOLDS = PRICES.GIFTS || {};
+delete PRICES.GIFTS;
 admin.initializeApp();
 
 const KEY_ID = defineSecret('RAZORPAY_KEY_ID');
@@ -41,10 +43,21 @@ async function calculateCheckout(items, currency, country) {
   if (!Array.isArray(items) || !items.length || items.length > 50) throw new Error('Your cart is empty.');
   if (!CURRENCIES.includes(currency)) throw new Error('Unsupported currency.');
   let subtotal = 0;
+  const requestedGifts = [];
   for (const it of items) {
-    const price = PRICES[it.id], qty = Math.floor(Number(it.qty));
-    if (!price || !(qty >= 1 && qty <= 20)) throw new Error('Unknown item or quantity: ' + String(it.id).slice(0, 40));
+    const qty = Math.floor(Number(it.qty));
+    if (!(qty >= 1 && qty <= 20)) throw new Error('Invalid item quantity.');
+    if (Object.prototype.hasOwnProperty.call(GIFT_THRESHOLDS, it.id)) {
+      if (qty !== 1) throw new Error('A complimentary gift can only be selected once.');
+      requestedGifts.push(it.id);
+      continue;
+    }
+    const price = PRICES[it.id];
+    if (price === undefined) throw new Error('Unknown item: ' + String(it.id).slice(0, 40));
     subtotal += price * qty;
+  }
+  for (const giftId of requestedGifts) {
+    if (subtotal < GIFT_THRESHOLDS[giftId]) throw new Error('Your cart does not qualify for the selected complimentary gift.');
   }
   const shipping = subtotal >= CFG.freeFrom ? 0 : CFG.shipping;
   const base = subtotal + shipping;

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Your Cart – The Reading Nook</title>
   <link rel="stylesheet" href="css/style.css" />
-</head>
+<style>.gift-rewards{margin:24px 0;padding:22px;background:#fff9e8;border:1px solid #f0d98f;border-radius:18px}.gift-rewards h3{margin:0 0 8px}.gift-rewards p{margin:0 0 12px}.reward-line{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid #efdfad}.reward-line small,.gift-rewards>small{color:var(--text-muted);font-size:.82rem}.reward-line.unlocked{color:#23623b}.reward-line .btn{white-space:nowrap}@media(max-width:540px){.reward-line{align-items:flex-start;flex-direction:column}}</style></head>
 <body>
 
   <header class="header">
@@ -29,7 +29,7 @@
 
   <div class="page-header">
     <h1>Your Cart</h1>
-    <p>Review your selected books before checkout.</p>
+    <p>Review your books, toys and unlocked gifts before checkout.</p>
   </div>
 
   <div class="container">
@@ -48,7 +48,10 @@
   <script src="js/analytics.js"></script>
   <script>
     function renderCart() {
-      const cart = getCart();
+      let cart = getCart();
+      const paidSubtotal = cart.filter(i => i.type !== 'gift').reduce((sum, i) => sum + (Number(i.price) || 0) * (Number(i.qty) || 0), 0);
+      cart.filter(i => (i.id === 'gift-colouring-kit' && paidSubtotal < 999) || (i.id === 'gift-mini-toy' && paidSubtotal < 1499)).forEach(i => removeFromCart(i.id));
+      cart = getCart();
       const container = document.getElementById('cartContent');
 
       if (cart.length === 0) {
@@ -71,12 +74,12 @@
               <div class="cart-item-info">
                 <div class="cart-item-cover">${coverHTML(item)}</div>
                 <div>
-                  <strong>${item.title}</strong><br>
+                  <strong>${item.title}</strong><br><span style="font-size:.8rem;color:var(--text-muted)">${item.type === 'toy' ? 'Toy / learning kit' : item.type === 'gift' ? 'FREE GIFT' : 'Book'}</span><br>
                   <span style="color:var(--text-muted);font-size:0.9rem;font-family:system-ui">${item.author}</span>
                 </div>
               </div>
             </td>
-            <td>₹${item.price}</td>
+            <td>${item.type === 'gift' ? 'FREE' : '₹'+item.price}</td>
             <td>
               <div class="qty-control">
                 <button onclick="changeQty('${item.id}', -1)">−</button>
@@ -84,7 +87,7 @@
                 <button onclick="changeQty('${item.id}', 1)">+</button>
               </div>
             </td>
-            <td><strong>₹${item.price * item.qty}</strong></td>
+            <td><strong>${item.type === 'gift' ? 'FREE' : '₹'+(item.price * item.qty)}</strong></td>
             <td>
               <button class="btn btn-sm btn-outline" onclick="removeItem('${item.id}')">Remove</button>
             </td>
@@ -93,11 +96,13 @@
       });
 
       const total = getCartTotal();
+      const hasGift = id => cart.some(i => i.id === id);
+      const rewardHtml = `<div class="gift-rewards"><h3>🎁 Your book + toy rewards</h3><p>Merchandise subtotal: <strong>₹${total}</strong></p><div class="reward-line ${total >= 999 ? 'unlocked' : ''}"><span>₹999 — Free colouring kit</span>${total >= 999 ? (hasGift('gift-colouring-kit') ? '<strong>Added ✓</strong>' : '<button class="btn btn-sm" onclick="addReward(999)">Choose free gift</button>') : `<small>Spend ₹${999-total} more</small>`}</div><div class="reward-line ${total >= 1499 ? 'unlocked' : ''}"><span>₹1,499 — Free mini toy</span>${total >= 1499 ? (hasGift('gift-mini-toy') ? '<strong>Added ✓</strong>' : '<button class="btn btn-sm" onclick="addReward(1499)">Choose free gift</button>') : `<small>Spend ₹${Math.max(0,1499-total)} more</small>`}</div><small>Rewards are complimentary, subject to stock. Shipping is calculated separately.</small></div>`;
       container.innerHTML = `
         <table class="cart-table">
           <thead>
             <tr>
-              <th>Book</th>
+              <th>Item</th>
               <th>Price</th>
               <th>Qty</th>
               <th>Subtotal</th>
@@ -107,6 +112,7 @@
           <tbody>${rows}</tbody>
         </table>
 
+        ${rewardHtml}
         <div class="cart-summary">
           <h3>Order Summary</h3>
           <div class="summary-row">
@@ -129,6 +135,13 @@
           </p>
         </div>
       `;
+    }
+
+    function addReward(threshold) {
+      const total = getCartTotal();
+      if (threshold === 999 && total >= 999) addToCart({id:'gift-colouring-kit',title:'Complimentary Colouring Kit',author:'The Reading Nook',price:0,cover:'🎨',category:'Gift',type:'gift'});
+      else if (threshold === 1499 && total >= 1499) addToCart({id:'gift-mini-toy',title:'Complimentary Mini Toy',author:'The Reading Nook',price:0,cover:'🧸',category:'Gift',type:'gift'});
+      renderCart();
     }
 
     function changeQty(id, delta) {

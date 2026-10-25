@@ -33,6 +33,7 @@ function addToCart(book) {
       price: book.price,
       cover: book.cover || '📖',
       category: book.category || '',
+      type: book.type || 'book',
       qty: book.qty || 1
     });
   }
@@ -91,7 +92,8 @@ function toggleWishlist(book) {
       author: book.author,
       price: book.price,
       cover: book.cover || '📖',
-      category: book.category || ''
+      category: book.category || '',
+      type: book.type || 'book'
     });
     saveStore(store);
     if (window.rnTrack) rnTrack('add_to_wishlist', { currency: 'INR', value: Number(book.price) || 0, items: [{ item_id: book.id, item_name: book.title, price: Number(book.price) || 0 }] });

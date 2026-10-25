@@ -15,6 +15,10 @@
         ".read": "auth != null && auth.uid === $uid",
         ".write": "auth != null && auth.uid === $uid"
       }
+    },
+    "toys": {
+      ".read": true,
+      ".write": "auth != null && auth.token.email === 'YOUR-ADMIN-EMAIL@example.com' && auth.token.email_verified === true"
     }
   }
 }
