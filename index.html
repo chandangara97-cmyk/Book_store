@@ -1,72 +1,46 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Reading Nook – Books · Ideas · Possibilities</title>
-  <link rel="stylesheet" href="css/style.css" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Books readers fall in love with. Browse, borrow and buy from The Reading Nook by Tanuja Sharma.">
+<title>The Reading Nook | Tanuja Sharma</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body data-page="home">
+<div class="top">A LITTLE SPACE FOR BIG IDEAS · WELCOME, BOOK LOVERS</div>
+<header class="nav"><div class="wrap">
+<a class="brand" href="index.html"><span class="mark">✦</span><span>The Reading Nook<small>Books · Ideas · Possibilities</small></span></a>
+<nav class="links" id="links"><a href="index.html" data-v="home">Home</a><a href="library.html" data-v="books">Library</a><a href="reviews.html" data-v="reviews">Reader Love</a><a href="story.html" data-v="story">Our Story</a><a href="contact.html" data-v="contact">Contact</a></nav>
+<div class="row" style="gap:10px"><button class="saved" id="savedBtn" title="Your saved books">♥ <span id="sc">0</span></button><button class="saved" id="cartBtn" title="Your bag">🛒 <span id="cc">0</span></button><button class="burger" id="burger" aria-label="Menu">☰</button></div>
+</div></header>
 
-  <header class="header">
-    <div class="header-inner">
-      <a href="index.html" class="logo">
-        <div class="logo-icon">✦</div>
-        <div class="logo-text">
-          <h1>THE READING NOOK</h1>
-          <span>Books · Ideas · Possibilities</span>
-        </div>
-      </a>
-      <div class="header-actions">
-        <a href="auth.html" class="icon-btn" title="Account" style="font-size:1.2rem">👤</a>
-        <a href="wishlist.html" class="icon-btn" title="Wishlist">♡</a>
-        <a href="cart.html" class="icon-btn" title="Cart">
-          🛒
-          <span class="cart-badge">0</span>
-        </a>
-      </div>
-    </div>
-  </header>
+<main>
+<section class="view" id="v-home">
+<div class="wrap hero"><div>
+<span class="eyebrow">A warm welcome from Tanuja Sharma</span>
+<h1>Books readers <em>fall in love with.</em></h1>
+<p class="lead">Stories, ideas and thoughtful gifts, chosen with care and shared with a growing circle of readers. Browse our shelves and find the one that stays with you.</p>
+<div class="row"><a class="btn" href="library.html">Visit our books →</a><a class="btn ghost" href="reviews.html">See reader love</a></div>
+<div class="proof"><div class="faces"><i style="background:#245747">A</i><i style="background:#b7764e">R</i><i style="background:#7c8a69">S</i><i style="background:#a87532">M</i></div><span>Readers are sharing their favourite pages with us every week.</span></div>
+</div>
+<div class="art"><div class="blob"></div><div class="stack" id="heroStack"></div>
+<div class="float f1">♡ <b>Reader favourites</b>Hand-picked, always</div><div class="float f2">A good book <b>stays with you.</b></div></div></div>
+<div class="tick"><div id="ticker"></div></div>
+<div class="sec"><div class="wrap"><div class="head"><span class="eyebrow">Fresh on our shelves</span><h2>Start with these four</h2><p>A taste of what our readers are picking up right now.</p></div><div class="grid" id="featured"></div><p style="text-align:center;margin:30px 0 0"><a class="btn ghost" href="library.html">Browse every book →</a></p></div></div>
+<div class="sec alt"><div class="wrap"><div class="head"><span class="eyebrow">Reader love</span><h2>Why readers keep coming back</h2></div><div class="cards" id="homeRev"></div><p style="text-align:center;margin:28px 0 0"><a class="btn" href="reviews.html">Read all reviews or add yours →</a></p></div></div>
+<div class="sec"><div class="wrap"><div class="head"><span class="eyebrow">More than just books</span><h2>How we help you read more</h2></div><div class="feat"><div><b>01 · DISCOVER</b><h3>Personal recommendations</h3><p>Tell us what you enjoy and we’ll suggest books that fit your mood and goals.</p></div><div><b>02 · CELEBRATE</b><h3>Book gifting ideas</h3><p>Meaningful reads for birthdays, milestones and simple thoughtful surprises.</p></div><div><b>03 · SOURCE</b><h3>Requests &amp; enquiries</h3><p>Looking for a particular title or author? Ask, and we’ll see what can be arranged.</p></div></div></div></div>
+<div class="cta"><div class="wrap"><div><span class="eyebrow">Your next chapter starts here</span><h2>Not sure what to read next?</h2><p>Tell us a little about what you love. We’ll narrow down the possibilities.</p></div><a class="btn" href="contact.html">Let’s find your book ↗</a></div></div>
+</section>
+</main>
 
-  <section class="hero">
-    <p>A collection that matches your interests, your goals and your next big idea.</p>
-  </section>
+<footer class="foot"><div class="wrap"><div><b>The Reading Nook</b><br>Curiosity, one page at a time.</div><div>Welcome from Tanuja Sharma · © <span id="yr"></span></div><div class="row" style="gap:16px"><a href="library.html">Books</a><a href="reviews.html">Reader Love</a><a href="contact.html">Contact</a></div></div></footer>
+<div class="drawer" id="drawer"><div class="dbk" data-close></div><aside class="dp"><div class="row" style="justify-content:space-between"><h3 style="margin:0">Your library bag</h3><button class="burger" style="display:block" data-close aria-label="Close">×</button></div><div id="items"></div><div class="li"><b>Total</b><b id="tot">₹0</b></div>
+<form id="co" style="margin-top:14px"><input id="on" required placeholder="Your name"><input id="op" required type="tel" placeholder="Phone / WhatsApp" style="margin-top:8px"><textarea id="oa" rows="2" placeholder="Delivery address (or write ‘pickup’)" style="margin-top:8px"></textarea><label style="font-size:12px;font-weight:700;margin:12px 0 6px;display:block">Pay with</label><div class="pm"><label><input type="radio" name="pm" value="upi" checked> UPI · scan or tap (GPay, PhonePe, Paytm)</label><label><input type="radio" name="pm" value="card"> Card / Net banking (secure link)</label><label><input type="radio" name="pm" value="store"> Pay at store / on delivery</label></div><button class="btn" style="width:100%;margin-top:14px" type="submit">Place order &amp; pay →</button></form><div id="done" style="display:none"></div></aside></div>
+<div class="toast" id="toast"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
-  <section class="categories">
-    <a href="library/fiction.html" class="category-card">
-      <div class="category-icon">∞</div>
-      <h2>Fiction & Stories</h2>
-      <p>Novels, timeless classics, mysteries and stories that take you somewhere new.</p>
-    </a>
-
-    <a href="library/learning.html" class="category-card">
-      <div class="category-icon">✎</div>
-      <h2>Learning & Growth</h2>
-      <p>Helpful reads for personal development, skills, business and lifelong learning.</p>
-    </a>
-
-    <a href="library/children.html" class="category-card">
-      <div class="category-icon">☀</div>
-      <h2>Children’s Books</h2>
-      <p>Imaginative tales and engaging books to help young minds bloom.</p>
-    </a>
-
-    <a href="library/gifts.html" class="category-card">
-      <div class="category-icon">✱</div>
-      <h2>Gifts & Special Reads</h2>
-      <p>Thoughtful book ideas for celebrations, milestones and people you love.</p>
-    </a>
-  </section>
-
-  <div style="text-align: center; margin: 10px 0 50px; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;">
-    <a href="library/all.html" class="btn">Browse All Books</a>
-    <a href="gift-finder.html" class="btn btn-secondary">🎁 Gift Finder</a>
-  </div>
-
-  <footer class="footer">
-    <p>© 2026 The Reading Nook · Curated with care</p>
-  </footer>
-
-  <script src="js/store.js"></script>
-</body>
-</html>
+<script src="app.js"></script>
+</body></html>
