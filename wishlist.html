@@ -68,7 +68,7 @@
       empty.style.display = 'none';
       grid.innerHTML = list.map(item => `
         <div class="book-card" style="cursor:default">
-          <div class="book-cover">${item.cover}</div>
+          <div class="book-cover">${coverHTML(item)}</div>
           <div class="book-info">
             <h3>${item.title}</h3>
             <div class="author">${item.author}</div>

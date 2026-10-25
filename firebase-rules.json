@@ -6,9 +6,8 @@
     },
     "orders": {
       "$orderId": {
-        ".write": "!data.exists()",
-        ".read": "auth != null && auth.token.email === 'YOUR-ADMIN-EMAIL@example.com'",
-        ".validate": "newData.hasChildren(['orderId','items','customer','totalsINR'])"
+        ".write": "false",
+        ".read": "auth != null && auth.token.email === 'YOUR-ADMIN-EMAIL@example.com'"
       }
     },
     "users": {

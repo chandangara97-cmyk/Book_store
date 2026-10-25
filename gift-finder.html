@@ -166,7 +166,7 @@
       const container = document.getElementById('resultBooks');
       container.innerHTML = books.map(b => `
         <div class="book-card" style="cursor:default">
-          <div class="book-cover">${b.cover}</div>
+          <div class="book-cover">${coverHTML(b)}</div>
           <div class="book-info">
             <h3>${b.title}</h3>
             <div class="author">${b.author}</div>

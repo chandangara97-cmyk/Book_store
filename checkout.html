@@ -345,6 +345,10 @@
               <span>Shipping</span>
               <span id="shipping">Calculated</span>
             </div>
+            <div class="row" id="feeRow" style="display:none">
+              <span>Payment processing fee (est.) <small id="feeNote" style="color:var(--text-muted)"></small></span>
+              <span id="feeAmt">₹0</span>
+            </div>
             <div class="row">
               <span>Tax / GST</span>
               <span id="tax">Included</span>
@@ -372,6 +376,7 @@
   </footer>
 
   <script src="js/store.js"></script>
+  <script src="js/payments.js"></script>
   <script src="js/analytics.js"></script>
   <script>
     // Live indicative rates from a public endpoint. INR remains the store's base currency.
@@ -407,7 +412,9 @@
     function getTotals() {
       const subtotal = getCart().reduce((sum, item) => sum + (Number(item.price) || 0) * (Number(item.qty) || 0), 0);
       const shipping = subtotal === 0 || subtotal >= 499 ? 0 : 49;
-      return { subtotal, shipping, tax: 0, total: subtotal + shipping };
+      const country = (document.getElementById('country') || {}).value;
+      const base = subtotal + shipping, c = PAYMENTS.calc(base, country);
+      return { subtotal, shipping, fee: c.fee, feePct: c.pct, international: c.international, tax: 0, total: base + c.fee };
     }
 
     function renderOrder() {
@@ -425,6 +432,10 @@
       const totals = getTotals();
       document.getElementById('subtotal').textContent = formatMoney(totals.subtotal);
       document.getElementById('shipping').textContent = totals.shipping === 0 ? 'Free' : formatMoney(totals.shipping);
+      const feeRow = document.getElementById('feeRow');
+      feeRow.style.display = totals.fee > 0 ? '' : 'none';
+      document.getElementById('feeAmt').textContent = formatMoney(totals.fee);
+      document.getElementById('feeNote').textContent = '(' + (totals.international ? 'international card' : 'India') + ' ~' + totals.feePct + '% + GST)';
       document.getElementById('tax').textContent = 'Included / as applicable';
       document.getElementById('grandTotal').textContent = formatMoney(totals.total);
     }
@@ -515,6 +526,12 @@
         convertedTotal: totals.total * Number(fxRates[currentCurrency]), exchangeRateUpdatedAt: fxUpdatedAt,
         exchangeRateSource: fxSource, exchangeRateWasLive: fxLive, paymentMethod: methodNames[method]
       };
+      const finish = o => { localStorage.setItem(ORDER_KEY, JSON.stringify(o)); if (window.rnTrack) rnTrack('purchase', { transaction_id: o.orderId, currency: 'INR', value: totals.total, items: o.items.map(i => ({ item_id: i.id, item_name: i.title, price: i.priceINR, quantity: i.qty })) }); window.location.href = 'order-success.html'; };
+      if (PAYMENTS.isLive()) {
+        showToast('Opening secure payment…');
+        PAYMENTS.pay(order, paid => { clearCart(); finish(paid); }, err => showToast(err.message || 'Payment failed. Please try again.'));
+        return;
+      }
       localStorage.setItem(ORDER_KEY, JSON.stringify(order));
       if (window.rnTrack) rnTrack('order_submitted', { transaction_id: orderId, currency: 'INR', value: totals.total, display_currency: currentCurrency, payment_method: methodNames[method], items: order.items.map(i => ({ item_id: i.id, item_name: i.title, price: i.priceINR, quantity: i.qty })) });
       if (window.rnSaveOrder) rnSaveOrder(order);
@@ -523,6 +540,7 @@
       setTimeout(() => { window.location.href = 'order-success.html'; }, 500);
     }
 
+    document.getElementById('country').addEventListener('change', renderOrder);
     document.addEventListener('DOMContentLoaded', () => { renderOrder(); loadExchangeRates(); if (window.rnTrack) { const c = getCart(); rnTrack('begin_checkout', { currency: 'INR', value: getTotals().total, items: c.map(i => ({ item_id: i.id, item_name: i.title, price: Number(i.price) || 0, quantity: i.qty })) }); } });
   </script>
 </body>

@@ -41,7 +41,7 @@ input[type=range]{width:100%;height:14px;margin:22px 0 4px;border-radius:99px;ap
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:34px;height:34px;border-radius:50%;background:var(--ink);border:4px solid var(--w);box-shadow:0 0 0 2px var(--ink);cursor:grab}
 input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;background:var(--ink);border:4px solid var(--w);cursor:grab}
 .ticks{display:flex;justify-content:space-between;font:600 13px var(--b);color:var(--mut);padding:0 8px}
-.tip{margin:22px 0 0;max-width:40em;color:var(--mut)}
+.fhimg{margin-left:auto;width:min(230px,38%);border-radius:20px}.fmt img{width:100%;border-radius:16px;margin-bottom:18px;display:block}.helpimg{width:min(260px,70%);margin:0 auto 18px;display:block;border-radius:24px}.cv{width:150px;aspect-ratio:5/7;border-radius:4px 12px 12px 4px;align-self:center;box-shadow:0 10px 24px rgba(27,42,74,.18);display:block}.tip{margin:22px 0 0;max-width:40em;color:var(--mut)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:20px;margin-top:30px}
 .card{background:var(--bg);border-radius:20px;padding:22px;border-top:8px solid var(--c);display:flex;flex-direction:column;gap:10px}
 .card h3{font-size:23px}.card p{font-size:16px;color:var(--mut);margin:0;flex:1}.chip{align-self:flex-start;background:var(--c);border-radius:99px;padding:3px 12px;font:700 14px var(--b)}
@@ -83,7 +83,7 @@ dialog{border:2px solid var(--ink);border-radius:20px;padding:28px;max-width:440
 <h2>How old is your child?</h2>
 <p class="intro">Slide to their age or tap a stage. The books below change to match.</p>
 <div class="finder">
-<div class="fh"><span class="age" id="ageOut" aria-live="polite">6</span><span class="sname" id="sname"></span></div>
+<div class="fh"><span class="age" id="ageOut" aria-live="polite">6</span><span class="sname" id="sname"></span><img class="fhimg" id="stageImg" src="img/stage-1.svg" alt="" width="400" height="300"></div>
 <div class="stg" id="stg" role="group" aria-label="Jump to a stage"></div>
 <label for="age" class="sr" style="position:absolute;left:-999px">Child's age</label>
 <input type="range" id="age" min="0" max="15" value="6" aria-valuetext="Age 6">
@@ -96,8 +96,8 @@ dialog{border:2px solid var(--ink);border-radius:20px;padding:28px;max-width:440
 <h2>Printed or digital, your choice</h2>
 <p class="intro">Every book can be offered in both formats, so you can pick what suits your family.</p>
 <div class="two">
-<div class="fmt" style="border-top:10px solid var(--pink)"><h3>Printed copy</h3><ul><li>A real book to hold, share and keep on the shelf</li><li>Good for bedtime reading and screen-free learning</li><li>Delivered to your address after payment</li></ul></div>
-<div class="fmt" style="border-top:10px solid var(--sky)"><h3>Digital copy</h3><ul><li>Read on a phone, tablet or computer</li><li>Lower price and no waiting for delivery</li><li>Easy to carry on trips and share across your devices</li></ul></div>
+<div class="fmt" style="border-top:10px solid var(--pink)"><img src="img/format-printed.svg" alt="An open printed book" loading="lazy"><h3>Printed copy</h3><ul><li>A real book to hold, share and keep on the shelf</li><li>Good for bedtime reading and screen-free learning</li><li>Delivered to your address after payment</li></ul></div>
+<div class="fmt" style="border-top:10px solid var(--sky)"><img src="img/format-digital.svg" alt="A tablet showing a digital book" loading="lazy"><h3>Digital copy</h3><ul><li>Read on a phone, tablet or computer</li><li>Lower price and no waiting for delivery</li><li>Easy to carry on trips and share across your devices</li></ul></div>
 </div></div></section>
 
 <section class="pay" id="how"><div class="wrap">
@@ -117,7 +117,7 @@ dialog{border:2px solid var(--ink);border-radius:20px;padding:28px;max-width:440
 <details><summary>Can I ask for a book on a topic you do not have yet?</summary><p>Yes. Send us a message with the age and topic, and we will tell you what can be arranged.</p></details>
 </div></section>
 
-<div class="help"><div class="wrap"><h2>Need help choosing?</h2><p>Tell us your child's age and interests, and we will suggest the right book.</p><button class="btn" id="ask">Ask us</button></div></div>
+<div class="help"><div class="wrap"><img class="helpimg" src="img/help.svg" alt="A child reading on a stack of books" loading="lazy"><h2>Need help choosing?</h2><p>Tell us your child's age and interests, and we will suggest the right book.</p><button class="btn" id="ask">Ask us</button></div></div>
 </main>
 <footer><div class="wrap fi"><div>&copy; <span id="yr">2026</span> The Reading Nook. All rights reserved.</div><div><a href="library/all.html">All books</a> &nbsp; <a href="gift-finder.html">Gift Finder</a> &nbsp; <a href="wishlist.html">Wishlist</a> &nbsp; <a href="cart.html">Cart</a> &nbsp; <a href="auth.html">Account</a></div></div></footer>
 <dialog id="dlg"><h3 id="dt"></h3><p id="dp"></p><button class="btn" id="dc">Close</button></dialog>
@@ -134,6 +134,7 @@ const BOOKS=[
 {title:'Explore the World',min:8,max:12,blurb:'Science, maps and big questions explained clearly.',printed:{price:429,link:''},digital:{price:219,link:''}},
 {title:'Study Smart',min:13,max:15,blurb:'Practical routines for notes, exams and focus.',printed:{price:499,link:''},digital:{price:249,link:''}},
 {title:'Skills for Tomorrow',min:13,max:15,blurb:'Communication, money basics and planning for teens.',printed:{price:479,link:''},digital:{price:239,link:''}}];
+/* Optional: add image:"img/your-cover.jpg" to any book to use your own cover. */
 /* ============================= */
 const STAGES=[
 {n:'Ages 0 to 3',a:0,b:3,c:'var(--sun)',t:'Short, bright pages for sharing out loud: first words, shapes and daily routines.'},
@@ -145,6 +146,10 @@ const stage=v=>STAGES.find(s=>v>=s.a&&v<=s.b);
 $('yr').textContent=new Date().getFullYear();
 for(let i=0;i<=15;i++){const s=document.createElement('span');s.textContent=i;$('ticks').append(s)}
 STAGES.forEach(s=>{const b=document.createElement('button');b.type='button';b.textContent=s.n;b.style.setProperty('--c',s.c);b.onclick=()=>{age.value=s.a;draw()};$('stg').append(b);s.btn=b});
+const HEX={'var(--sun)':'#ffc83d','var(--pink)':'#ff7aa2','var(--sky)':'#6cb8ff','var(--mint)':'#4fd6a6'};
+function svgCover(t,col){const e=x=>x.replace(/&/g,'&amp;').replace(/</g,'&lt;'),w=[];let l='';t.split(' ').forEach(x=>{if((l+' '+x).trim().length>12){w.push(l);l=x}else l=(l+' '+x).trim()});w.push(l);
+ const tx=w.slice(0,4).map((x,i)=>'<text x="44" y="'+(72+i*36)+'" font-size="30" font-weight="700" fill="#1b2a4a" font-family="Trebuchet MS,Arial,sans-serif">'+e(x)+'</text>').join('');
+ return 'data:image/svg+xml;utf8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 420"><rect width="300" height="420" fill="'+(HEX[col]||'#6cb8ff')+'"/><circle cx="205" cy="290" r="70" fill="#fff" opacity=".85"/><circle cx="205" cy="290" r="38" fill="#1b2a4a"/><rect width="26" height="420" fill="#1b2a4a" opacity=".18"/>'+tx+'</svg>')}
 function dlg(t,p){$('dt').textContent=t;$('dp').textContent=p;$('dlg').showModal()}
 $('dc').onclick=()=>$('dlg').close();
 function contact(msg,title){
@@ -158,10 +163,12 @@ function draw(){
  const v=+age.value,s=stage(v);age.setAttribute('aria-valuetext','Age '+v);
  $('ageOut').textContent=v;$('sname').textContent=s.n;$('tip').textContent=s.t;
  STAGES.forEach(x=>x.btn.setAttribute('aria-pressed',x===s));
+ $('stageImg').src='img/stage-'+STAGES.indexOf(s)+'.svg';$('stageImg').alt=s.n+' illustration';
  $('ageOut').style.textShadow='0 6px 0 '+s.c;
  const list=BOOKS.filter(b=>v>=b.min&&v<=b.max),g=$('grid');g.innerHTML='';
  if(!list.length){const p=document.createElement('p');p.className='empty';p.textContent='No books for this exact age yet. Try a neighbouring age or ask us for a recommendation.';g.append(p);return}
  list.forEach(bk=>{const c=document.createElement('article');c.className='card';c.style.setProperty('--c',stage(bk.min).c);
+  const im=document.createElement('img');im.className='cv';im.alt='Cover of '+bk.title;im.loading='lazy';im.src=bk.image||svgCover(bk.title,stage(bk.min).c);c.append(im);
   const chip=document.createElement('span');chip.className='chip';chip.textContent='Ages '+bk.min+' to '+bk.max;
   const h=document.createElement('h3');h.textContent=bk.title;const p=document.createElement('p');p.textContent=bk.blurb;
   const row=document.createElement('div');row.className='buy';

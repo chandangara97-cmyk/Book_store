@@ -145,3 +145,17 @@ function showToast(message) {
 
 // Run on every page
 document.addEventListener('DOMContentLoaded', updateCartBadge);
+
+/* ========== COVER IMAGES ========== */
+const COVER_SLUGS=['atomic-habits', 'becoming', 'deep-work', 'goodnight-moon', 'harry-potter-1', 'little-women', 'percy-jackson', 'pride-and-prejudice', 'the-alchemist', 'the-book-thief', 'the-fault-in-our-stars', 'the-gruffalo', 'the-hate-u-give', 'the-lean-startup', 'the-night-circus', 'the-silent-patient', 'the-very-hungry-caterpillar', 'thinking-fast-and-slow', 'where-the-crawdads-sing', 'where-the-wild-things-are'];
+const COVER_ALIAS={'harry-potter-and-the-philosophers-stone':'harry-potter-1','percy-jackson-the-olympians':'percy-jackson','where-the-crawdads-sing':'where-the-crawdads-sing'};
+function coverSlug(item){
+  const t=String(item.title||'').toLowerCase().replace(/[\u2019']/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  if(COVER_ALIAS[t])return COVER_ALIAS[t];
+  return COVER_SLUGS.find(s=>s===t||t.startsWith(s))||null;
+}
+function coverHTML(item){
+  const s=coverSlug(item);
+  if(!s)return item.cover||'📖';
+  return '<img src="img/covers/'+s+'.svg" alt="Cover of '+String(item.title||'').replace(/"/g,'&quot;')+'" loading="lazy">';
+}
