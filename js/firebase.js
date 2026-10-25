@@ -28,7 +28,7 @@ function initFirebase() {
     return false;
   }
 
-  app = firebase.initializeApp(firebaseConfig);
+  app = firebase.apps.length ? firebase.app() : firebase.initializeApp(firebaseConfig);
   
   try {
     analytics = firebase.analytics();

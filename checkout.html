@@ -372,6 +372,7 @@
   </footer>
 
   <script src="js/store.js"></script>
+  <script src="js/analytics.js"></script>
   <script>
     // Live indicative rates from a public endpoint. INR remains the store's base currency.
     // A real payment gateway may apply its own rate/fees; this page is currently a checkout demo.
@@ -515,12 +516,14 @@
         exchangeRateSource: fxSource, exchangeRateWasLive: fxLive, paymentMethod: methodNames[method]
       };
       localStorage.setItem(ORDER_KEY, JSON.stringify(order));
+      if (window.rnTrack) rnTrack('order_submitted', { transaction_id: orderId, currency: 'INR', value: totals.total, display_currency: currentCurrency, payment_method: methodNames[method], items: order.items.map(i => ({ item_id: i.id, item_name: i.title, price: i.priceINR, quantity: i.qty })) });
+      if (window.rnSaveOrder) rnSaveOrder(order);
       showToast(`Preparing order summary in ${currentCurrency}…`);
       // Demo only: no payment is captured until a real payment gateway is integrated.
       setTimeout(() => { window.location.href = 'order-success.html'; }, 500);
     }
 
-    document.addEventListener('DOMContentLoaded', () => { renderOrder(); loadExchangeRates(); });
+    document.addEventListener('DOMContentLoaded', () => { renderOrder(); loadExchangeRates(); if (window.rnTrack) { const c = getCart(); rnTrack('begin_checkout', { currency: 'INR', value: getTotals().total, items: c.map(i => ({ item_id: i.id, item_name: i.title, price: Number(i.price) || 0, quantity: i.qty })) }); } });
   </script>
 </body>
 </html>

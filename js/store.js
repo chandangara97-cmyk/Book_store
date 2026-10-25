@@ -37,6 +37,7 @@ function addToCart(book) {
     });
   }
   saveStore(store);
+  if (window.rnTrack) rnTrack('add_to_cart', { currency: 'INR', value: (Number(book.price) || 0) * (book.qty || 1), items: [{ item_id: book.id, item_name: book.title, price: Number(book.price) || 0, quantity: book.qty || 1 }] });
   showToast(`“${book.title}” added to cart`);
 }
 
@@ -93,6 +94,7 @@ function toggleWishlist(book) {
       category: book.category || ''
     });
     saveStore(store);
+    if (window.rnTrack) rnTrack('add_to_wishlist', { currency: 'INR', value: Number(book.price) || 0, items: [{ item_id: book.id, item_name: book.title, price: Number(book.price) || 0 }] });
     showToast(`“${book.title}” added to wishlist`);
     return true;
   }

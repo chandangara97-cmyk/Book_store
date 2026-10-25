@@ -1,0 +1,21 @@
+{
+  "rules": {
+    "books": {
+      ".read": true,
+      ".write": "auth != null && auth.token.email === 'YOUR-ADMIN-EMAIL@example.com' && auth.token.email_verified === true"
+    },
+    "orders": {
+      "$orderId": {
+        ".write": "!data.exists()",
+        ".read": "auth != null && auth.token.email === 'YOUR-ADMIN-EMAIL@example.com'",
+        ".validate": "newData.hasChildren(['orderId','items','customer','totalsINR'])"
+      }
+    },
+    "users": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    }
+  }
+}
