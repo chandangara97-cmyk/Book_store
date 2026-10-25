@@ -1,29 +1,51 @@
-THE READING NOOK - multi-page website
-Pages: index.html, library.html, reviews.html, story.html, contact.html
-Shared: style.css (design), app.js (books, reviews, prices, gifts, cart)
+THE READING NOOK — folder layout & paths
+========================================
 
-1. Open app.js. Edit the block at the top:
-   - CONFIG (email, phone, WhatsApp, address, UPI ID, payment link, giftWrapFee)
-   - GIFTS (free toy / sketchbook / colour set / bookmark + eligibility thresholds)
-   - PRICES, OPTS (borrow/digital rates)
-   - BOOKS — each book supports full metadata:
-       t title, a author, c category, k cover colour,
-       pub, isbn, ed, lang, pages, bind, age,
-       mrp (MRP), p (selling price)
-   - REVIEWS (replace samples; set sample:false for real ones)
+reading-nook-site/
+├── index.html                 ← Home (open this)
+├── library.html               ← Browse by age
+├── reviews.html
+├── story.html
+├── contact.html
+├── assets/
+│   ├── css/
+│   │   └── style.css          ← shared styles
+│   └── js/
+│       └── app.js             ← books, prices, gifts, cart
+├── books/
+│   ├── book-the-sleepy-sun.html
+│   ├── book-little-worlds.html
+│   └── … (one page per book)
+├── tools/
+│   └── generate-book-pages.py ← regenerates books/*.html
+└── README.txt
 
-2. Every book card shows: title, author, category, price, MRP, discount %, savings,
-   pages/binding/age, quantity selector, Add to bag, Enquire, Wishlist ♥, and
-   “Full details” modal with publisher, ISBN, edition, language, WhatsApp & email links.
+PATHS (already wired)
+---------------------
+From root pages (index, library, …):
+  CSS  → assets/css/style.css
+  JS   → assets/js/app.js
+  Book → books/book-<slug>.html
 
-3. Bag supports quantity, gift-wrap request, live gift eligibility banners, and
-   WhatsApp order confirmation.
+From book pages (books/*.html):
+  CSS  → ../assets/css/style.css
+  JS   → ../assets/js/app.js
+  Nav  → ../index.html, ../library.html, …
+  Peer books → book-<slug>.html (same folder)
 
-4. Library page includes a dedicated Offers & Terms section driven by GIFTS config.
+app.js detects whether it is on a book page and builds
+correct links via BASE / pageUrl() / bookUrl().
 
-5. Upload ALL files in this folder to any web hosting (keep them in the same folder)
-   and open index.html. Mobile-responsive throughout.
+ADD A NEW BOOK
+--------------
+1. Edit BOOKS in assets/js/app.js (set band: toddler|early|primary|middle|teen)
+2. Run:  python3 tools/generate-book-pages.py
+3. New file appears in books/
+4. Upload the whole reading-nook-site folder
 
-6. Payments: UPI goes to your UPI ID. Add a Razorpay/PayU link in CONFIG.payLink for cards.
-   Orders are confirmed when the customer sends the order on WhatsApp; there is no server
-   to verify payments.
+FEATURES
+--------
+• Children’s books organised by age (0–3, 3–6, 6–9, 9–12, 12+)
+• Age-matched complimentary gift when buy-subtotal ≥ ₹499
+• Premium gift wrap (+₹49) with optional message
+• Full metadata, MRP/discount, qty, wishlist, WhatsApp enquiry

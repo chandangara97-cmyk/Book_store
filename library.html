@@ -7,7 +7,7 @@
 <title>Library — Buy, Borrow or Read Digital | The Reading Nook</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body data-page="books">
 <div class="top">A LITTLE SPACE FOR BIG IDEAS · WELCOME, BOOK LOVERS</div>
@@ -20,8 +20,8 @@
 <main>
 <section class="view" id="v-books">
 <div class="sec"><div class="wrap">
-<div class="head"><span class="eyebrow">Our products</span><h2>A shelf for every kind of reader</h2><p>Choose how you’d like each book: buy it, borrow it for 7, 14 or 30 days, or get a digital copy. Full details, pricing and gift options on every title.</p></div>
-<div class="tools"><div class="chips" id="chips"></div><input id="q" type="search" placeholder="Search title, author or ISBN…" aria-label="Search books"></div>
+<div class="head"><span class="eyebrow">Our products</span><h2>Children’s books by age</h2><p>Filter by age band (0–3, 3–6, 6–9, 9–12, 12+). Buy, borrow or digital. Spend ₹499+ on books and unlock a complimentary gift matched to your child’s age.</p></div>
+<div class="tools"><div class="chips" id="chips"></div><input id="q" type="search" placeholder="Search title, author, age or ISBN…" aria-label="Search books"></div>
 <div class="grid" id="shelf"></div>
 <p id="none" style="display:none;text-align:center;color:var(--muted)">No books match that search. Try another word, or ask us to source it.</p>
 </div></div>
@@ -34,6 +34,6 @@
 <form id="co" style="margin-top:14px"><input id="on" required placeholder="Your name"><input id="op" required type="tel" placeholder="Phone / WhatsApp" style="margin-top:8px"><textarea id="oa" rows="2" placeholder="Delivery address (or write ‘pickup’)" style="margin-top:8px"></textarea><label style="font-size:12px;font-weight:700;margin:12px 0 6px;display:block">Pay with</label><div class="pm"><label><input type="radio" name="pm" value="upi" checked> UPI · scan or tap (GPay, PhonePe, Paytm)</label><label><input type="radio" name="pm" value="card"> Card / Net banking (secure link)</label><label><input type="radio" name="pm" value="store"> Pay at store / on delivery</label></div><button class="btn" style="width:100%;margin-top:14px" type="submit">Place order &amp; pay →</button></form><div id="done" style="display:none"></div></aside></div>
 <div class="toast" id="toast"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="app.js"></script>
+<script src="assets/js/app.js"></script>
 </body>
 </html>
