@@ -53,6 +53,37 @@ details{background:var(--w);border:2px solid var(--line);border-radius:16px;padd
 .help{background:var(--sun);text-align:center;padding:64px 0}.help h2{margin:0 auto 12px}.help p{max-width:34em;margin:0 auto 24px}
 footer{padding:30px 0;font-size:15px;color:var(--mut)}.fi{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 dialog{border:2px solid var(--ink);border-radius:20px;padding:28px;max-width:440px;font:17px/1.55 var(--b);color:var(--ink)}dialog::backdrop{background:rgba(27,42,74,.5)}dialog h3{margin-bottom:10px;font-size:24px}
+
+/* Visual storytelling upgrade: warm, welcoming bookshop atmosphere */
+.hero{position:relative;isolation:isolate;padding:0;min-height:560px;background:#26334a url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=2000&q=85') center 48%/cover no-repeat}
+.hero:before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(18,28,47,.88) 0%,rgba(18,28,47,.72) 48%,rgba(18,28,47,.28) 100%)}
+.hero .hg{min-height:560px;align-items:center;padding-top:56px}
+.hero h1{color:#fff;max-width:12ch;text-shadow:0 3px 18px rgba(0,0,0,.22)}
+.hero .lead{color:#f4f6fb;max-width:29em}
+.hero .btn{background:var(--sun);border-color:var(--sun);color:#1b2a4a;box-shadow:0 8px 22px rgba(0,0,0,.18)}
+.hero .btn.alt{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.8);color:#fff;backdrop-filter:blur(6px)}
+.stairs{height:300px;gap:9px;filter:drop-shadow(0 12px 22px rgba(0,0,0,.18))}
+.stair{border:1px solid rgba(255,255,255,.55);box-shadow:inset 8px 0 rgba(27,42,74,.08),0 8px 24px rgba(0,0,0,.12)}
+.visual-story{padding:76px 0;background:#fffaf1}
+.visual-story .intro{margin-bottom:30px}
+.story-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.story-card{position:relative;min-height:330px;overflow:hidden;border-radius:24px;background:#dce4ed;box-shadow:0 12px 28px rgba(27,42,74,.10);isolation:isolate}
+.story-card:before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(12,22,39,.02) 25%,rgba(12,22,39,.84) 100%)}
+.story-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;transition:transform .45s ease}
+.story-card:hover img{transform:scale(1.05)}
+.story-copy{position:absolute;left:22px;right:22px;bottom:22px;color:#fff}
+.story-copy span{display:inline-block;padding:4px 10px;border-radius:99px;background:var(--sun);color:var(--ink);font-size:13px;font-weight:800;margin-bottom:10px}
+.story-copy h3{font-size:27px;margin-bottom:8px}.story-copy p{font-size:15px;line-height:1.5;margin:0;color:#f0f3f8}
+#formats .fmt{overflow:hidden;box-shadow:0 12px 28px rgba(27,42,74,.06);transition:transform .2s,box-shadow .2s}
+#formats .fmt:hover{transform:translateY(-4px);box-shadow:0 18px 34px rgba(27,42,74,.11)}
+#formats .fmt img{height:180px;object-fit:cover;background:#f3f6fb}
+.finder{box-shadow:0 12px 32px rgba(27,42,74,.06)}
+.card{box-shadow:0 8px 22px rgba(27,42,74,.05);border:1px solid var(--line);border-top:7px solid var(--c)}
+.help{background:linear-gradient(135deg,#ffe18a,#ffc83d)}
+@media(max-width:900px){.hero,.hero .hg{min-height:unset}.hero .hg{padding-top:58px;padding-bottom:0}.stairs{height:245px}.story-grid{grid-template-columns:1fr 1fr}.story-card:last-child{grid-column:1/-1;min-height:260px}}
+@media(max-width:600px){.hero{background-position:58% center}.hero:before{background:linear-gradient(180deg,rgba(18,28,47,.86),rgba(18,28,47,.67))}.hero .hg{padding-top:42px}.hero h1{font-size:clamp(38px,11vw,54px)}.hero .lead{font-size:18px}.stairs{height:205px;margin-top:4px}.stair{padding:12px 9px}.story-grid{grid-template-columns:1fr}.story-card,.story-card:last-child{grid-column:auto;min-height:290px}.visual-story{padding:54px 0}}
+@media(prefers-reduced-motion:reduce){.story-card img,#formats .fmt{transition:none}}
+
 @media(max-width:900px){.hg{grid-template-columns:1fr}.stairs{height:250px}.acts{padding-bottom:32px}.two,.steps{grid-template-columns:1fr}section{padding:60px 0}.finder{padding:24px}}
 @media(max-width:720px){.menu{display:block}nav ul{display:none;position:absolute;left:0;right:0;top:70px;background:var(--bg);flex-direction:column;gap:0;padding:8px 24px 18px;border-bottom:1px solid var(--line)}nav ul.open{display:flex}nav li a{display:block;padding:12px 0}.nav>.btn{display:none}}
 @media(max-width:480px){.stair b{font-size:22px}.stair span{font-size:13px}.stg button{padding:7px 12px;font-size:15px}.ticks span:nth-child(even){visibility:hidden}}
@@ -98,6 +129,15 @@ dialog{border:2px solid var(--ink);border-radius:20px;padding:28px;max-width:440
 <div class="two">
 <div class="fmt" style="border-top:10px solid var(--pink)"><img src="img/format-printed.svg" alt="An open printed book" loading="lazy"><h3>Printed copy</h3><ul><li>A real book to hold, share and keep on the shelf</li><li>Good for bedtime reading and screen-free learning</li><li>Delivered to your address after payment</li></ul></div>
 <div class="fmt" style="border-top:10px solid var(--sky)"><img src="img/format-digital.svg" alt="A tablet showing a digital book" loading="lazy"><h3>Digital copy</h3><ul><li>Read on a phone, tablet or computer</li><li>Lower price and no waiting for delivery</li><li>Easy to carry on trips and share across your devices</li></ul></div>
+</div></div></section>
+
+<section class="visual-story" aria-labelledby="story-title"><div class="wrap">
+<h2 id="story-title">Little readers. Big possibilities.</h2>
+<p class="intro">A welcoming place for every kind of learner — from first picture books to the ideas that inspire tomorrow.</p>
+<div class="story-grid">
+<article class="story-card"><img src="https://images.unsplash.com/photo-1516627069848-6b6e1b6e8f5f?auto=format&fit=crop&w=900&q=85" alt="A parent sharing a book with a young child" loading="lazy"><div class="story-copy"><span>AGES 0–7</span><h3>Make story time special</h3><p>Build joyful little routines with bright, friendly learning books.</p></div></article>
+<article class="story-card"><img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=900&q=85" alt="A child learning and writing at a desk" loading="lazy"><div class="story-copy"><span>AGES 8–12</span><h3>Curiosity lives here</h3><p>Encourage questions, creativity and the confidence to try.</p></div></article>
+<article class="story-card"><img src="https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=900&q=85" alt="Books and notebooks ready for focused study" loading="lazy"><div class="story-copy"><span>AGES 13–15</span><h3>Ready for what’s next</h3><p>Support stronger study habits and independent thinking.</p></div></article>
 </div></div></section>
 
 <section class="pay" id="how"><div class="wrap">
