@@ -130,7 +130,7 @@ function showToast(message) {
     toast.id = 'rn-toast';
     toast.style.cssText = `
       position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
-      background: #1a3c34; color: white; padding: 14px 24px; border-radius: 12px;
+      background: #1b2a4a; color: white; padding: 14px 24px; border-radius: 12px;
       font-family: system-ui, sans-serif; font-size: 0.95rem; z-index: 9999;
       box-shadow: 0 8px 30px rgba(0,0,0,0.2); opacity: 0; transition: opacity 0.3s;
       max-width: 90%; text-align: center;

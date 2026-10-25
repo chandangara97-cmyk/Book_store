@@ -1,14 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;800&display=swap');
 /* The Reading Nook - Main Stylesheet */
 :root {
-  --primary: #1a3c34;
-  --primary-light: #2d5a4a;
-  --accent: #e8f0e9;
-  --bg: #f9f6f0;
-  --card-bg: #f7f3eb;
-  --text: #1a3c34;
-  --text-muted: #5c6b66;
-  --border: #e5dfd3;
-  --shadow: 0 8px 30px rgba(26, 60, 52, 0.08);
+  --primary: #1b2a4a;
+  --primary-light: #2e4270;
+  --accent: #e9f1ff;
+  --bg: #f4f8ff;
+  --card-bg: #ffffff;
+  --text: #1b2a4a;
+  --text-muted: #53607c;
+  --border: #dbe4f3;
+  --shadow: 0 8px 30px rgba(27, 42, 74, 0.08);
   --radius: 18px;
   --radius-sm: 12px;
 }
@@ -20,7 +21,7 @@
 }
 
 body {
-  font-family: 'Georgia', 'Times New Roman', serif;
+  font-family: 'Nunito','Segoe UI',system-ui,sans-serif;
   background: var(--bg);
   color: var(--text);
   line-height: 1.6;
@@ -29,7 +30,7 @@ body {
 
 /* ========== HEADER ========== */
 .header {
-  background: #fdfbf7;
+  background: #ffffff;
   border-bottom: 1px solid var(--border);
   padding: 18px 0;
   position: sticky;
@@ -137,7 +138,7 @@ body {
 .category-icon {
   width: 52px;
   height: 52px;
-  background: #efe9dc;
+  background: #e6edf9;
   border-radius: 14px;
   display: flex;
   align-items: center;
@@ -163,7 +164,7 @@ body {
 
 /* ========== LIBRARY PAGES ========== */
 .page-header {
-  background: #fdfbf7;
+  background: #ffffff;
   border-bottom: 1px solid var(--border);
   padding: 40px 24px;
   text-align: center;
@@ -253,7 +254,7 @@ body {
 
 .book-cover {
   height: 180px;
-  background: linear-gradient(135deg, #e8f0e9, #d4e4d8);
+  background: linear-gradient(135deg, #e9f1ff, #cfe0fb);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -301,7 +302,7 @@ body {
 .book-cover-large {
   width: 220px;
   height: 300px;
-  background: linear-gradient(135deg, #e8f0e9, #d4e4d8);
+  background: linear-gradient(135deg, #e9f1ff, #cfe0fb);
   border-radius: var(--radius);
   display: flex;
   align-items: center;
@@ -380,7 +381,7 @@ body {
   border-radius: 10px;
   font-size: 1rem;
   font-family: system-ui, sans-serif;
-  background: #fdfbf7;
+  background: #ffffff;
 }
 
 .form-group textarea {
@@ -552,7 +553,7 @@ body {
   width: 36px;
   height: 40px;
   border: none;
-  background: #f5f0e8;
+  background: #eef3fc;
   font-size: 1.1rem;
   cursor: pointer;
   color: var(--primary);
@@ -601,7 +602,7 @@ body {
 .cart-item-cover {
   width: 56px;
   height: 72px;
-  background: linear-gradient(135deg, #e8f0e9, #d4e4d8);
+  background: linear-gradient(135deg, #e9f1ff, #cfe0fb);
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -680,7 +681,7 @@ body {
   padding: 16px;
   border: 1.5px solid var(--border);
   border-radius: 12px;
-  background: #fdfbf7;
+  background: #ffffff;
   cursor: pointer;
   font-family: system-ui, sans-serif;
   text-align: center;
@@ -722,3 +723,11 @@ body {
 .steps-row h3{font-size:1.05rem;margin-bottom:4px}.steps-row p{font:.88rem/1.5 system-ui,sans-serif;color:var(--text-muted);margin:0}
 @media(max-width:900px){.feature-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:560px){.feature-grid{grid-template-columns:1fr}.steps-row{grid-template-columns:1fr}}
+
+/* ========== KIDS THEME (matches index) ========== */
+h1,h2,h3,.logo-text h1,.category-card h2{font-family:'Fredoka','Trebuchet MS',system-ui,sans-serif;letter-spacing:-.01em}
+.btn,.age-btn,.filter-btn,.icon-btn{border-radius:999px;font-family:'Fredoka','Trebuchet MS',system-ui,sans-serif}
+.logo-icon{background:linear-gradient(135deg,#ffc83d,#ff7aa2 50%,#6cb8ff)!important;color:#1b2a4a!important}
+.category-card,.book-card{border:2px solid #dbe4f3}
+.category-card:nth-child(1){border-top:8px solid #6cb8ff}.category-card:nth-child(2){border-top:8px solid #ffc83d}.category-card:nth-child(3){border-top:8px solid #4fd6a6}.category-card:nth-child(4){border-top:8px solid #ff7aa2}
+.footer{background:#1b2a4a;color:#c3cde4}.footer *{color:inherit}
