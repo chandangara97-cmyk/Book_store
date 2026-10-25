@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seed Data – The Reading Nook (Testing)</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="../index.html" class="logo">
+        <div class="logo-icon">✦</div>
+        <div class="logo-text">
+          <h1>THE READING NOOK</h1>
+          <span>Admin · Testing</span>
+        </div>
+      </a>
+    </div>
+  </header>
+
+  <div class="container">
+    <a href="../index.html" class="back-link">← Back to Home</a>
+
+    <h1 style="margin-bottom: 12px;">Firebase Testing Tools</h1>
+    <p style="color: var(--text-muted); margin-bottom: 32px; font-family: system-ui;">
+      Use these buttons only during the testing phase.
+    </p>
+
+    <div style="display: flex; flex-direction: column; gap: 16px; max-width: 400px;">
+      <button class="btn" onclick="seedBooks()">Seed Sample Books to Database</button>
+      <button class="btn btn-secondary" onclick="loadBooks()">Load & Show Books from Firebase</button>
+      <button class="btn btn-outline" onclick="checkConnection()">Check Firebase Connection</button>
+    </div>
+
+    <div id="output" style="margin-top: 32px; padding: 20px; background: #f5f0e8; border-radius: 12px; font-family: system-ui; font-size: 0.95rem; white-space: pre-wrap; display: none;"></div>
+  </div>
+
+  <footer class="footer"><p>© 2026 The Reading Nook · Testing</p></footer>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-analytics-compat.js"></script>
+  <script src="../js/firebase.js"></script>
+
+  <script>
+    initFirebase();
+
+    function show(msg) {
+      const el = document.getElementById('output');
+      el.style.display = 'block';
+      el.textContent = msg;
+    }
+
+    function checkConnection() {
+      show('Checking connection...');
+      database.ref('.info/connected').once('value')
+        .then(snap => {
+          show(snap.val() === true 
+            ? '✅ Connected to Firebase Realtime Database successfully!' 
+            : '⚠️ Connected status: false');
+        })
+        .catch(err => show('❌ Error: ' + err.message));
+    }
+
+    function seedBooks() {
+      show('Seeding sample books...');
+      seedSampleBooks()
+        .then(() => show('✅ Sample books added to /books in Realtime Database!\n\nYou can now view them in Firebase Console → Realtime Database.'))
+        .catch(err => show('❌ Error: ' + err.message));
+    }
+
+    function loadBooks() {
+      show('Loading books from Firebase...');
+      getBooksFromFirebase()
+        .then(books => {
+          if (books.length === 0) {
+            show('No books found. Click "Seed Sample Books" first.');
+          } else {
+            show('✅ Found ' + books.length + ' books:\n\n' + 
+              books.map(b => `• ${b.title} by ${b.author} (₹${b.price}) [${b.category}]`).join('\n'));
+          }
+        })
+        .catch(err => show('❌ Error: ' + err.message));
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gift Finder – The Reading Nook</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-inner">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">✦</div>
+        <div class="logo-text">
+          <h1>THE READING NOOK</h1>
+          <span>Books · Ideas · Possibilities</span>
+        </div>
+      </a>
+      <div class="header-actions">
+        <a href="wishlist.html" class="icon-btn" title="Wishlist">♡</a>
+        <a href="cart.html" class="icon-btn" title="Cart">
+          🛒
+          <span class="cart-badge">0</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="page-header">
+    <h1>Gift Finder</h1>
+    <p>Answer a few questions and we’ll suggest the perfect book.</p>
+  </div>
+
+  <div class="container">
+    <a href="index.html" class="back-link">← Back to Home</a>
+
+    <div class="gift-quiz" id="quiz">
+      <!-- Step 1: Who -->
+      <div class="quiz-step" id="step1">
+        <h3>1. Who is this gift for?</h3>
+        <div class="quiz-options">
+          <div class="quiz-option" data-value="child">A Child</div>
+          <div class="quiz-option" data-value="teen">A Teenager</div>
+          <div class="quiz-option" data-value="adult">An Adult</div>
+          <div class="quiz-option" data-value="friend">A Friend / Colleague</div>
+        </div>
+      </div>
+
+      <!-- Step 2: Interest -->
+      <div class="quiz-step" id="step2" style="display:none">
+        <h3>2. What do they enjoy?</h3>
+        <div class="quiz-options">
+          <div class="quiz-option" data-value="stories">Stories & Adventure</div>
+          <div class="quiz-option" data-value="learning">Learning & Growth</div>
+          <div class="quiz-option" data-value="inspiration">Inspiration & Motivation</div>
+          <div class="quiz-option" data-value="classic">Timeless Classics</div>
+        </div>
+      </div>
+
+      <!-- Step 3: Age (only for child/teen) -->
+      <div class="quiz-step" id="step3" style="display:none">
+        <h3>3. Approximate age?</h3>
+        <div class="quiz-options">
+          <div class="quiz-option" data-value="0-3">0 – 3 years</div>
+          <div class="quiz-option" data-value="4-7">4 – 7 years</div>
+          <div class="quiz-option" data-value="8-12">8 – 12 years</div>
+          <div class="quiz-option" data-value="13+">13 years & above</div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div class="quiz-step" id="results" style="display:none">
+        <h3>Perfect matches for you</h3>
+        <div id="resultBooks" class="book-grid" style="margin-top:20px"></div>
+        <button class="btn btn-secondary" style="margin-top:24px" onclick="resetQuiz()">Start Over</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>© 2026 The Reading Nook</p>
+  </footer>
+
+  <script src="js/store.js"></script>
+  <script>
+    const answers = {};
+    let currentStep = 1;
+
+    // Sample recommendation data
+    const recommendations = {
+      'child-stories-0-3': [
+        { id: 'caterpillar', title: 'The Very Hungry Caterpillar', author: 'Eric Carle', price: 299, cover: '🐛', category: 'children' }
+      ],
+      'child-stories-4-7': [
+        { id: 'wild-things', title: 'Where the Wild Things Are', author: 'Maurice Sendak', price: 349, cover: '👹', category: 'children' },
+        { id: 'gruffalo', title: 'The Gruffalo', author: 'Julia Donaldson', price: 299, cover: '🦊', category: 'children' }
+      ],
+      'child-stories-8-12': [
+        { id: 'hp1', title: 'Harry Potter and the Philosopher’s Stone', author: 'J.K. Rowling', price: 499, cover: '⚡', category: 'children' }
+      ],
+      'teen-stories-13+': [
+        { id: 'hate-u-give', title: 'The Hate U Give', author: 'Angie Thomas', price: 399, cover: '✊', category: 'children' }
+      ],
+      'adult-learning': [
+        { id: 'atomic', title: 'Atomic Habits', author: 'James Clear', price: 499, cover: '⚙️', category: 'learning' },
+        { id: 'deep-work', title: 'Deep Work', author: 'Cal Newport', price: 449, cover: '🎯', category: 'learning' }
+      ],
+      'adult-inspiration': [
+        { id: 'alchemist', title: 'The Alchemist', author: 'Paulo Coelho', price: 299, cover: '🌟', category: 'gifts' }
+      ],
+      'adult-classic': [
+        { id: 'pride', title: 'Pride and Prejudice', author: 'Jane Austen', price: 249, cover: '📜', category: 'fiction' }
+      ],
+      'friend-inspiration': [
+        { id: 'alchemist', title: 'The Alchemist', author: 'Paulo Coelho', price: 299, cover: '🌟', category: 'gifts' },
+        { id: 'becoming', title: 'Becoming', author: 'Michelle Obama', price: 599, cover: '👑', category: 'gifts' }
+      ]
+    };
+
+    document.querySelectorAll('.quiz-option').forEach(opt => {
+      opt.addEventListener('click', function() {
+        const step = this.closest('.quiz-step');
+        step.querySelectorAll('.quiz-option').forEach(o => o.classList.remove('selected'));
+        this.classList.add('selected');
+
+        const value = this.dataset.value;
+
+        if (currentStep === 1) {
+          answers.who = value;
+          document.getElementById('step1').style.display = 'none';
+          document.getElementById('step2').style.display = 'block';
+          currentStep = 2;
+        } else if (currentStep === 2) {
+          answers.interest = value;
+          document.getElementById('step2').style.display = 'none';
+
+          if (answers.who === 'child' || answers.who === 'teen') {
+            document.getElementById('step3').style.display = 'block';
+            currentStep = 3;
+          } else {
+            showResults();
+          }
+        } else if (currentStep === 3) {
+          answers.age = value;
+          document.getElementById('step3').style.display = 'none';
+          showResults();
+        }
+      });
+    });
+
+    function showResults() {
+      let key = '';
+      if (answers.who === 'child' || answers.who === 'teen') {
+        key = `${answers.who === 'teen' ? 'teen' : 'child'}-${answers.interest}-${answers.age || '8-12'}`;
+      } else {
+        key = `${answers.who}-${answers.interest}`;
+      }
+
+      // Fallback keys
+      let books = recommendations[key] 
+        || recommendations['adult-inspiration'] 
+        || recommendations['friend-inspiration'];
+
+      const container = document.getElementById('resultBooks');
+      container.innerHTML = books.map(b => `
+        <div class="book-card" style="cursor:default">
+          <div class="book-cover">${b.cover}</div>
+          <div class="book-info">
+            <h3>${b.title}</h3>
+            <div class="author">${b.author}</div>
+            <div class="meta">₹${b.price}</div>
+            <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+              <button class="btn btn-sm" onclick='addToCart(${JSON.stringify(b)})'>Add to Cart</button>
+              <button class="btn btn-sm btn-outline" onclick='toggleWishlist(${JSON.stringify(b)})'>♡ Wishlist</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('results').style.display = 'block';
+    }
+
+    function resetQuiz() {
+      answers.who = answers.interest = answers.age = null;
+      currentStep = 1;
+      document.querySelectorAll('.quiz-step').forEach(s => s.style.display = 'none');
+      document.getElementById('step1').style.display = 'block';
+      document.querySelectorAll('.quiz-option').forEach(o => o.classList.remove('selected'));
+    }
+  </script>
+</body>
+</html>

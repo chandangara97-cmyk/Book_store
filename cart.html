@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Cart – The Reading Nook</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-inner">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">✦</div>
+        <div class="logo-text">
+          <h1>THE READING NOOK</h1>
+          <span>Books · Ideas · Possibilities</span>
+        </div>
+      </a>
+      <div class="header-actions">
+        <a href="wishlist.html" class="icon-btn" title="Wishlist">♡</a>
+        <a href="cart.html" class="icon-btn" title="Cart">
+          🛒
+          <span class="cart-badge">0</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="page-header">
+    <h1>Your Cart</h1>
+    <p>Review your selected books before checkout.</p>
+  </div>
+
+  <div class="container">
+    <a href="index.html" class="back-link">← Continue Shopping</a>
+
+    <div id="cartContent">
+      <!-- Filled by JS -->
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>© 2026 The Reading Nook</p>
+  </footer>
+
+  <script src="js/store.js"></script>
+  <script>
+    function renderCart() {
+      const cart = getCart();
+      const container = document.getElementById('cartContent');
+
+      if (cart.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="icon">🛒</div>
+            <h3>Your cart is empty</h3>
+            <p style="margin: 12px 0 24px;">Discover something wonderful to read.</p>
+            <a href="library/all.html" class="btn">Browse Books</a>
+          </div>
+        `;
+        return;
+      }
+
+      let rows = '';
+      cart.forEach(item => {
+        rows += `
+          <tr data-id="${item.id}">
+            <td>
+              <div class="cart-item-info">
+                <div class="cart-item-cover">${item.cover}</div>
+                <div>
+                  <strong>${item.title}</strong><br>
+                  <span style="color:var(--text-muted);font-size:0.9rem;font-family:system-ui">${item.author}</span>
+                </div>
+              </div>
+            </td>
+            <td>₹${item.price}</td>
+            <td>
+              <div class="qty-control">
+                <button onclick="changeQty('${item.id}', -1)">−</button>
+                <input type="number" value="${item.qty}" min="1" onchange="setQty('${item.id}', this.value)" />
+                <button onclick="changeQty('${item.id}', 1)">+</button>
+              </div>
+            </td>
+            <td><strong>₹${item.price * item.qty}</strong></td>
+            <td>
+              <button class="btn btn-sm btn-outline" onclick="removeItem('${item.id}')">Remove</button>
+            </td>
+          </tr>
+        `;
+      });
+
+      const total = getCartTotal();
+      container.innerHTML = `
+        <table class="cart-table">
+          <thead>
+            <tr>
+              <th>Book</th>
+              <th>Price</th>
+              <th>Qty</th>
+              <th>Subtotal</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+
+        <div class="cart-summary">
+          <h3>Order Summary</h3>
+          <div class="summary-row">
+            <span>Subtotal</span>
+            <span>₹${total}</span>
+          </div>
+          <div class="summary-row">
+            <span>Shipping</span>
+            <span>${total >= 499 ? 'Free' : '₹49'}</span>
+          </div>
+          <div class="summary-row total">
+            <span>Total</span>
+            <span>₹${total >= 499 ? total : total + 49}</span>
+          </div>
+          <button class="btn btn-block" style="margin-top:20px" onclick="checkout()">
+            Proceed to Checkout
+          </button>
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-top:12px;font-family:system-ui;text-align:center">
+            Free shipping on orders above ₹499
+          </p>
+        </div>
+      `;
+    }
+
+    function changeQty(id, delta) {
+      const item = getCart().find(i => i.id === id);
+      if (item) {
+        updateCartQty(id, item.qty + delta);
+        renderCart();
+      }
+    }
+
+    function setQty(id, value) {
+      updateCartQty(id, parseInt(value) || 1);
+      renderCart();
+    }
+
+    function removeItem(id) {
+      removeFromCart(id);
+      renderCart();
+      showToast('Item removed from cart');
+    }
+
+    function checkout() {
+      showToast('Checkout will connect to payment gateway in the full version');
+      // In real app: redirect to Razorpay / payment page
+    }
+
+    document.addEventListener('DOMContentLoaded', renderCart);
+  </script>
+</body>
+</html>

@@ -1,0 +1,145 @@
+/**
+ * The Reading Nook - Cart & Wishlist Store
+ * Uses localStorage so it works without a backend
+ */
+
+const STORE_KEY = 'readingNook';
+
+function getStore() {
+  try {
+    return JSON.parse(localStorage.getItem(STORE_KEY)) || { cart: [], wishlist: [] };
+  } catch {
+    return { cart: [], wishlist: [] };
+  }
+}
+
+function saveStore(data) {
+  localStorage.setItem(STORE_KEY, JSON.stringify(data));
+  updateCartBadge();
+}
+
+/* ========== CART ========== */
+function addToCart(book) {
+  const store = getStore();
+  const existing = store.cart.find(item => item.id === book.id);
+
+  if (existing) {
+    existing.qty += book.qty || 1;
+  } else {
+    store.cart.push({
+      id: book.id,
+      title: book.title,
+      author: book.author,
+      price: book.price,
+      cover: book.cover || '📖',
+      category: book.category || '',
+      qty: book.qty || 1
+    });
+  }
+  saveStore(store);
+  showToast(`“${book.title}” added to cart`);
+}
+
+function removeFromCart(id) {
+  const store = getStore();
+  store.cart = store.cart.filter(item => item.id !== id);
+  saveStore(store);
+}
+
+function updateCartQty(id, qty) {
+  const store = getStore();
+  const item = store.cart.find(i => i.id === id);
+  if (item) {
+    item.qty = Math.max(1, qty);
+    saveStore(store);
+  }
+}
+
+function getCart() {
+  return getStore().cart;
+}
+
+function getCartCount() {
+  return getStore().cart.reduce((sum, item) => sum + item.qty, 0);
+}
+
+function getCartTotal() {
+  return getStore().cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+}
+
+function clearCart() {
+  const store = getStore();
+  store.cart = [];
+  saveStore(store);
+}
+
+/* ========== WISHLIST ========== */
+function toggleWishlist(book) {
+  const store = getStore();
+  const index = store.wishlist.findIndex(item => item.id === book.id);
+
+  if (index > -1) {
+    store.wishlist.splice(index, 1);
+    saveStore(store);
+    showToast(`Removed from wishlist`);
+    return false;
+  } else {
+    store.wishlist.push({
+      id: book.id,
+      title: book.title,
+      author: book.author,
+      price: book.price,
+      cover: book.cover || '📖',
+      category: book.category || ''
+    });
+    saveStore(store);
+    showToast(`“${book.title}” added to wishlist`);
+    return true;
+  }
+}
+
+function isInWishlist(id) {
+  return getStore().wishlist.some(item => item.id === id);
+}
+
+function getWishlist() {
+  return getStore().wishlist;
+}
+
+function removeFromWishlist(id) {
+  const store = getStore();
+  store.wishlist = store.wishlist.filter(item => item.id !== id);
+  saveStore(store);
+}
+
+/* ========== UI HELPERS ========== */
+function updateCartBadge() {
+  const count = getCartCount();
+  document.querySelectorAll('.cart-badge').forEach(el => {
+    el.textContent = count;
+    el.style.display = count > 0 ? 'flex' : 'none';
+  });
+}
+
+function showToast(message) {
+  let toast = document.getElementById('rn-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'rn-toast';
+    toast.style.cssText = `
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+      background: #1a3c34; color: white; padding: 14px 24px; border-radius: 12px;
+      font-family: system-ui, sans-serif; font-size: 0.95rem; z-index: 9999;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.2); opacity: 0; transition: opacity 0.3s;
+      max-width: 90%; text-align: center;
+    `;
+    document.body.appendChild(toast);
+  }
+  toast.textContent = message;
+  toast.style.opacity = '1';
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => { toast.style.opacity = '0'; }, 2500);
+}
+
+// Run on every page
+document.addEventListener('DOMContentLoaded', updateCartBadge);

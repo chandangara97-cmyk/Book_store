@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin – The Reading Nook</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="../index.html" class="logo">
+        <div class="logo-icon">✦</div>
+        <div class="logo-text">
+          <h1>THE READING NOOK</h1>
+          <span>Admin Panel</span>
+        </div>
+      </a>
+    </div>
+  </header>
+
+  <div class="admin-container">
+    <h1 style="margin-bottom: 8px;">Add / Edit Book</h1>
+    <p style="color: var(--text-muted); margin-bottom: 28px; font-family: system-ui;">
+      Assign a category slug. The system will automatically create the book page and place it in the correct library.
+    </p>
+
+    <div class="admin-form">
+      <form id="bookForm">
+        <div class="form-group">
+          <label for="title">Book Title *</label>
+          <input type="text" id="title" name="title" required placeholder="e.g. Atomic Habits" />
+        </div>
+
+        <div class="form-group">
+          <label for="author">Author *</label>
+          <input type="text" id="author" name="author" required placeholder="e.g. James Clear" />
+        </div>
+
+        <div class="form-group">
+          <label for="category">Category (Master Library) *</label>
+          <select id="category" name="category" required>
+            <option value="">— Select Category —</option>
+            <option value="fiction">Fiction & Stories</option>
+            <option value="learning">Learning & Growth</option>
+            <option value="children-0-3">Children’s Books · Ages 0–3</option>
+            <option value="children-4-7">Children’s Books · Ages 4–7</option>
+            <option value="children-8-12">Children’s Books · Ages 8–12</option>
+            <option value="children-13-plus">Children’s Books · Ages 13+</option>
+            <option value="gifts">Gifts & Special Reads</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="slug">URL Slug (auto-generated, editable)</label>
+          <input type="text" id="slug" name="slug" placeholder="atomic-habits" />
+        </div>
+
+        <div class="form-group">
+          <label for="description">Short Description</label>
+          <textarea id="description" name="description" placeholder="A short blurb about the book..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="tags">Tags (comma separated)</label>
+          <input type="text" id="tags" name="tags" placeholder="Self-Help, Habits, Productivity" />
+        </div>
+
+        <button type="submit" class="btn">Save Book & Generate Page</button>
+        <a href="../index.html" class="btn btn-secondary">Cancel</a>
+      </form>
+
+      <div id="result" style="margin-top: 24px; display: none; padding: 16px; background: #e8f0e9; border-radius: 10px; font-family: system-ui;">
+        <strong>Book saved!</strong><br>
+        Page would be created at: <code id="generatedPath"></code><br>
+        Category library updated.
+      </div>
+    </div>
+
+    <div style="margin-top: 48px; font-family: system-ui; font-size: 0.95rem; color: var(--text-muted);">
+      <h3 style="color: var(--primary); margin-bottom: 12px;">How the linking works</h3>
+      <ul style="padding-left: 20px; line-height: 1.8;">
+        <li>Each book is assigned one <strong>category slug</strong> from the dropdown above.</li>
+        <li>The system automatically creates a clean HTML page: <code>/books/book-slug.html</code></li>
+        <li>The book appears in the correct master library page (Fiction, Learning, Children age group, or Gifts).</li>
+        <li>Homepage category cards always link to the master library of that category.</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer class="footer"><p>© 2026 The Reading Nook · Admin</p></footer>
+
+  <script>
+    // Simple demo – in a real app this would call a backend
+    document.getElementById('bookForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const title = document.getElementById('title').value;
+      const slug = document.getElementById('slug').value || title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      document.getElementById('generatedPath').textContent = `/books/${slug}.html`;
+      document.getElementById('result').style.display = 'block';
+    });
+
+    // Auto-generate slug from title
+    document.getElementById('title').addEventListener('input', function() {
+      const slugField = document.getElementById('slug');
+      if (!slugField.dataset.touched) {
+        slugField.value = this.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      }
+    });
+    document.getElementById('slug').addEventListener('input', function() {
+      this.dataset.touched = true;
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Very Hungry Caterpillar – The Reading Nook</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="../index.html" class="logo">
+        <div class="logo-icon">✦</div>
+        <div class="logo-text">
+          <h1>THE READING NOOK</h1>
+          <span>Books · Ideas · Possibilities</span>
+        </div>
+      </a>
+      <div class="header-actions">
+        <a href="../wishlist.html" class="icon-btn" title="Wishlist">♡</a>
+        <a href="../cart.html" class="icon-btn" title="Cart">
+          🛒
+          <span class="cart-badge">0</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="book-detail">
+    <a href="../library/children/ages-0-3.html" class="back-link">← Back to Ages 0–3</a>
+
+    <div class="book-detail-header">
+      <div class="book-cover-large">🐛</div>
+      <div class="book-meta">
+        <h1>The Very Hungry Caterpillar</h1>
+        <div class="author">by Eric Carle</div>
+        <div class="tags">
+          <span class="tag">Children’s Books</span>
+          <span class="tag">Ages 0–3</span>
+          <span class="tag">Picture Book</span>
+        </div>
+        <div class="price-tag">₹299</div>
+
+        <div class="book-actions">
+          <div class="qty-control">
+            <button type="button" onclick="changeQty(-1)">−</button>
+            <input type="number" id="qty" value="1" min="1" />
+            <button type="button" onclick="changeQty(1)">+</button>
+          </div>
+          <button class="btn" onclick="handleAddToCart()">Add to Cart</button>
+          <button class="btn btn-secondary" id="wishBtn" onclick="handleWishlist()">♡ Wishlist</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="book-description">
+      <p>One sunny Sunday, the caterpillar was hatched out of a tiny egg. He was very hungry. On Monday, he ate through one apple; on Tuesday, he ate through two pears… and so on through the days of the week. A classic that has delighted generations of children and parents alike. Perfect for ages 0–3.</p>
+    </div>
+  </div>
+
+  <footer class="footer"><p>© 2026 The Reading Nook</p></footer>
+
+  <script src="../js/store.js"></script>
+  <script>
+    const book = {
+      id: 'the-very-hungry-caterpillar',
+      title: 'The Very Hungry Caterpillar',
+      author: 'Eric Carle',
+      price: 299,
+      cover: '🐛',
+      category: 'children'
+    };
+
+    function changeQty(delta) {
+      const input = document.getElementById('qty');
+      input.value = Math.max(1, parseInt(input.value || 1) + delta);
+    }
+
+    function handleAddToCart() {
+      const qty = parseInt(document.getElementById('qty').value) || 1;
+      addToCart({ ...book, qty });
+    }
+
+    function handleWishlist() {
+      const added = toggleWishlist(book);
+      document.getElementById('wishBtn').textContent = added ? '♥ In Wishlist' : '♡ Wishlist';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (isInWishlist(book.id)) {
+        document.getElementById('wishBtn').textContent = '♥ In Wishlist';
+      }
+    });
+  </script>
+</body>
+</html>

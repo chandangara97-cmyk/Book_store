@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Atomic Habits – The Reading Nook</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="../index.html" class="logo">
+        <div class="logo-icon">✦</div>
+        <div class="logo-text">
+          <h1>THE READING NOOK</h1>
+          <span>Books · Ideas · Possibilities</span>
+        </div>
+      </a>
+      <div class="header-actions">
+        <a href="../wishlist.html" class="icon-btn" title="Wishlist">♡</a>
+        <a href="../cart.html" class="icon-btn" title="Cart">
+          🛒
+          <span class="cart-badge">0</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="book-detail">
+    <a href="../library/learning.html" class="back-link">← Back to Learning & Growth</a>
+
+    <div class="book-detail-header">
+      <div class="book-cover-large">⚙️</div>
+      <div class="book-meta">
+        <h1>Atomic Habits</h1>
+        <div class="author">by James Clear</div>
+        <div class="tags">
+          <span class="tag">Learning & Growth</span>
+          <span class="tag">Self-Help</span>
+          <span class="tag">Habits</span>
+        </div>
+        <div class="price-tag">₹499</div>
+        <p style="font-family: system-ui; color: #5c6b66; margin-bottom: 8px;">
+          An Easy & Proven Way to Build Good Habits & Break Bad Ones
+        </p>
+
+        <div class="book-actions">
+          <div class="qty-control">
+            <button type="button" onclick="changeQty(-1)">−</button>
+            <input type="number" id="qty" value="1" min="1" />
+            <button type="button" onclick="changeQty(1)">+</button>
+          </div>
+          <button class="btn" onclick="handleAddToCart()">Add to Cart</button>
+          <button class="btn btn-secondary" id="wishBtn" onclick="handleWishlist()">♡ Wishlist</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="book-description">
+      <p>No matter your goals, Atomic Habits offers a proven framework for improving—every day. James Clear, one of the world's leading experts on habit formation, reveals practical strategies that will teach you exactly how to form good habits, break bad ones, and master the tiny behaviors that lead to remarkable results.</p>
+      <br>
+      <p>If you're having trouble changing your habits, the problem isn't you. The problem is your system. Bad habits repeat themselves again and again not because you don't want to change, but because you have the wrong system for change. You do not rise to the level of your goals. You fall to the level of your systems.</p>
+    </div>
+  </div>
+
+  <footer class="footer"><p>© 2026 The Reading Nook</p></footer>
+
+  <script src="../js/store.js"></script>
+  <script>
+    const book = {
+      id: 'atomic-habits',
+      title: 'Atomic Habits',
+      author: 'James Clear',
+      price: 499,
+      cover: '⚙️',
+      category: 'learning'
+    };
+
+    function changeQty(delta) {
+      const input = document.getElementById('qty');
+      input.value = Math.max(1, parseInt(input.value || 1) + delta);
+    }
+
+    function handleAddToCart() {
+      const qty = parseInt(document.getElementById('qty').value) || 1;
+      addToCart({ ...book, qty });
+    }
+
+    function handleWishlist() {
+      const added = toggleWishlist(book);
+      document.getElementById('wishBtn').textContent = added ? '♥ In Wishlist' : '♡ Wishlist';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (isInWishlist(book.id)) {
+        document.getElementById('wishBtn').textContent = '♥ In Wishlist';
+      }
+    });
+  </script>
+</body>
+</html>
