@@ -37,7 +37,7 @@ export const Header: React.FC = () => {
             navigateTo('home');
           }}
         >
-          <img className="brand-logo" src="/img/kiddie-bloom-logo-sm.png" alt="" width="56" height="56" />
+          <img className="brand-logo" src="/img/kiddie-bloom-logo-sm.png" alt="Kiddie Bloom logo" width="56" height="56" />
           <div className="brand-text">
             <h1 aria-label="Kiddie Bloom">
               {['K','i','d','d','i','e'].map((c, i) => (

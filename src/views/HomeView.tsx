@@ -60,7 +60,7 @@ export const HomeView: React.FC = () => {
             </div>
           </div>
 
-          <img className="hero-logo" src="/img/kiddie-bloom-logo.png" alt="Kiddie Bloom: a girl and her teddy bear with an ABC notebook, crayons and a rainbow" width="520" height="512" />
+          <img className="hero-logo" src="/img/kiddie-bloom-logo.png" alt="Kiddie Bloom logo featuring a child, teddy bear, ABC notebook, crayons and rainbow" width="520" height="512" />
 
           <div className="stairs" role="img" aria-label="Four stages of books, from ages 0 to 3 up to ages 13 to 15">
             <div
