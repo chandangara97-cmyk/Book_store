@@ -1,0 +1,9 @@
+{
+  "name": "The Reading Nook",
+  "description": "Tutorial books and learning gifts for children aged 0 to 15, with multi-currency checkout and interactive age finder.",
+  "prompt": "The Reading Nook bookstore and learning studio",
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ],
+  "permissions": []
+}
