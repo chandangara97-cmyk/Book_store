@@ -17,6 +17,8 @@ import {
   X
 } from 'lucide-react';
 
+import HERO_BANNER from '../assets/images/kiddie_bloom_banner.jpg';
+
 const HERO_IMG = '/src/assets/images/hero_futuristic_book_1793017194843.jpg';
 const TOY_IMG = '/src/assets/images/futuristic_learning_toy_1793017195881.jpg';
 const TABLET_IMG = '/src/assets/images/digital_holo_tablet_1793017195631.jpg';
@@ -55,6 +57,16 @@ export const HomeView: React.FC = () => {
         {/* Ambient Glows */}
         <div className="absolute top-0 left-1/4 -z-10 w-96 h-96 rounded-full bg-cyan-500/15 blur-[120px] pointer-events-none" />
         <div className="absolute top-20 right-1/4 -z-10 w-96 h-96 rounded-full bg-blue-600/15 blur-[140px] pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10 sm:mb-14">
+          <img
+            src={HERO_BANNER}
+            alt="Kiddie Bloom: cute giraffe, bunny, bear, panda and squirrel with books and crayons"
+            width={1600}
+            height={593}
+            className="w-full h-auto rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.35)]"
+          />
+        </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-14 items-center">
