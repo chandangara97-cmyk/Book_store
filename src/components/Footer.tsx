@@ -1,3 +1,4 @@
+import { asset } from '../utils/images';
 import React from 'react';
 import { useStore } from '../context/StoreContext';
 
@@ -14,7 +15,7 @@ export const Footer: React.FC = () => {
     <footer className="footer">
       <div className="wrap footer-inner">
         <div className="footer-brand">
-          <img src="/img/kiddie-bloom-logo-sm.png" alt="Kiddie Bloom logo" width="44" height="44" />
+          <img src={asset('/img/kiddie-bloom-logo-sm.png')} alt="Kiddie Bloom logo" width="44" height="44" />
           <span>&copy; {new Date().getFullYear()} <strong>Kiddie Bloom</strong>. All rights reserved.</span>
         </div>
         <div className="footer-links">

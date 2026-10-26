@@ -1910,7 +1910,7 @@ h1, h2, h3, h4 { letter-spacing: 0.1px; }
 
 /* Header + wordmark */
 header.header { border-bottom: 3px dashed var(--stitch); }
-.brand { gap: 10px; }
+.brand { gap: 10px; white-space: nowrap; }
 .brand-logo { width: 56px; height: 56px; object-fit: contain; flex-shrink: 0; filter: drop-shadow(0 3px 6px rgba(255, 79, 154, 0.25)); }
 .brand-text h1 { font-size: 1.7rem; font-weight: 800; letter-spacing: 0; }
 .brand-text h1 .wm { display: inline-block; }
