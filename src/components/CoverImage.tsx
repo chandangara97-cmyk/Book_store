@@ -4,7 +4,6 @@ import { asset, cleanSrc, fallbackOf, isEmojiCover } from '../utils/images';
 interface Props {
   cover: string;
   alt: string;
-  className?: string;
   emojiClassName?: string;
   emojiStyle?: React.CSSProperties;
   imgStyle?: React.CSSProperties;
@@ -15,7 +14,6 @@ interface Props {
 export const CoverImage: React.FC<Props> = ({
   cover,
   alt,
-  className = '',
   emojiClassName,
   emojiStyle,
   imgStyle,
@@ -26,7 +24,7 @@ export const CoverImage: React.FC<Props> = ({
 
   if (isEmojiCover(cover) || stage === 2) {
     return (
-      <span className={`inline-flex items-center justify-center text-4xl select-none ${emojiClassName || ''}`} style={emojiStyle}>
+      <span className={emojiClassName} style={emojiStyle}>
         {isEmojiCover(cover) ? cover : emojiFallback}
       </span>
     );
@@ -41,7 +39,6 @@ export const CoverImage: React.FC<Props> = ({
       alt={alt}
       loading="lazy"
       referrerPolicy="no-referrer"
-      className={className}
       style={imgStyle}
       onError={() => setStage(stage === 0 && fb ? 1 : 2)}
     />

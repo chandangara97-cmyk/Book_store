@@ -1,128 +1,129 @@
 import React from 'react';
 import { useStore } from '../context/StoreContext';
 import { BookCard } from '../components/BookCard';
-import { Bot, ArrowLeft, Sparkles, Gift, BookOpen, ShoppingBag, CheckCircle2 } from 'lucide-react';
-
-import TOY_HERO_IMG from '../assets/images/futuristic_learning_toy_1793017195881.jpg';
 
 export const ToysView: React.FC = () => {
-  const { toys, setView, setSelectedCategory, formatPrice } = useStore();
+  const { toys, setView, setSelectedCategory } = useStore();
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-      
-      {/* Return to Home */}
-      <button
-        type="button"
-        onClick={() => setView('home')}
-        className="inline-flex items-center gap-1.5 text-xs font-mono text-cyan-400 hover:text-cyan-300 transition-colors mb-6"
+    <div>
+      <div
+        style={{
+          padding: '65px 0',
+          background: "linear-gradient(100deg, rgba(22,43,57,0.88), rgba(22,43,57,0.3)), url('https://images.unsplash.com/photo-1560961911-ba7ef651a56c?auto=format&fit=crop&w=1800&q=85') center/cover",
+          color: 'white',
+          marginBottom: '36px'
+        }}
       >
-        <ArrowLeft className="w-4 h-4" />
-        <span>Return to Overview</span>
-      </button>
-
-      {/* Hero Banner */}
-      <div className="relative rounded-3xl bg-gradient-to-r from-purple-950/60 via-slate-900/80 to-slate-950 border border-purple-500/25 p-8 sm:p-12 mb-12 overflow-hidden shadow-2xl">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-          
-          <div className="lg:col-span-7 flex flex-col">
-            <div className="inline-flex items-center gap-2 text-xs font-mono text-purple-400 mb-2">
-              <Bot className="w-3.5 h-3.5" />
-              <span>HANDS-ON TACTILE HORIZONS</span>
-            </div>
-
-            <h1 className="text-3xl sm:text-5xl font-black text-white font-display tracking-tight mb-4 text-balance">
-              Big Discoveries Begin with Tactile Adventures.
-            </h1>
-
-            <p className="text-sm sm:text-base text-slate-300 font-normal leading-relaxed mb-8 max-w-xl">
-              Pair favourite holographic tutorial stories with programmable robotics, spatial blocks, and creative lab kits. Every item invites hands-on imagination and real engineering curiosity.
-            </p>
-
-            <div className="flex flex-wrap items-center gap-4">
-              <a
-                href="#toy-products"
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById('toy-products')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-                className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-400 hover:to-indigo-500 text-white font-bold text-xs font-mono transition-all shadow-[0_0_20px_rgba(168,85,247,0.3)] flex items-center gap-2"
-              >
-                <span>Explore Kits</span>
-              </a>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedCategory('all');
-                  setView('library');
-                }}
-                className="px-6 py-3 rounded-xl bg-slate-900 border border-slate-700 hover:border-purple-500/40 text-slate-300 text-xs font-mono transition-colors flex items-center gap-2"
-              >
-                <BookOpen className="w-4 h-4 text-purple-400" />
-                <span>Pair with a Book</span>
-              </button>
-            </div>
+        <div className="wrap">
+          <button
+            type="button"
+            onClick={() => setView('home')}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#dbe7f5',
+              fontSize: '14px',
+              cursor: 'pointer',
+              marginBottom: '14px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              fontWeight: 600
+            }}
+          >
+            ← Back to Home
+          </button>
+          <h1 style={{ fontSize: 'clamp(34px, 5vw, 56px)', color: '#fff', maxWidth: '14ch', marginBottom: '14px' }}>
+            Big ideas begin with little adventures.
+          </h1>
+          <p style={{ maxWidth: '620px', color: '#f3f8f5', fontSize: '18px', marginBottom: '24px' }}>
+            Pair favourite stories with puzzles, creative kits and playful learning tools. Every
+            gift is an invitation to imagine, build and discover.
+          </p>
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <a
+              href="#toy-products"
+              className="btn gold"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('toy-products')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
+              Shop toys & kits
+            </a>
+            <button
+              type="button"
+              className="btn btn-outline"
+              style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', borderColor: '#fff' }}
+              onClick={() => {
+                setSelectedCategory('all');
+                setView('library');
+              }}
+            >
+              Find a book to pair
+            </button>
           </div>
-
-          <div className="lg:col-span-5">
-            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-purple-500/30 shadow-2xl">
-              <img 
-                src={TOY_HERO_IMG} 
-                alt="Futuristic educational STEM robotics kit" 
-                className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
-              />
-              <div className="absolute top-3 left-3 px-2.5 py-1 rounded bg-slate-950/80 text-[10px] font-mono text-purple-300 border border-purple-500/30">
-                TACTILE LAB VERIFIED
-              </div>
-            </div>
-          </div>
-
         </div>
       </div>
 
-      {/* Reward Teleport Threshold Banner */}
-      <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-cyan-950/40 to-blue-950/40 border border-cyan-500/25 mb-12 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 backdrop-blur-md">
-        <div className="flex items-start gap-4">
-          <div className="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-300 shrink-0 mt-0.5">
-            <Gift className="w-5 h-5" />
-          </div>
-          <div>
-            <h3 className="text-base sm:text-lg font-bold text-white font-display">
-              Book + Toy Quantum Pairing Rewards
-            </h3>
-            <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl leading-relaxed">
-              Spend <strong className="text-cyan-300 font-mono">{formatPrice(999)}</strong> across works and toys to unlock a complimentary Creative Colouring Kit. Reach <strong className="text-cyan-300 font-mono">{formatPrice(1499)}</strong> to claim a free companion mini learning toy.
-            </p>
-          </div>
+      <main className="wrap" style={{ paddingBottom: '70px' }}>
+        {/* Reward banner */}
+        <div className="gift-rewards" style={{ margin: '20px 0 36px' }}>
+          <h2 style={{ fontSize: '24px', marginBottom: '8px' }}>
+            🎁 Book + toy = an extra-special gift
+          </h2>
+          <p style={{ margin: 0, fontSize: '16px', lineHeight: 1.55 }}>
+            Spend <strong>₹999</strong> on books and toys to choose a free colouring kit. Spend{' '}
+            <strong>₹1,499</strong> to unlock a free mini toy as well. Gifts can be selected in your
+            cart once you reach each threshold.
+          </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setView('cart')}
-          className="px-4 py-2 rounded-xl bg-slate-900 border border-cyan-500/40 text-cyan-300 font-mono text-xs hover:bg-cyan-500 hover:text-slate-950 transition-all whitespace-nowrap shrink-0"
-        >
-          Check Threshold Status
-        </button>
-      </div>
+        <h2 id="toy-products" className="sec-title">Toys & creative kits</h2>
+        <p className="intro">
+          Playful add-ons for curious minds. Pair a toy with a storybook for a ready-made gift
+          bundle.
+        </p>
 
-      {/* Toys Grid */}
-      <div id="toy-products" className="scroll-mt-24 mb-12">
-        <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-800">
-          <div>
-            <h2 className="text-2xl font-bold text-white font-display">STEM & Discovery Kits</h2>
-            <p className="text-xs text-slate-400 mt-0.5">Curated physical kits designed to amplify cognitive comprehension.</p>
-          </div>
-          <span className="text-xs font-mono text-slate-400">{toys.length} Kits Available</span>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="book-grid">
           {toys.map((toy) => (
             <BookCard key={toy.id} book={toy} />
           ))}
         </div>
-      </div>
 
+        <div style={{ marginTop: '48px', display: 'flex', gap: '16px', color: 'var(--mut)', fontSize: '15px' }}>
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedCategory('all');
+              setView('library');
+            }}
+            style={{ background: 'none', border: 'none', color: 'var(--ink)', cursor: 'pointer', textDecoration: 'underline' }}
+          >
+            ← Browse books
+          </button>
+          <span>·</span>
+          <button
+            type="button"
+            onClick={() => setView('cart')}
+            style={{ background: 'none', border: 'none', color: 'var(--ink)', cursor: 'pointer', textDecoration: 'underline' }}
+          >
+            View cart
+          </button>
+          <span>·</span>
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedCategory('gifts');
+              setView('library');
+            }}
+            style={{ background: 'none', border: 'none', color: 'var(--ink)', cursor: 'pointer', textDecoration: 'underline' }}
+          >
+            Book gifts
+          </button>
+        </div>
+      </main>
     </div>
   );
 };

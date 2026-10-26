@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useStore } from '../context/StoreContext';
 import { BookCard } from '../components/BookCard';
 import { Book } from '../types';
-import { Gift, ArrowLeft, RotateCcw, Sparkles, User, Heart, Compass, CheckCircle2 } from 'lucide-react';
 
 export const GiftFinderView: React.FC = () => {
   const { books, setView } = useStore();
@@ -37,26 +36,27 @@ export const GiftFinderView: React.FC = () => {
     setStep(1);
   };
 
+  // Recommendations matching logic from original gift-finder.html
   const getRecommendations = (): Book[] => {
     if (who === 'child') {
       if (ageRange === '0-3') {
-        return books.filter((b) => b.id === 'the-very-hungry-caterpillar' || b.id === 'goodnight-moon' || b.id === 'my-first-words');
+        return books.filter((b) => b.id === 'the-very-hungry-caterpillar' || b.id === 'goodnight-moon');
       }
       if (ageRange === '4-7') {
-        return books.filter((b) => b.id === 'where-the-wild-things-are' || b.id === 'the-gruffalo' || b.id === 'learn-and-play-4-7');
+        return books.filter((b) => b.id === 'where-the-wild-things-are' || b.id === 'the-gruffalo');
       }
       if (ageRange === '8-12') {
-        return books.filter((b) => b.id === 'harry-potter-1' || b.id === 'percy-jackson' || b.id === 'young-inventors-handbook');
+        return books.filter((b) => b.id === 'harry-potter-1' || b.id === 'percy-jackson');
       }
       return books.filter((b) => b.category === 'children');
     }
 
     if (who === 'teen') {
-      return books.filter((b) => b.id === 'the-hate-u-give' || b.id === 'the-fault-in-our-stars' || b.id === 'thinking-fast-and-slow');
+      return books.filter((b) => b.id === 'the-hate-u-give' || b.id === 'the-fault-in-our-stars');
     }
 
     if (interest === 'learning') {
-      return books.filter((b) => b.id === 'atomic-habits' || b.id === 'deep-work' || b.id === 'the-lean-startup');
+      return books.filter((b) => b.id === 'atomic-habits' || b.id === 'deep-work');
     }
 
     if (interest === 'inspiration') {
@@ -67,181 +67,195 @@ export const GiftFinderView: React.FC = () => {
       return books.filter((b) => b.id === 'pride-and-prejudice' || b.id === 'little-women');
     }
 
-    return books.filter((b) => b.category === 'gifts' || b.category === 'fiction').slice(0, 4);
+    // fallback
+    return books.filter((b) => b.category === 'gifts' || b.category === 'fiction').slice(0, 3);
   };
 
   const matchedBooks = getRecommendations();
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-      
-      {/* Return Button */}
-      <button
-        type="button"
-        onClick={() => setView('home')}
-        className="inline-flex items-center gap-1.5 text-xs font-mono text-cyan-400 hover:text-cyan-300 transition-colors mb-6"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        <span>Return to Overview</span>
-      </button>
-
-      {/* Header */}
-      <div className="text-center max-w-xl mx-auto mb-10">
-        <div className="inline-flex items-center gap-2 text-xs font-mono text-amber-400 mb-2">
-          <Gift className="w-3.5 h-3.5" />
-          <span>INTELLIGENT GIFT ENGINE</span>
+    <div>
+      <div className="page-header page-header--photo" style={{ backgroundImage: "linear-gradient(100deg, rgba(18,28,47,0.88), rgba(18,28,47,0.45)), url('https://images.unsplash.com/photo-1516627145497-ae6968895b74?auto=format&fit=crop&w=1800&q=85')" }}>
+        <div className="container">
+          <button
+            type="button"
+            onClick={() => setView('home')}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--mut)',
+              fontSize: '14px',
+              cursor: 'pointer',
+              marginBottom: '12px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              fontWeight: 600
+            }}
+          >
+            ← Back to Home
+          </button>
+          <h1>Gift Finder</h1>
+          <p>Answer a few questions and we’ll suggest the perfect book.</p>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-white font-display tracking-tight text-balance">
-          Discover the Ideal Learning Gift
-        </h1>
-        <p className="text-sm text-slate-400 mt-2">
-          Calibrate recipient age and cognitive interests to synthesize targeted reading pairings.
-        </p>
       </div>
 
-      {/* Interactive Step Container */}
-      <div className="rounded-3xl bg-slate-900/70 border border-cyan-500/20 backdrop-blur-2xl p-6 sm:p-10 shadow-2xl mb-12">
-        
-        {/* Step Progress Readout */}
-        <div className="flex items-center justify-between text-xs font-mono text-slate-400 pb-6 mb-6 border-b border-slate-800">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-cyan-400" />
-            <span className="text-cyan-300 font-semibold">STAGE {step} OF 3</span>
-          </div>
-          {step > 1 && (
-            <button
-              type="button"
-              onClick={handleReset}
-              className="text-slate-400 hover:text-white flex items-center gap-1 transition-colors"
-            >
-              <RotateCcw className="w-3 h-3" />
-              <span>Reset Engine</span>
-            </button>
-          )}
-        </div>
-
-        {/* Step 1: Who */}
-        {step === 1 && (
-          <div>
-            <h2 className="text-xl font-bold text-white font-display mb-4">
-              1. Who is the recipient of this gift?
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {[
-                { id: 'child', label: 'Young Child (0–12 Years)', desc: 'Developing words, phonics & early wonders' },
-                { id: 'teen', label: 'Adolescent (13–15 Years)', desc: 'Curiosity, skills & coming of age stories' },
-                { id: 'adult', label: 'Adult / Parent', desc: 'Growth, habits & cognitive exploration' },
-                { id: 'friend', label: 'Educator or Colleague', desc: 'Inspirational reads & special editions' },
-              ].map((opt) => (
-                <button
-                  key={opt.id}
-                  type="button"
-                  onClick={() => handleSelectWho(opt.id)}
-                  className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 hover:border-cyan-400/60 hover:bg-cyan-500/10 text-left transition-all group"
-                >
-                  <div className="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors">
+      <div className="container" style={{ paddingBottom: '70px', maxWidth: '800px' }}>
+        <div
+          style={{
+            background: 'var(--card-bg)',
+            border: '2px solid var(--border)',
+            borderRadius: '24px',
+            padding: '36px',
+            boxShadow: '0 12px 30px rgba(27,42,74,0.06)'
+          }}
+        >
+          {/* Step 1: Who */}
+          {step === 1 && (
+            <div>
+              <h3 style={{ fontSize: '24px', marginBottom: '18px' }}>1. Who is this gift for?</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                {[
+                  { id: 'child', label: '👶 A Child' },
+                  { id: 'teen', label: '🎒 A Teenager' },
+                  { id: 'adult', label: '☕ An Adult' },
+                  { id: 'friend', label: '🤝 A Friend / Colleague' },
+                ].map((opt) => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    style={{
+                      padding: '18px',
+                      borderRadius: '16px',
+                      border: '2px solid var(--border)',
+                      background: 'var(--accent)',
+                      color: 'var(--ink)',
+                      fontSize: '17px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      transition: 'all 0.15s'
+                    }}
+                    onClick={() => handleSelectWho(opt.id)}
+                  >
                     {opt.label}
-                  </div>
-                  <div className="text-xs text-slate-400 mt-1">
-                    {opt.desc}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Step 2: Focus / Interest */}
-        {step === 2 && (
-          <div>
-            <h2 className="text-xl font-bold text-white font-display mb-4">
-              2. What learning horizon or interest?
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {[
-                { id: 'learning', label: 'STEM, Phonics & Skills', desc: 'Tutorial worksheets, mathematics & science' },
-                { id: 'inspiration', label: 'Creativity & Imagination', desc: 'Stories that stretch curiosity and courage' },
-                { id: 'classic', label: 'Enduring Literature', desc: 'Beloved bedtime classics & timeless tales' },
-                { id: 'any', label: 'Surprise Me', desc: 'Top rated studio favorites' },
-              ].map((opt) => (
-                <button
-                  key={opt.id}
-                  type="button"
-                  onClick={() => handleSelectInterest(opt.id)}
-                  className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 hover:border-cyan-400/60 hover:bg-cyan-500/10 text-left transition-all group"
-                >
-                  <div className="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors">
-                    {opt.label}
-                  </div>
-                  <div className="text-xs text-slate-400 mt-1">
-                    {opt.desc}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Step 3: Age Band if Child */}
-        {step === 3 && (
-          <div>
-            <h2 className="text-xl font-bold text-white font-display mb-4">
-              3. Select explorer age band:
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {[
-                { id: '0-3', label: '0 to 3 Years', desc: 'Board books, first words & sensory play' },
-                { id: '4-7', label: '4 to 7 Years', desc: 'Phonics, early numbers & bedtime stories' },
-                { id: '8-12', label: '8 to 12 Years', desc: 'Problem solving, chapter adventures & science' },
-              ].map((opt) => (
-                <button
-                  key={opt.id}
-                  type="button"
-                  onClick={() => handleSelectAge(opt.id)}
-                  className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 hover:border-cyan-400/60 hover:bg-cyan-500/10 text-left transition-all group"
-                >
-                  <div className="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors">
-                    {opt.label}
-                  </div>
-                  <div className="text-xs text-slate-400 mt-1">
-                    {opt.desc}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Step 4: Synthesized Recommendations */}
-        {step === 4 && (
-          <div>
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-2xl font-bold text-white font-display">
-                  Recommended Learning Works
-                </h2>
-                <p className="text-xs font-mono text-cyan-400 mt-0.5">
-                  Calibrated for {who} · {interest || 'All Horizons'} {ageRange ? `· Ages ${ageRange}` : ''}
-                </p>
+                  </button>
+                ))}
               </div>
+            </div>
+          )}
 
+          {/* Step 2: Interest */}
+          {step === 2 && (
+            <div>
+              <h3 style={{ fontSize: '24px', marginBottom: '18px' }}>2. What do they enjoy?</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                {[
+                  { id: 'stories', label: '📖 Stories & Adventure' },
+                  { id: 'learning', label: '🌱 Learning & Growth' },
+                  { id: 'inspiration', label: '🌟 Inspiration & Motivation' },
+                  { id: 'classic', label: '📜 Timeless Classics' },
+                ].map((opt) => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    style={{
+                      padding: '18px',
+                      borderRadius: '16px',
+                      border: '2px solid var(--border)',
+                      background: 'var(--accent)',
+                      color: 'var(--ink)',
+                      fontSize: '17px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      transition: 'all 0.15s'
+                    }}
+                    onClick={() => handleSelectInterest(opt.id)}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
               <button
                 type="button"
-                onClick={handleReset}
-                className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono text-slate-200 transition-colors"
+                className="btn btn-secondary sm"
+                style={{ marginTop: '20px' }}
+                onClick={() => setStep(1)}
               >
-                Start Over
+                ← Back
               </button>
             </div>
+          )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
-              {matchedBooks.map((book) => (
-                <BookCard key={book.id} book={book} />
-              ))}
+          {/* Step 3: Age Range */}
+          {step === 3 && (
+            <div>
+              <h3 style={{ fontSize: '24px', marginBottom: '18px' }}>3. Approximate age?</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                {[
+                  { id: '0-3', label: '🧸 0 – 3 years' },
+                  { id: '4-7', label: '🎨 4 – 7 years' },
+                  { id: '8-12', label: '⚡ 8 – 12 years' },
+                  { id: '13+', label: '💡 13 years & above' },
+                ].map((opt) => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    style={{
+                      padding: '18px',
+                      borderRadius: '16px',
+                      border: '2px solid var(--border)',
+                      background: 'var(--accent)',
+                      color: 'var(--ink)',
+                      fontSize: '17px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      transition: 'all 0.15s'
+                    }}
+                    onClick={() => handleSelectAge(opt.id)}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+              <button
+                type="button"
+                className="btn btn-secondary sm"
+                style={{ marginTop: '20px' }}
+                onClick={() => setStep(2)}
+              >
+                ← Back
+              </button>
             </div>
-          </div>
-        )}
+          )}
 
+          {/* Step 4: Results */}
+          {step === 4 && (
+            <div>
+              <h3 style={{ fontSize: '26px', marginBottom: '8px' }}>Perfect matches for you</h3>
+              <p style={{ color: 'var(--mut)', marginBottom: '24px' }}>
+                Based on your selections, here are the most thoughtful book choices:
+              </p>
+
+              <div className="book-grid">
+                {matchedBooks.map((book) => (
+                  <BookCard key={book.id} book={book} />
+                ))}
+              </div>
+
+              <div style={{ marginTop: '28px', display: 'flex', gap: '12px' }}>
+                <button type="button" className="btn btn-secondary" onClick={handleReset}>
+                  Start Over
+                </button>
+                <button type="button" className="btn" onClick={() => setView('cart')}>
+                  View Cart
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

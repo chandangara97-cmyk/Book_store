@@ -1,7 +1,6 @@
 import React, { useState, useId } from 'react';
 import { useStore } from '../context/StoreContext';
 import { BookCard } from '../components/BookCard';
-import { Search, SlidersHorizontal, ArrowLeft, BookOpen, RotateCcw } from 'lucide-react';
 
 export const LibraryView: React.FC = () => {
   const { books, selectedCategory, setSelectedCategory, setView } = useStore();
@@ -9,6 +8,7 @@ export const LibraryView: React.FC = () => {
   const [search, setSearch] = useState<string>('');
   const sortSelectId = useId();
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const activeFilters = (selectedCategory !== 'all' ? 1 : 0) + (sortBy !== 'title-asc' ? 1 : 0);
 
   // Filter
   const filtered = books.filter((book) => {
@@ -43,125 +43,171 @@ export const LibraryView: React.FC = () => {
     }
   });
 
-  const categories = [
-    { id: 'all', label: 'All Works' },
-    { id: 'children', label: "Children's Core" },
-    { id: 'learning', label: 'STEM & Tutorial' },
-    { id: 'fiction', label: 'Imaginative Worlds' },
-    { id: 'gifts', label: 'Special Editions' }
-  ];
-
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-      
-      {/* Top Header */}
-      <div className="mb-10">
-        <button
-          type="button"
-          onClick={() => setView('home')}
-          className="inline-flex items-center gap-1.5 text-xs font-mono text-cyan-400 hover:text-cyan-300 transition-colors mb-4"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Return to Overview</span>
-        </button>
-
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 text-xs font-mono text-cyan-400 mb-1">
-              <BookOpen className="w-3.5 h-3.5" />
-              <span>CENTRAL QUANTUM VAULT</span>
-            </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-white font-display tracking-tight">
-              All Holo-Books & Tutorials
-            </h1>
-            <p className="text-sm text-slate-400 mt-1 max-w-xl">
-              Browse the complete curriculum catalog. Filter by developmental category, search, and sort with live price conversion.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
-            <span>Archive Count:</span>
-            <span className="font-bold text-white px-2 py-0.5 rounded bg-slate-900 border border-slate-800 tabular-nums">
-              {sorted.length} Works
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Futuristic Controls Bar */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-slate-900/70 border border-slate-800 backdrop-blur-xl mb-8 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
-        
-        {/* Category Filters */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-2 md:pb-0 scrollbar-none">
-          {categories.map((cat) => (
-            <button
-              key={cat.id}
-              type="button"
-              onClick={() => setSelectedCategory(cat.id)}
-              className={`px-3 py-2 rounded-xl text-xs font-mono whitespace-nowrap transition-all ${
-                selectedCategory === cat.id
-                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-semibold shadow-[0_0_12px_rgba(6,182,212,0.15)]'
-                  : 'bg-slate-950/60 text-slate-400 border border-slate-800/80 hover:text-white hover:border-slate-700'
-              }`}
-            >
-              {cat.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Search & Sort */}
-        <div className="flex items-center gap-3">
-          <div className="relative flex-1 md:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="search"
-              placeholder="Search title, author, topic…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs font-mono text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition-colors"
-            />
-          </div>
-
-          <select
-            id={sortSelectId}
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs font-mono text-slate-300 focus:outline-none focus:border-cyan-400 cursor-pointer"
-          >
-            <option value="title-asc">Title (A–Z)</option>
-            <option value="title-desc">Title (Z–A)</option>
-            <option value="author-asc">Author (A–Z)</option>
-            <option value="price-asc">Price: Low to High</option>
-            <option value="price-desc">Price: High to Low</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Grid of Books */}
-      {sorted.length === 0 ? (
-        <div className="text-center py-20 px-4 rounded-3xl bg-slate-900/40 border border-slate-800">
-          <p className="text-base font-mono text-slate-300 mb-2">No holo-works match your query telemetry.</p>
-          <p className="text-xs text-slate-500 mb-6">Try clearing your search terms or selecting another category.</p>
+    <div>
+      <div className="page-header page-header--photo" style={{ backgroundImage: "linear-gradient(100deg, rgba(18,28,47,0.88), rgba(18,28,47,0.45)), url('https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=1800&q=85')" }}>
+        <div className="container">
           <button
             type="button"
-            onClick={() => {
-              setSelectedCategory('all');
-              setSearch('');
+            onClick={() => setView('home')}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--mut)',
+              fontSize: '14px',
+              cursor: 'pointer',
+              marginBottom: '12px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              fontWeight: 600
             }}
-            className="px-4 py-2 rounded-xl bg-slate-800 text-cyan-300 font-mono text-xs hover:bg-slate-700 transition-colors inline-flex items-center gap-2"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset Search & Filters</span>
+            ← Back to Home
+          </button>
+          <h1>All Books</h1>
+          <p>Browse the complete collection. Filter by category, search, and sort as you like.</p>
+        </div>
+      </div>
+
+      <div className="container" style={{ paddingBottom: '70px' }}>
+        {/* Mobile: search + Filters button (filters stay hidden until tapped) */}
+        <div className="mobile-filter-bar">
+          <input
+            type="search"
+            placeholder="Search books…"
+            aria-label="Search books"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <button type="button" className="filter-toggle" onClick={() => setFiltersOpen(true)}>
+            ⚙️ Filters{activeFilters > 0 && <span className="ft-badge">{activeFilters}</span>}
           </button>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {sorted.map((book) => (
-            <BookCard key={book.id} book={book} />
-          ))}
-        </div>
-      )}
+        {filtersOpen && <div className="sheet-backdrop" onClick={() => setFiltersOpen(false)} />}
 
+        {/* Controls Bar (side sheet on mobile) */}
+        <div className={`controls-bar ${filtersOpen ? 'open' : ''}`}>
+          <div className="sheet-head">
+            <strong>Filters</strong>
+            <button type="button" className="sheet-close" onClick={() => setFiltersOpen(false)} aria-label="Close filters">✕</button>
+          </div>
+          <div className="filter-group">
+            <label>Filter by Category</label>
+            <div className="filter-buttons">
+              <button
+                type="button"
+                className={`filter-btn ${selectedCategory === 'all' ? 'active' : ''}`}
+                onClick={() => setSelectedCategory('all')}
+              >
+                All
+              </button>
+              <button
+                type="button"
+                className={`filter-btn ${selectedCategory === 'fiction' ? 'active' : ''}`}
+                onClick={() => setSelectedCategory('fiction')}
+              >
+                Fiction & Stories
+              </button>
+              <button
+                type="button"
+                className={`filter-btn ${selectedCategory === 'learning' ? 'active' : ''}`}
+                onClick={() => setSelectedCategory('learning')}
+              >
+                Learning & Growth
+              </button>
+              <button
+                type="button"
+                className={`filter-btn ${selectedCategory === 'children' ? 'active' : ''}`}
+                onClick={() => setSelectedCategory('children')}
+              >
+                Children’s Books
+              </button>
+              <button
+                type="button"
+                className={`filter-btn ${selectedCategory === 'gifts' ? 'active' : ''}`}
+                onClick={() => setSelectedCategory('gifts')}
+              >
+                Gifts & Special Reads
+              </button>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+            <div className="form-group search-desktop" style={{ marginBottom: 0 }}>
+              <label htmlFor="bookSearch" style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--primary)', marginBottom: '6px', display: 'block' }}>
+                Search
+              </label>
+              <input
+                id="bookSearch"
+                type="text"
+                placeholder="Search title, author, tag…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                style={{
+                  padding: '9px 14px',
+                  borderRadius: '10px',
+                  border: '1.5px solid var(--border)',
+                  fontSize: '0.92rem',
+                  minWidth: '200px'
+                }}
+              />
+            </div>
+
+            <div className="sort-group">
+              <label htmlFor={sortSelectId}>Sort by</label>
+              <select
+                id={sortSelectId}
+                className="sort-select"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+              >
+                <option value="title-asc">Title (A–Z)</option>
+                <option value="title-desc">Title (Z–A)</option>
+                <option value="author-asc">Author (A–Z)</option>
+                <option value="author-desc">Author (Z–A)</option>
+                <option value="price-asc">Price (Low to High)</option>
+                <option value="price-desc">Price (High to Low)</option>
+                <option value="category">Category</option>
+              </select>
+            </div>
+          </div>
+          <div className="sheet-actions">
+            <button type="button" className="btn btn-secondary" onClick={() => { setSelectedCategory('all'); setSortBy('title-asc'); }}>Reset</button>
+            <button type="button" className="btn" onClick={() => setFiltersOpen(false)}>Show {sorted.length} {sorted.length === 1 ? 'book' : 'books'}</button>
+          </div>
+        </div>
+
+        {/* Results Counter */}
+        <div style={{ color: 'var(--text-muted)', fontSize: '15px', marginBottom: '22px' }}>
+          Showing <strong>{sorted.length}</strong> {sorted.length === 1 ? 'book' : 'books'}
+          {selectedCategory !== 'all' && ` in ${selectedCategory}`}
+          {search && ` matching "${search}"`}
+        </div>
+
+        {/* Books Grid */}
+        {sorted.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-muted)' }}>
+            <p style={{ fontSize: '20px' }}>No books found matching your criteria.</p>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => {
+                setSelectedCategory('all');
+                setSearch('');
+              }}
+            >
+              Reset filters
+            </button>
+          </div>
+        ) : (
+          <div className="book-grid">
+            {sorted.map((book) => (
+              <BookCard key={book.id} book={book} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

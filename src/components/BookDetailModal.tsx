@@ -2,19 +2,6 @@ import { CoverImage } from './CoverImage';
 import React, { useEffect, useState } from 'react';
 import { Book } from '../types';
 import { useStore } from '../context/StoreContext';
-import { 
-  X, 
-  ShoppingBag, 
-  Heart, 
-  ArrowRight, 
-  Check, 
-  BookOpen, 
-  Sparkles, 
-  Layers, 
-  ShieldCheck, 
-  Zap,
-  RotateCcw
-} from 'lucide-react';
 
 interface BookDetailModalProps {
   book: Book;
@@ -22,15 +9,15 @@ interface BookDetailModalProps {
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
-  fiction: 'Fiction & Stories',
-  learning: 'Tutorial & Growth',
-  children: "Children's Works",
-  gifts: 'Gifts & Special Editions',
-  toys: 'STEM & Robotics Kits'
+  fiction: 'Fiction & stories',
+  learning: 'Learning & growth',
+  children: "Children's books",
+  gifts: 'Gifts & special reads',
+  toys: 'Toys & learning kits'
 };
 
 export const BookDetailModal: React.FC<BookDetailModalProps> = ({ book, onClose }) => {
-  const { books, toys, addToCart, toggleWishlist, isInWishlist, setSelectedBook, setView, formatPrice } = useStore();
+  const { books, toys, addToCart, toggleWishlist, isInWishlist, setSelectedBook, setView } = useStore();
   const [format, setFormat] = useState<'printed' | 'digital'>('printed');
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
@@ -67,7 +54,7 @@ export const BookDetailModal: React.FC<BookDetailModalProps> = ({ book, onClose 
   const addItem = () =>
     addToCart({
       id: format === 'digital' ? `${book.id}-digital` : book.id,
-      title: `${book.title}${format === 'digital' ? ' (Holo-Digital Edition)' : ' (Molecular Print)'}`,
+      title: `${book.title}${format === 'digital' ? ' (Digital Edition)' : ''}`,
       author: book.author,
       price: activePrice,
       cover: book.cover,
@@ -82,6 +69,7 @@ export const BookDetailModal: React.FC<BookDetailModalProps> = ({ book, onClose 
     setAdded(true);
   };
 
+  // Checkout: make sure the item is in the basket (without adding it twice), then go to checkout
   const handleCheckout = () => {
     if (!added) addItem();
     onClose();
@@ -95,188 +83,108 @@ export const BookDetailModal: React.FC<BookDetailModalProps> = ({ book, onClose 
     window.scrollTo({ top: 0 });
   };
 
+  const detailRows: { label: string; value: string }[] = [
+    { label: 'Category', value: CATEGORY_LABELS[book.category] || book.category },
+    ...(hasAges ? [{ label: 'Recommended age', value: `${book.minAge}–${book.maxAge} years` }] : []),
+    { label: 'Type', value: isToy ? 'Toy / learning kit' : 'Book' },
+    ...(!isToy ? [{ label: 'Formats', value: hasDigital ? 'Printed copy and digital eBook' : 'Printed copy' }] : []),
+    { label: 'Delivery', value: 'Free delivery on orders of ₹499 or more (₹49 below that)' }
+  ];
+
   return (
-    <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/85 backdrop-blur-xl overflow-y-auto"
-      onClick={onClose}
-      role="dialog" 
-      aria-modal="true" 
-      aria-label={book.title}
-    >
-      <div 
-        className="relative w-full max-w-3xl rounded-3xl bg-slate-900/95 border border-cyan-500/30 p-6 sm:p-8 md:p-10 shadow-[0_25px_70px_rgba(0,0,0,0.7)] text-slate-100 my-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Close Button */}
-        <button 
-          onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-xl bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
-          aria-label="Close details"
-        >
-          <X className="w-5 h-5" />
+    <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-label={book.title}>
+      <div className="modal-content bd-modal" onClick={(e) => e.stopPropagation()}>
+        <button className="close-modal-btn" onClick={onClose} aria-label="Close details">
+          ✕
         </button>
 
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-          
-          {/* Left Column: Hologram Cover */}
-          <div className="md:col-span-5 flex flex-col items-center">
-            <div className="relative aspect-[3/4] w-full max-w-64 rounded-2xl overflow-hidden bg-slate-950 border border-slate-700 shadow-2xl p-2 flex items-center justify-center">
-              <CoverImage
-                cover={book.cover}
-                alt={book.title}
-                className="w-full h-full object-cover rounded-xl"
-                emojiStyle={{ fontSize: '72px' }}
-                emojiFallback={book.emoji}
-              />
-              <div className="absolute top-4 left-4 px-2 py-0.5 rounded bg-slate-950/80 text-[10px] font-mono text-cyan-400 border border-cyan-500/30">
-                VERIFIED ARCHIVE
-              </div>
-            </div>
-
-            {/* Quick Status */}
-            <div className="mt-4 flex items-center gap-2 text-xs font-mono text-slate-400">
-              <span className="w-2 h-2 rounded-full bg-emerald-400" />
-              <span>In Stock · Instant Dispatch</span>
-            </div>
+        <div className="bd-grid">
+          <div className="bd-cover">
+            <CoverImage
+              cover={book.cover}
+              alt={book.title}
+              emojiStyle={{ fontSize: '72px' }}
+              imgStyle={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              emojiFallback={book.emoji}
+            />
           </div>
 
-          {/* Right Column: Title, Metadata, Formats, and Actions */}
-          <div className="md:col-span-7 flex flex-col">
-            
-            {/* Category and Age metadata */}
-            <div className="flex items-center gap-2 text-xs text-cyan-400 font-mono mb-2">
-              <span>{CATEGORY_LABELS[book.category] || book.category}</span>
-              {hasAges && (
-                <>
-                  <span className="text-slate-600">·</span>
-                  <span>Ages {book.minAge}–{book.maxAge}</span>
-                </>
-              )}
+          <div>
+            <h2 style={{ fontSize: '26px', marginBottom: '6px', paddingRight: '28px' }}>{book.title}</h2>
+            <div style={{ color: 'var(--mut)', fontSize: '15px', marginBottom: '12px' }}>
+              by <strong>{book.author}</strong>
             </div>
 
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white font-display tracking-tight mb-1 pr-8">
-              {book.title}
-            </h2>
+            {book.tags && book.tags.length > 0 && (
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
+                {book.tags.map((t) => (
+                  <span key={t} className="bd-tag">
+                    {t}
+                  </span>
+                ))}
+              </div>
+            )}
 
-            <div className="text-sm text-slate-400 mb-4">
-              Authored by <span className="text-slate-200 font-medium">{book.author}</span>
-            </div>
-
-            {/* Synopsis / Blurb */}
-            <p className="text-sm text-slate-300 leading-relaxed mb-6">
-              {book.description}
-            </p>
-
-            {/* Format Selector if digital available */}
             {hasDigital && (
-              <div className="mb-6">
-                <span className="block text-xs font-mono uppercase text-slate-400 mb-2">
-                  Select Edition Format:
-                </span>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => { setFormat('printed'); setAdded(false); }}
-                    className={`p-3 rounded-xl border text-left transition-all flex flex-col ${
-                      format === 'printed'
-                        ? 'bg-cyan-500/15 border-cyan-400/60 text-white shadow-[0_0_15px_rgba(6,182,212,0.2)]'
-                        : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    <span className="text-xs font-bold text-white">Molecular Print</span>
-                    <span className="text-[11px] font-mono text-cyan-400 mt-1">{formatPrice(book.printedPrice || book.price)}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => { setFormat('digital'); setAdded(false); }}
-                    className={`p-3 rounded-xl border text-left transition-all flex flex-col ${
-                      format === 'digital'
-                        ? 'bg-cyan-500/15 border-cyan-400/60 text-white shadow-[0_0_15px_rgba(6,182,212,0.2)]'
-                        : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    <span className="text-xs font-bold text-white">Holo-Digital Scroll</span>
-                    <span className="text-[11px] font-mono text-cyan-400 mt-1">{formatPrice(book.digitalPrice || 0)}</span>
-                  </button>
+              <div style={{ marginBottom: '14px' }}>
+                <div style={{ fontSize: '13px', fontWeight: 700, marginBottom: '6px', color: 'var(--mut)' }}>SELECT FORMAT</div>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  {(['printed', 'digital'] as const).map((f) => (
+                    <button
+                      key={f}
+                      type="button"
+                      className={`bd-format ${format === f ? 'on' : ''}`}
+                      onClick={() => {
+                        setFormat(f);
+                        setAdded(false);
+                      }}
+                    >
+                      {f === 'printed' ? `📖 Printed · ₹${book.printedPrice || book.price}` : `📱 Digital · ₹${book.digitalPrice}`}
+                    </button>
+                  ))}
                 </div>
               </div>
             )}
 
-            {/* Active Price Readout */}
-            <div className="flex items-baseline gap-3 mb-6 pb-6 border-b border-slate-800">
-              <span className="text-3xl font-black text-white font-mono tracking-tight tabular-nums">
-                {formatPrice(activePrice * qty)}
-              </span>
+            <div style={{ fontSize: '26px', fontWeight: 800, color: 'var(--ink)', marginBottom: '14px' }}>
+              ₹{(activePrice * qty).toLocaleString('en-IN')}
               {qty > 1 && (
-                <span className="text-xs font-mono text-slate-400">
-                  ({qty} × {formatPrice(activePrice)})
+                <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--mut)', marginLeft: '8px' }}>
+                  ({qty} × ₹{activePrice.toLocaleString('en-IN')})
                 </span>
               )}
             </div>
 
-            {/* Buy and Cart Actions */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-6">
-              
-              {/* Quantity */}
-              <div className="flex items-center justify-between sm:justify-start rounded-xl bg-slate-950 border border-slate-800 p-1">
-                <button
-                  type="button"
-                  onClick={() => { setQty((q) => Math.max(1, q - 1)); setAdded(false); }}
-                  className="w-8 h-8 rounded-lg bg-slate-900 text-slate-300 hover:text-white flex items-center justify-center font-bold text-base"
-                >
-                  −
-                </button>
-                <span className="w-10 text-center font-mono font-bold text-sm text-white">
-                  {qty}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => { setQty((q) => q + 1); setAdded(false); }}
-                  className="w-8 h-8 rounded-lg bg-slate-900 text-slate-300 hover:text-white flex items-center justify-center font-bold text-base"
-                >
-                  +
-                </button>
+            <div className="bd-buy">
+              <div className="qty-control">
+                <button type="button" onClick={() => { setQty((q) => Math.max(1, q - 1)); setAdded(false); }} aria-label="Decrease quantity">−</button>
+                <input
+                  type="number"
+                  value={qty}
+                  min={1}
+                  onChange={(e) => { setQty(Math.max(1, parseInt(e.target.value) || 1)); setAdded(false); }}
+                  aria-label="Quantity"
+                />
+                <button type="button" onClick={() => { setQty((q) => q + 1); setAdded(false); }} aria-label="Increase quantity">+</button>
               </div>
 
-              {/* Add to Cart Button */}
-              <button
-                type="button"
-                onClick={handleAddToBasket}
-                className={`flex-1 py-3 px-5 rounded-xl font-bold text-xs font-mono tracking-wide transition-all flex items-center justify-center gap-2 ${
-                  added 
-                    ? 'bg-emerald-500 text-slate-950' 
-                    : 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 shadow-[0_0_20px_rgba(6,182,212,0.3)]'
-                }`}
-              >
-                {added ? (
-                  <>
-                    <Check className="w-4 h-4" />
-                    <span>Added to Cart</span>
-                  </>
-                ) : (
-                  <>
-                    <ShoppingBag className="w-4 h-4" />
-                    <span>Add to Cart</span>
-                  </>
-                )}
+              <button type="button" className="btn" onClick={handleAddToBasket}>
+                {added ? '✓ Added to basket' : '🛒 Add to basket'}
               </button>
-
-              {/* Instant Checkout Button */}
-              <button
-                type="button"
-                onClick={handleCheckout}
-                className="py-3 px-5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-mono text-xs font-semibold transition-colors flex items-center justify-center gap-1.5"
-              >
-                <span>Checkout</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+              <button type="button" className="btn gold" onClick={handleCheckout}>
+                Checkout →
               </button>
             </div>
 
-            {/* Sub-actions */}
-            <div className="flex items-center justify-between text-xs font-mono text-slate-400 pt-2">
+            <div className="bd-secondary">
+              {added && (
+                <button type="button" className="bd-link" onClick={handleViewBasket}>
+                  View basket
+                </button>
+              )}
               <button
                 type="button"
+                className={`bd-link ${inWishlist ? 'on' : ''}`}
                 onClick={() =>
                   toggleWishlist({
                     id: book.id,
@@ -288,53 +196,52 @@ export const BookDetailModal: React.FC<BookDetailModalProps> = ({ book, onClose 
                     type: book.type || 'book'
                   })
                 }
-                className={`flex items-center gap-1.5 transition-colors ${inWishlist ? 'text-pink-400' : 'hover:text-white'}`}
               >
-                <Heart className={`w-4 h-4 ${inWishlist ? 'fill-pink-400' : ''}`} />
-                <span>{inWishlist ? 'Saved in Wishlist' : 'Add to Wishlist'}</span>
+                {inWishlist ? '♥ Saved to favourites' : '♡ Save to favourites'}
               </button>
-
-              {added && (
-                <button
-                  type="button"
-                  onClick={handleViewBasket}
-                  className="text-cyan-400 hover:underline flex items-center gap-1"
-                >
-                  <span>Open Cart ({qty})</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-              )}
             </div>
-
           </div>
         </div>
 
-        {/* Related Works strip */}
+        <div className="bd-section">
+          <h4>About this item</h4>
+          <p style={{ color: 'var(--mut)', fontSize: '15px', lineHeight: 1.6, margin: 0 }}>{book.description}</p>
+        </div>
+
+        <div className="bd-section">
+          <h4>Details</h4>
+          <dl className="bd-details">
+            {detailRows.map((r) => (
+              <React.Fragment key={r.label}>
+                <dt>{r.label}</dt>
+                <dd>{r.value}</dd>
+              </React.Fragment>
+            ))}
+          </dl>
+        </div>
+
         {related.length > 0 && (
-          <div className="mt-10 pt-8 border-t border-slate-800">
-            <h4 className="text-xs font-mono uppercase tracking-wider text-slate-400 mb-4">
-              Paired Learning Works:
-            </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="bd-section">
+            <h4>You may also like</h4>
+            <div className="bd-related">
               {related.map((r) => (
-                <div
-                  key={r.id}
-                  onClick={() => setSelectedBook(r)}
-                  className="p-3 rounded-xl bg-slate-950/60 border border-slate-800 hover:border-cyan-500/40 transition-all cursor-pointer flex items-center gap-3"
-                >
-                  <div className="w-10 h-14 rounded bg-slate-900 shrink-0 overflow-hidden">
-                    <CoverImage cover={r.cover} alt={r.title} className="w-full h-full object-cover" emojiFallback="📖" />
-                  </div>
-                  <div className="flex flex-col min-w-0">
-                    <span className="text-xs font-bold text-white truncate">{r.title}</span>
-                    <span className="text-[11px] font-mono text-cyan-400">{formatPrice(r.price)}</span>
-                  </div>
-                </div>
+                <button key={r.id} type="button" className="bd-rel" onClick={() => setSelectedBook(r)}>
+                  <span className="bd-rel-cover">
+                    <CoverImage
+                      cover={r.cover}
+                      alt={r.title}
+                      emojiStyle={{ fontSize: '34px' }}
+                      imgStyle={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      emojiFallback={r.emoji}
+                    />
+                  </span>
+                  <span className="bd-rel-title">{r.title}</span>
+                  <span className="bd-rel-price">₹{r.price.toLocaleString('en-IN')}</span>
+                </button>
               ))}
             </div>
           </div>
         )}
-
       </div>
     </div>
   );
