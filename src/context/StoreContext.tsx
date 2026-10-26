@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Book, CartItem, WishlistItem, Order, User } from '../types';
-import { INITIAL_BOOKS, INITIAL_TOYS } from '../data/initialData';
+import { INITIAL_BOOKS, INITIAL_TOYS, CURRENCY_SYMBOLS, DEFAULT_FX_RATES } from '../data/initialData';
 import { cloudUid, loadAllOrders, loadUserData, mergeById, mergeOrders, saveCart, saveOrderCloud, saveProfile, saveWishlist } from '../userCloud';
 import { databaseRequest, firebaseSignIn, firebaseSignUp, firebaseSignOut, isFirebaseAdmin, refreshFirebaseToken, firebaseConfigured } from '../firebaseClient';
 
@@ -63,6 +63,12 @@ interface StoreContextType {
   theme: 'light' | 'dark';
   toggleTheme: () => void;
 
+  // Currency
+  currency: string;
+  setCurrency: (currency: string) => void;
+  formatPrice: (amountINR: number) => string;
+  fxRates: Record<string, number>;
+
   // Toast
   toastMessage: string | null;
   showToast: (msg: string) => void;
@@ -73,6 +79,7 @@ const ORDERS_KEY = 'readingNookOrders';
 const LAST_ORDER_KEY = 'readingNookLastOrder';
 const USER_KEY = 'readingNookUser';
 const CATALOG_BOOKS_KEY = 'readingNookCustomBooks';
+const CURRENCY_KEY = 'readingNookCurrency';
 const CATALOG_TOYS_KEY = 'readingNookCustomToys';
 const THEME_KEY = 'readingNookTheme';
 
@@ -90,8 +97,41 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     } catch (e) {
       console.error(e);
     }
-    return 'light';
+    return 'dark';
   });
+
+  // Currency State
+  const [currency, setCurrencyState] = useState<string>(() => {
+    try {
+      const saved = localStorage.getItem(CURRENCY_KEY);
+      if (saved && CURRENCY_SYMBOLS[saved]) return saved;
+    } catch (e) {
+      console.error(e);
+    }
+    return 'INR';
+  });
+
+  const [fxRates, setFxRates] = useState<Record<string, number>>(DEFAULT_FX_RATES);
+
+  const setCurrency = (c: string) => {
+    setCurrencyState(c);
+    try {
+      localStorage.setItem(CURRENCY_KEY, c);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const formatPrice = (amountINR: number): string => {
+    if (!amountINR && amountINR !== 0) return '—';
+    const sym = CURRENCY_SYMBOLS[currency] || '₹';
+    if (currency === 'INR') {
+      return `${sym}${Math.round(amountINR).toLocaleString('en-IN')}`;
+    }
+    const rate = fxRates[currency] || DEFAULT_FX_RATES[currency] || 0.012;
+    const converted = amountINR * rate;
+    return `${sym}${converted.toFixed(2)}`;
+  };
 
   // View Routing
   const [view, setView] = useState<string>('home');
@@ -526,6 +566,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         saveOrder,
         theme,
         toggleTheme,
+        currency,
+        setCurrency,
+        formatPrice,
+        fxRates,
         toastMessage,
         showToast
       }}
