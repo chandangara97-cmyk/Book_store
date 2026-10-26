@@ -43,7 +43,7 @@ export const LibraryView: React.FC = () => {
 
   return (
     <div>
-      <div className="page-header page-header--photo" style={{ backgroundImage: "linear-gradient(100deg, rgba(18,28,47,0.88), rgba(18,28,47,0.45)), url('https://loremflickr.com/1600/400/301?lock=301')" }}>
+      <div className="page-header page-header--photo" style={{ backgroundImage: "linear-gradient(100deg, rgba(18,28,47,0.88), rgba(18,28,47,0.45)), url('https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=1800&q=85')" }}>
         <div className="container">
           <button
             type="button"
