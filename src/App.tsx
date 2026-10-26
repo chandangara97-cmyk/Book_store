@@ -2,7 +2,6 @@ import React from 'react';
 import { useStore } from './context/StoreContext';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
-import { BottomNav } from './components/BottomNav';
 import { BookDetailModal } from './components/BookDetailModal';
 import { HomeView } from './views/HomeView';
 import { LibraryView } from './views/LibraryView';
@@ -50,7 +49,6 @@ export const AppContent: React.FC = () => {
       <Header />
       <div style={{ flex: 1 }}>{renderView()}</div>
       <Footer />
-      <BottomNav />
 
       {/* Book details modal */}
       {selectedBook && (

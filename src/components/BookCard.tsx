@@ -49,9 +49,6 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onOpenDetails }) => {
         <div className="price">₹{book.price.toLocaleString('en-IN')}</div>
 
         <div className="book-actions-row">
-          <button type="button" className="btn btn-sm alt" onClick={handleCardClick}>
-            View details
-          </button>
           <button
             type="button"
             className="btn btn-sm"

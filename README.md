@@ -35,9 +35,3 @@ npm run build
 ```
 
 © 2026 Kiddie Bloom. All rights reserved.
-
-## Kiddie Bloom logo assets
-
-- Main logo: `public/img/kiddie-bloom-logo.png` (used on the homepage hero and social preview).
-- Compact logo: `public/img/kiddie-bloom-logo-sm.png` (used in the header, footer, favicon, and mobile-friendly brand areas).
-- The same source assets are retained in `img/` for repository compatibility. App references use root-relative `/img/...` paths so they are included in Vite production builds.

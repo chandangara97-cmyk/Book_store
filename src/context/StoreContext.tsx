@@ -1,16 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Book, CartItem, WishlistItem, Order, User } from '../types';
 import { INITIAL_BOOKS, INITIAL_TOYS } from '../data/initialData';
-import { cloudUid, loadAllOrders, loadUserData, mergeById, mergeOrders, saveCart, saveOrderCloud, saveProfile, saveWishlist } from '../userCloud';
 import { databaseRequest, firebaseSignIn, firebaseSignUp, firebaseSignOut, isFirebaseAdmin, refreshFirebaseToken, firebaseConfigured } from '../firebaseClient';
-
-// Older Firebase records have no age range; borrow it from the built-in catalog (same id) so the age finder still works.
-const withAges = (list: Book[]): Book[] =>
-  list.map((b) => {
-    if (b.minAge !== undefined && b.maxAge !== undefined) return b;
-    const d = INITIAL_BOOKS.find((x) => x.id === b.id);
-    return d && d.minAge !== undefined ? { ...b, minAge: d.minAge, maxAge: d.maxAge } : b;
-  });
 
 interface StoreContextType {
   // Navigation & View
@@ -103,7 +94,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [books, setBooks] = useState<Book[]>(() => {
     try {
       const saved = localStorage.getItem(CATALOG_BOOKS_KEY);
-      if (saved) return withAges(JSON.parse(saved));
+      if (saved) { const parsed = JSON.parse(saved); return { ...parsed, isAdmin: isFirebaseAdmin(parsed.email) }; }
     } catch (e) {
       console.error(e);
     }
@@ -202,7 +193,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           databaseRequest<Record<string, Book> | Book[]>('books'),
           databaseRequest<Record<string, Book> | Book[]>('toys')
         ]);
-        if (remoteBooks) { const list = Array.isArray(remoteBooks) ? remoteBooks : Object.values(remoteBooks); if (list.length) setBooks(withAges(list)); }
+        if (remoteBooks) { const list = Array.isArray(remoteBooks) ? remoteBooks : Object.values(remoteBooks); if (list.length) setBooks(list); }
         if (remoteToys) { const list = Array.isArray(remoteToys) ? remoteToys : Object.values(remoteToys); if (list.length) setToys(list); }
       } catch (error) { console.warn('Firebase catalog fetch failed; using local catalog.', error); }
     })();
@@ -234,45 +225,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       console.error(e);
     }
   }, [cart, wishlist]);
-
-  // ---- Per-user cloud sync (cart, favourites, purchases) ----
-  // `syncedUid` is set only after the user's saved data has been loaded, so an empty local cart can never overwrite it.
-  const [syncedUid, setSyncedUid] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!firebaseConfigured) return;
-    const uid = user ? cloudUid() : null;
-    if (!user || !uid) { setSyncedUid(null); return; }
-    let cancelled = false;
-    (async () => {
-      try {
-        await refreshFirebaseToken();
-        const remote = await loadUserData(uid);
-        if (cancelled) return;
-        setCart((prev) => mergeById(remote.cart, prev));
-        setWishlist((prev) => mergeById(remote.wishlist, prev));
-        if (user.isAdmin) {
-          try { const all = await loadAllOrders(); if (!cancelled) setOrders(all.sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)))); } catch { setOrders((prev) => mergeOrders(remote.orders, prev)); }
-        } else {
-          setOrders((prev) => mergeOrders(remote.orders, prev));
-        }
-        setSyncedUid(uid);
-      } catch (error) {
-        console.warn('Could not load your saved data from Firebase.', error);
-      }
-    })();
-    return () => { cancelled = true; };
-  }, [user?.email]);
-
-  // Save cart & favourites to the signed-in user's account whenever they change.
-  useEffect(() => {
-    if (!syncedUid) return;
-    const t = setTimeout(() => {
-      saveCart(syncedUid, cart).catch((e) => console.warn('Cart sync failed', e));
-      saveWishlist(syncedUid, wishlist).catch((e) => console.warn('Wishlist sync failed', e));
-    }, 600);
-    return () => clearTimeout(t);
-  }, [cart, wishlist, syncedUid]);
 
   // Threshold gift verification
   useEffect(() => {
@@ -411,7 +363,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const isAdmin = isFirebaseAdmin(authUser.email);
     const u: User = { email: authUser.email, name: authUser.displayName || authUser.email.split('@')[0], isAdmin };
     setUser(u); localStorage.setItem(USER_KEY, JSON.stringify(u));
-    saveProfile(authUser.localId, { email: authUser.email, name: authUser.displayName }, false).catch((e) => console.warn('Profile sync failed', e));
     showToast(isAdmin ? 'Welcome back, Admin!' : `Welcome back, ${u.name}!`);
   };
 
@@ -419,20 +370,13 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const authUser = await firebaseSignUp(email, password, name);
     const u: User = { email: authUser.email, name: name || authUser.email.split('@')[0], isAdmin: isFirebaseAdmin(authUser.email) };
     setUser(u); localStorage.setItem(USER_KEY, JSON.stringify(u));
-    saveProfile(authUser.localId, { email: authUser.email, name: u.name }, true).catch((e) => { console.warn('Profile sync failed', e); showToast('Account created, but saving your profile to Firebase failed. Check the database rules.'); });
     showToast(`Account created. Welcome, ${u.name}!`);
   };
 
   const logout = () => {
     firebaseSignOut();
-    setSyncedUid(null);
     setUser(null);
     localStorage.removeItem(USER_KEY);
-    if (firebaseConfigured) {
-      // Everything is saved in the account, so clear this device (shared phones/tablets).
-      setCart([]); setWishlist([]); setOrders([]); setLastOrder(null);
-      localStorage.removeItem(ORDERS_KEY); localStorage.removeItem(LAST_ORDER_KEY);
-    }
     showToast('Signed out successfully');
   };
 
@@ -445,13 +389,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       localStorage.setItem(ORDERS_KEY, JSON.stringify(next));
       return next;
     });
-    const uid = cloudUid();
-    if (user && uid) {
-      saveOrderCloud(uid, order).catch((e) => {
-        console.warn('Order sync failed', e);
-        showToast('Order saved on this device, but syncing it to your account failed.');
-      });
-    }
     clearCart();
   };
 
@@ -467,7 +404,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const fetchCatalogFromFirebase = async () => {
     const [remoteBooks, remoteToys] = await Promise.all([databaseRequest<Record<string, Book> | Book[]>('books'), databaseRequest<Record<string, Book> | Book[]>('toys')]);
-    const bookList = withAges(remoteBooks ? (Array.isArray(remoteBooks) ? remoteBooks : Object.values(remoteBooks)) : []);
+    const bookList = remoteBooks ? (Array.isArray(remoteBooks) ? remoteBooks : Object.values(remoteBooks)) : [];
     const toyList = remoteToys ? (Array.isArray(remoteToys) ? remoteToys : Object.values(remoteToys)) : [];
     setBooks(bookList); setToys(toyList);
     localStorage.setItem(CATALOG_BOOKS_KEY, JSON.stringify(bookList)); localStorage.setItem(CATALOG_TOYS_KEY, JSON.stringify(toyList));
