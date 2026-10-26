@@ -1,3 +1,4 @@
+import { CoverImage } from './CoverImage';
 import React, { useState } from 'react';
 import { Book } from '../types';
 import { useStore } from '../context/StoreContext';
@@ -31,8 +32,6 @@ export const BookDetailModal: React.FC<BookDetailModalProps> = ({ book, onClose 
     onClose();
   };
 
-  const isEmoji = book.cover && book.cover.length <= 4 && !book.cover.includes('/') && !book.cover.includes('.');
-
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -54,15 +53,7 @@ export const BookDetailModal: React.FC<BookDetailModalProps> = ({ book, onClose 
               boxShadow: '0 8px 24px rgba(27,42,74,0.12)'
             }}
           >
-            {isEmoji ? (
-              <span style={{ fontSize: '72px' }}>{book.cover}</span>
-            ) : (
-              <img
-                src={book.cover}
-                alt={book.title}
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
-            )}
+            <CoverImage cover={book.cover} alt={book.title} emojiStyle={{ fontSize: '72px' }} imgStyle={{ width: '100%', height: '100%', objectFit: 'cover' }} emojiFallback={book.emoji} />
           </div>
 
           <div>

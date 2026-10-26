@@ -449,8 +449,10 @@ h2.sec-title {
 
 .fhimg {
   width: min(200px, 34%);
-  max-height: 120px;
-  object-fit: contain;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(27, 42, 74, 0.15);
 }
 
 .stage-buttons {
@@ -1874,4 +1876,23 @@ body, header.header, .book-card, .finder, .fmt-card, .cart-table, .checkout-sect
 [data-theme="dark"] .admin-panel h2,
 [data-theme="dark"] .admin-stat strong {
   color: #a5d8b8;
+}
+
+/* Photo page headers (Library, Gift Finder) */
+.page-header--photo {
+  background-color: #1b2a4a;
+  background-size: cover;
+  background-position: center;
+  border-bottom: none;
+  color: #fff;
+}
+.page-header--photo h1,
+.page-header--photo p {
+  color: #fff;
+}
+.page-header--photo button {
+  color: #dbe7f5 !important;
+}
+[data-theme="dark"] .page-header--photo {
+  background-color: #1b2a4a;
 }

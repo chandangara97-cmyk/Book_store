@@ -1,3 +1,5 @@
+import { CoverImage } from './CoverImage';
+import { asset, cleanSrc, imgFallback, isEmojiCover } from '../utils/images';
 import React, { useState, useId } from 'react';
 import { STAGES, TUTORIAL_BOOKS } from '../data/initialData';
 import { useStore } from '../context/StoreContext';
@@ -46,12 +48,13 @@ export const AgeFinder: React.FC = () => {
 
         <img
           className="fhimg"
-          src={currentStage.image}
+          key={currentStage.image}
+          src={asset(cleanSrc(currentStage.image))}
+          data-src={currentStage.image}
           alt={currentStage.name}
           loading="lazy"
-          onError={(e) => {
-            (e.currentTarget as HTMLElement).style.display = 'none';
-          }}
+          referrerPolicy="no-referrer"
+          onError={imgFallback}
         />
       </div>
 
@@ -108,6 +111,7 @@ export const AgeFinder: React.FC = () => {
               <div
                 style={{
                   height: '140px',
+                  overflow: 'hidden',
                   borderRadius: '12px',
                   background: currentStage.hex,
                   display: 'flex',
@@ -118,9 +122,23 @@ export const AgeFinder: React.FC = () => {
                   boxShadow: 'inset 0 0 0 1px rgba(27,42,74,0.1)'
                 }}
               >
-                <div style={{ textAlign: 'center', padding: '12px' }}>
-                  <div style={{ fontSize: '32px', marginBottom: '4px' }}>{book.cover}</div>
-                  <strong style={{ fontSize: '16px', fontFamily: 'var(--d)' }}>{book.title}</strong>
+                <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                  {isEmojiCover(book.cover) ? (
+                    <div style={{ textAlign: 'center', padding: '12px' }}>
+                      <div style={{ fontSize: '32px', marginBottom: '4px' }}>{book.cover}</div>
+                      <strong style={{ fontSize: '16px', fontFamily: 'var(--d)' }}>{book.title}</strong>
+                    </div>
+                  ) : (
+                    <>
+                      <CoverImage
+                        cover={book.cover}
+                        alt={book.title}
+                        emojiFallback={book.emoji}
+                        emojiStyle={{ fontSize: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}
+                        imgStyle={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px', display: 'block' }}
+                      />
+                    </>
+                  )}
                 </div>
               </div>
 

@@ -8,6 +8,7 @@ export interface Book {
   digitalPrice?: number;
   printedPrice?: number;
   cover: string;
+  emoji?: string;
   category: 'fiction' | 'learning' | 'children' | 'gifts' | 'toys';
   blurb?: string;
   description: string;

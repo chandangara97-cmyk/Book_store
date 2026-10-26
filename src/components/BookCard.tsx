@@ -1,3 +1,4 @@
+import { CoverImage } from './CoverImage';
 import React from 'react';
 import { Book } from '../types';
 import { useStore } from '../context/StoreContext';
@@ -19,26 +20,10 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onOpenDetails }) => {
     }
   };
 
-  const isEmoji = book.cover && book.cover.length <= 4 && !book.cover.includes('/') && !book.cover.includes('.');
-
   return (
     <article className="book-card" style={{ cursor: 'pointer' }}>
       <div className="book-cover" onClick={handleCardClick}>
-        {isEmoji ? (
-          <span className="emoji-cover">{book.cover}</span>
-        ) : (
-          <img
-            src={book.cover}
-            alt={`Cover of ${book.title}`}
-            loading="lazy"
-            onError={(e) => {
-              // fallback to emoji or placeholder
-              (e.currentTarget as HTMLElement).style.display = 'none';
-              const parent = e.currentTarget.parentElement;
-              if (parent) parent.innerHTML = '<span class="emoji-cover">📖</span>';
-            }}
-          />
-        )}
+        <CoverImage cover={book.cover} alt={`Cover of ${book.title}`} emojiClassName="emoji-cover" emojiFallback={book.emoji} />
       </div>
 
       <div className="book-info">

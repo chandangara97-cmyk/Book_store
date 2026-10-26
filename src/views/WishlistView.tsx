@@ -1,3 +1,4 @@
+import { CoverImage } from '../components/CoverImage';
 import React from 'react';
 import { useStore } from '../context/StoreContext';
 
@@ -68,17 +69,11 @@ export const WishlistView: React.FC = () => {
         ) : (
           <div className="book-grid">
             {wishlist.map((item) => {
-              const isEmoji =
-                item.cover && item.cover.length <= 4 && !item.cover.includes('/') && !item.cover.includes('.');
 
               return (
                 <article key={item.id} className="book-card">
                   <div className="book-cover">
-                    {isEmoji ? (
-                      <span className="emoji-cover">{item.cover}</span>
-                    ) : (
-                      <img src={item.cover} alt={item.title} />
-                    )}
+                    <CoverImage cover={item.cover} alt={item.title} emojiClassName="emoji-cover" />
                   </div>
 
                   <div className="book-info">

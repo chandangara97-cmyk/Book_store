@@ -1,3 +1,4 @@
+import { CoverImage } from '../components/CoverImage';
 import React from 'react';
 import { useStore } from '../context/StoreContext';
 
@@ -90,19 +91,13 @@ export const CartView: React.FC = () => {
             <tbody>
               {cart.map((item) => {
                 const isGift = item.type === 'gift';
-                const isEmoji =
-                  item.cover && item.cover.length <= 4 && !item.cover.includes('/') && !item.cover.includes('.');
 
                 return (
                   <tr key={item.id}>
                     <td>
                       <div className="cart-item-info">
                         <div className="cart-item-cover">
-                          {isEmoji ? (
-                            <span>{item.cover}</span>
-                          ) : (
-                            <img src={item.cover} alt={item.title} />
-                          )}
+                          <CoverImage cover={item.cover} alt={item.title} />
                         </div>
                         <div>
                           <strong>{item.title}</strong>

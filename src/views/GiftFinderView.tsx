@@ -75,7 +75,7 @@ export const GiftFinderView: React.FC = () => {
 
   return (
     <div>
-      <div className="page-header">
+      <div className="page-header page-header--photo" style={{ backgroundImage: "linear-gradient(100deg, rgba(18,28,47,0.88), rgba(18,28,47,0.45)), url('https://loremflickr.com/1600/400/302?lock=302')" }}>
         <div className="container">
           <button
             type="button"

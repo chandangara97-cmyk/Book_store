@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import { useStore } from '../context/StoreContext';
 import { AgeFinder } from '../components/AgeFinder';
+import { asset, cleanSrc, imgFallback, photo } from '../utils/images';
+
+const IMG_PRINTED = photo('books,bookshelf', 201, '/img/format-printed.svg', 800, 360);
+const IMG_DIGITAL = photo('tablet,reading', 202, '/img/format-digital.svg', 800, 360);
+const IMG_HELP = photo('child,reading,books', 203, '/img/help.svg', 440, 440);
 
 export const HomeView: React.FC = () => {
   const { setView, setSelectedCategory } = useStore();
@@ -115,7 +120,10 @@ export const HomeView: React.FC = () => {
           </p>
           <div className="two-cols">
             <div className="fmt-card" style={{ borderTop: '10px solid var(--pink)' }}>
-              <img src="/img/format-printed.svg" alt="An open printed book" loading="lazy" />
+              <img src={asset(cleanSrc(IMG_PRINTED))}
+              data-src={IMG_PRINTED}
+              referrerPolicy="no-referrer"
+              onError={imgFallback} alt="An open printed book" loading="lazy" />
               <h3>Printed copy</h3>
               <ul>
                 <li>A real book to hold, share and keep on the shelf</li>
@@ -124,7 +132,10 @@ export const HomeView: React.FC = () => {
               </ul>
             </div>
             <div className="fmt-card" style={{ borderTop: '10px solid var(--sky)' }}>
-              <img src="/img/format-digital.svg" alt="A tablet showing a digital book" loading="lazy" />
+              <img src={asset(cleanSrc(IMG_DIGITAL))}
+              data-src={IMG_DIGITAL}
+              referrerPolicy="no-referrer"
+              onError={imgFallback} alt="A tablet showing a digital book" loading="lazy" />
               <h3>Digital copy</h3>
               <ul>
                 <li>Read on a phone, tablet or computer</li>
@@ -301,7 +312,10 @@ export const HomeView: React.FC = () => {
         <div className="wrap">
           <img
             className="helpimg"
-            src="/img/help.svg"
+            src={asset(cleanSrc(IMG_HELP))}
+              data-src={IMG_HELP}
+              referrerPolicy="no-referrer"
+              onError={imgFallback}
             alt="A child reading on a stack of books"
             loading="lazy"
           />
