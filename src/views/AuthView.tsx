@@ -7,16 +7,16 @@ export const AuthView: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [authError, setAuthError] = useState('');
-  const [busy, setBusy] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); setAuthError(''); setBusy(true);
-    try {
-      if (tab === 'signin') await login(email, password);
-      else await signup(email, password, name || email.split('@')[0]);
-    } catch (error) { setAuthError(error instanceof Error ? error.message : 'Could not authenticate. Check Firebase setup and credentials.'); }
-    finally { setBusy(false); }
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+
+    if (tab === 'signin') {
+      login(email);
+    } else {
+      signup(email, name || email.split('@')[0]);
+    }
   };
 
   if (user) {
@@ -265,20 +265,18 @@ export const AuthView: React.FC = () => {
             <input
               type="password"
               required
-              minLength={6}
-              placeholder="At least 6 characters"
+              placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
-          {authError && <p role="alert" style={{ color: '#b42318', marginTop: '12px' }}>{authError}</p>}
-          <button type="submit" disabled={busy} className="btn btn-block" style={{ marginTop: '16px', opacity: busy ? 0.7 : 1 }}>
-            {busy ? 'Please wait…' : tab === 'signin' ? 'Sign In' : 'Create Account'}
+          <button type="submit" className="btn btn-block" style={{ marginTop: '16px' }}>
+            {tab === 'signin' ? 'Sign In' : 'Create Account'}
           </button>
 
           <p style={{ fontSize: '12px', color: 'var(--mut)', marginTop: '18px', textAlign: 'center' }}>
-            Sign in with the email and password registered in Firebase Authentication. Admin access is restricted to the configured admin email allowlist.
+            Tip: Sign in with any email (or use an admin email like <code>admin@readingnook.com</code>)
           </p>
         </form>
       </div>

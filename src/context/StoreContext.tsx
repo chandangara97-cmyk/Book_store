@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Book, CartItem, WishlistItem, Order, User } from '../types';
 import { INITIAL_BOOKS, INITIAL_TOYS } from '../data/initialData';
-import { databaseRequest, firebaseSignIn, firebaseSignUp, firebaseSignOut, isFirebaseAdmin, refreshFirebaseToken, firebaseConfigured } from '../firebaseClient';
 
 interface StoreContextType {
   // Navigation & View
@@ -19,9 +18,6 @@ interface StoreContextType {
   toys: Book[];
   addOrUpdateProduct: (product: Book) => void;
   resetCatalogToDefault: () => void;
-  fetchCatalogFromFirebase: () => Promise<void>;
-  pushCatalogToFirebase: () => Promise<void>;
-  firebaseConfigured: boolean;
 
   // Cart
   cart: CartItem[];
@@ -41,9 +37,9 @@ interface StoreContextType {
 
   // User & Auth
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, name?: string) => void;
   logout: () => void;
-  signup: (email: string, password: string, name: string) => Promise<void>;
+  signup: (email: string, name: string) => void;
 
   // Orders
   lastOrder: Order | null;
@@ -94,7 +90,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [books, setBooks] = useState<Book[]>(() => {
     try {
       const saved = localStorage.getItem(CATALOG_BOOKS_KEY);
-      if (saved) { const parsed = JSON.parse(saved); return { ...parsed, isAdmin: isFirebaseAdmin(parsed.email) }; }
+      if (saved) return JSON.parse(saved);
     } catch (e) {
       console.error(e);
     }
@@ -142,7 +138,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [user, setUser] = useState<User | null>(() => {
     try {
       const saved = localStorage.getItem(USER_KEY);
-      if (saved) { const parsed = JSON.parse(saved) as User; return { ...parsed, isAdmin: isFirebaseAdmin(parsed.email) }; }
+      if (saved) return JSON.parse(saved);
     } catch (e) {
       console.error(e);
     }
@@ -182,22 +178,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const t = setTimeout(() => setToastMessage(null), 2800);
     return () => clearTimeout(t);
   }, [toastMessage]);
-
-  // Pull the public catalog from Firebase on startup when configured. Local defaults remain as offline fallback.
-  useEffect(() => {
-    if (!firebaseConfigured) return;
-    (async () => {
-      try {
-        await refreshFirebaseToken();
-        const [remoteBooks, remoteToys] = await Promise.all([
-          databaseRequest<Record<string, Book> | Book[]>('books'),
-          databaseRequest<Record<string, Book> | Book[]>('toys')
-        ]);
-        if (remoteBooks) { const list = Array.isArray(remoteBooks) ? remoteBooks : Object.values(remoteBooks); if (list.length) setBooks(list); }
-        if (remoteToys) { const list = Array.isArray(remoteToys) ? remoteToys : Object.values(remoteToys); if (list.length) setToys(list); }
-      } catch (error) { console.warn('Firebase catalog fetch failed; using local catalog.', error); }
-    })();
-  }, []);
 
   // Apply Theme to Document
   useEffect(() => {
@@ -358,23 +338,23 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   // Auth operations
-  const login = async (email: string, password: string) => {
-    const authUser = await firebaseSignIn(email, password);
-    const isAdmin = isFirebaseAdmin(authUser.email);
-    const u: User = { email: authUser.email, name: authUser.displayName || authUser.email.split('@')[0], isAdmin };
-    setUser(u); localStorage.setItem(USER_KEY, JSON.stringify(u));
-    showToast(isAdmin ? 'Welcome back, Admin!' : `Welcome back, ${u.name}!`);
+  const login = (email: string, name?: string) => {
+    const isAdmin = email.toLowerCase().includes('admin') || email.toLowerCase().includes('gara');
+    const u: User = { email, name: name || email.split('@')[0], isAdmin };
+    setUser(u);
+    localStorage.setItem(USER_KEY, JSON.stringify(u));
+    showToast(`Welcome back, ${u.name}!`);
   };
 
-  const signup = async (email: string, password: string, name: string) => {
-    const authUser = await firebaseSignUp(email, password, name);
-    const u: User = { email: authUser.email, name: name || authUser.email.split('@')[0], isAdmin: isFirebaseAdmin(authUser.email) };
-    setUser(u); localStorage.setItem(USER_KEY, JSON.stringify(u));
+  const signup = (email: string, name: string) => {
+    const isAdmin = email.toLowerCase().includes('admin') || email.toLowerCase().includes('gara');
+    const u: User = { email, name, isAdmin };
+    setUser(u);
+    localStorage.setItem(USER_KEY, JSON.stringify(u));
     showToast(`Account created. Welcome, ${u.name}!`);
   };
 
   const logout = () => {
-    firebaseSignOut();
     setUser(null);
     localStorage.removeItem(USER_KEY);
     showToast('Signed out successfully');
@@ -392,36 +372,32 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     clearCart();
   };
 
-  // Admin Catalog Management. Writes require a valid Firebase token and rules that allow the configured admin email.
+  // Admin Catalog Management
   const addOrUpdateProduct = (product: Book) => {
     if (product.type === 'toy') {
-      setToys(prev => { const idx = prev.findIndex(t => t.id === product.id); const updated = idx >= 0 ? prev.map(t => t.id === product.id ? product : t) : [product, ...prev]; localStorage.setItem(CATALOG_TOYS_KEY, JSON.stringify(updated)); return updated; });
+      setToys(prev => {
+        const idx = prev.findIndex(t => t.id === product.id);
+        const updated = idx >= 0 ? prev.map(t => (t.id === product.id ? product : t)) : [product, ...prev];
+        localStorage.setItem(CATALOG_TOYS_KEY, JSON.stringify(updated));
+        return updated;
+      });
     } else {
-      setBooks(prev => { const idx = prev.findIndex(b => b.id === product.id); const updated = idx >= 0 ? prev.map(b => b.id === product.id ? product : b) : [product, ...prev]; localStorage.setItem(CATALOG_BOOKS_KEY, JSON.stringify(updated)); return updated; });
+      setBooks(prev => {
+        const idx = prev.findIndex(b => b.id === product.id);
+        const updated = idx >= 0 ? prev.map(b => (b.id === product.id ? product : b)) : [product, ...prev];
+        localStorage.setItem(CATALOG_BOOKS_KEY, JSON.stringify(updated));
+        return updated;
+      });
     }
-    showToast(`Product “${product.title}” saved locally. Use Push to Firebase to publish it.`);
-  };
-
-  const fetchCatalogFromFirebase = async () => {
-    const [remoteBooks, remoteToys] = await Promise.all([databaseRequest<Record<string, Book> | Book[]>('books'), databaseRequest<Record<string, Book> | Book[]>('toys')]);
-    const bookList = remoteBooks ? (Array.isArray(remoteBooks) ? remoteBooks : Object.values(remoteBooks)) : [];
-    const toyList = remoteToys ? (Array.isArray(remoteToys) ? remoteToys : Object.values(remoteToys)) : [];
-    setBooks(bookList); setToys(toyList);
-    localStorage.setItem(CATALOG_BOOKS_KEY, JSON.stringify(bookList)); localStorage.setItem(CATALOG_TOYS_KEY, JSON.stringify(toyList));
-    showToast(`Fetched ${bookList.length} books and ${toyList.length} toys from Firebase.`);
-  };
-
-  const pushCatalogToFirebase = async () => {
-    if (!user?.isAdmin) throw new Error('This account is not on the Firebase admin allowlist.');
-    await Promise.all([databaseRequest('books', 'PUT', Object.fromEntries(books.map(item => [item.id, item]))), databaseRequest('toys', 'PUT', Object.fromEntries(toys.map(item => [item.id, { ...item, type: 'toy' }])))]);
-    showToast('Books and toys pushed to Firebase successfully.');
+    showToast(`Product “${product.title}” saved`);
   };
 
   const resetCatalogToDefault = () => {
-    if (!window.confirm('Restore the local catalog to defaults? This does not change Firebase until you press Push to Firebase.')) return;
-    setBooks(INITIAL_BOOKS); setToys(INITIAL_TOYS);
-    localStorage.setItem(CATALOG_BOOKS_KEY, JSON.stringify(INITIAL_BOOKS)); localStorage.setItem(CATALOG_TOYS_KEY, JSON.stringify(INITIAL_TOYS));
-    showToast('Local catalog restored to defaults. Push to Firebase to publish.');
+    setBooks(INITIAL_BOOKS);
+    setToys(INITIAL_TOYS);
+    localStorage.removeItem(CATALOG_BOOKS_KEY);
+    localStorage.removeItem(CATALOG_TOYS_KEY);
+    showToast('Catalog restored to default');
   };
 
   return (
@@ -439,9 +415,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         toys,
         addOrUpdateProduct,
         resetCatalogToDefault,
-        fetchCatalogFromFirebase,
-        pushCatalogToFirebase,
-        firebaseConfigured,
         cart,
         addToCart,
         removeFromCart,

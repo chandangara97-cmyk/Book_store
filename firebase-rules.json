@@ -2,16 +2,12 @@
   "rules": {
     "books": {
       ".read": true,
-      ".write": "auth != null && auth.token.email_verified === true && auth.token.email === 'REPLACE-WITH-ADMIN-EMAIL@example.com'"
-    },
-    "toys": {
-      ".read": true,
-      ".write": "auth != null && auth.token.email_verified === true && auth.token.email === 'REPLACE-WITH-ADMIN-EMAIL@example.com'"
+      ".write": "auth != null && auth.token.email === 'YOUR-ADMIN-EMAIL@example.com' && auth.token.email_verified === true"
     },
     "orders": {
       "$orderId": {
-        ".read": "auth != null && auth.token.email === 'REPLACE-WITH-ADMIN-EMAIL@example.com'",
-        ".write": false
+        ".write": "false",
+        ".read": "auth != null && auth.token.email === 'YOUR-ADMIN-EMAIL@example.com'"
       }
     },
     "users": {
@@ -19,6 +15,10 @@
         ".read": "auth != null && auth.uid === $uid",
         ".write": "auth != null && auth.uid === $uid"
       }
+    },
+    "toys": {
+      ".read": true,
+      ".write": "auth != null && auth.token.email === 'YOUR-ADMIN-EMAIL@example.com' && auth.token.email_verified === true"
     }
   }
 }

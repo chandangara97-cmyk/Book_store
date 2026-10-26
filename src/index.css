@@ -2010,76 +2010,126 @@ footer.footer { background: #fffdf4; border-top: 3px dashed var(--stitch); }
 }
 @media (max-width: 480px) { .brand-text span { display: none; } .brand-text h1 { font-size: 1.4rem; } .brand-logo { width: 46px; height: 46px; } }
 
-
-/* KIDDIE BLOOM VISUAL REFRESH — warm storybook atmosphere */
+/* Kiddie Bloom Storybook Boutique refresh — layered over the existing app styles */
+:root {
+  --primary: #315442;
+  --primary-light: #527b62;
+  --accent: #fff0df;
+  --bg: #fffaf2;
+  --card-bg: #ffffff;
+  --text: #243a30;
+  --text-muted: #65756b;
+  --border: #eadfce;
+  --shadow: 0 14px 38px rgba(49, 84, 66, .10);
+  --radius: 24px;
+  --ink: #315442;
+  --sun: #f5c45c;
+  --pink: #e9828f;
+  --sky: #8dc9d1;
+  --mint: #b9d7b0;
+  --orange: #e9a45f;
+  --purple: #b8a3d8;
+  --pink-soft: #fff0ed;
+  --sky-soft: #eaf6f5;
+  --stitch: #eadfce;
+  --mut: #65756b;
+  --line: #eadfce;
+}
 body {
-  background-image:
-    radial-gradient(circle at 8% 18%, rgba(255, 210, 31, .10) 0 2px, transparent 3px),
-    radial-gradient(circle at 92% 34%, rgba(255, 79, 154, .08) 0 3px, transparent 4px),
-    linear-gradient(180deg, rgba(255,250,240,.96), rgba(255,246,250,.98));
-  background-attachment: fixed;
+  background-color: var(--bg);
+  background-image: radial-gradient(ellipse at 8% 8%, rgba(245,196,92,.13), transparent 28%), radial-gradient(ellipse at 94% 28%, rgba(141,201,209,.13), transparent 25%);
 }
-section:not(.toy-promo) {
+::selection { background: #f5d990; color: #243a30; }
+.wrap, .container { max-width: 1220px; }
+section { padding-top: clamp(42px, 6vw, 76px); padding-bottom: clamp(42px, 6vw, 76px); }
+.sec-title { letter-spacing: -.025em; }
+.intro { max-width: 680px; }
+.hero {
   position: relative;
-}
-#find {
-  background: linear-gradient(135deg, rgba(255,227,239,.62), rgba(227,243,255,.58)),
-    url('https://images.unsplash.com/photo-1455390582262-044c92458b2e?auto=format&fit=crop&w=1800&q=80') center/cover;
-  padding: 48px 0 54px;
-  border-block: 1px solid rgba(246,211,225,.7);
-}
-#formats {
-  background: linear-gradient(180deg, rgba(255,250,240,.94), rgba(255,240,246,.92)),
-    url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=1800&q=80') center/cover;
-  padding: 48px 0 56px !important;
-}
-.fmt-card, .gift-rewards, .controls-bar, .book-card, .cart-table,
-.admin-shell form, .admin-shell .admin-panel {
-  backdrop-filter: blur(5px);
-}
-.fmt-card {
-  background: rgba(255,255,255,.93);
-  border-radius: 22px;
-  box-shadow: 0 16px 40px rgba(23,34,79,.10);
   overflow: hidden;
-  transition: transform .22s ease, box-shadow .22s ease;
+  background: linear-gradient(112deg, rgba(255,250,242,.98) 4%, rgba(255,246,227,.93) 56%, rgba(231,245,237,.88) 100%);
+  background-image: radial-gradient(circle at 8% 16%, rgba(245,196,92,.22), transparent 23%), radial-gradient(circle at 92% 82%, rgba(141,201,209,.24), transparent 27%), linear-gradient(115deg, #fffaf2 0%, #fff4df 58%, #eaf5ec 100%);
+  border-bottom: 1px solid rgba(234,223,206,.8);
 }
-.fmt-card:hover, .book-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 18px 42px rgba(23,34,79,.14);
+.hero::before, .hero::after { content: ''; position: absolute; border-radius: 50%; pointer-events: none; }
+.hero::before { width: 260px; height: 260px; right: -95px; top: -105px; background: rgba(245,196,92,.18); }
+.hero::after { width: 190px; height: 190px; left: -95px; bottom: -105px; background: rgba(233,130,143,.12); }
+.hero .hg { position: relative; z-index: 1; padding-top: clamp(42px, 7vw, 88px); padding-bottom: clamp(42px, 7vw, 88px); }
+.hero h1 { font-size: clamp(2.5rem, 5.2vw, 4.8rem); max-width: 700px; letter-spacing: -.045em; color: #315442; }
+.hero .lead { font-size: clamp(1rem, 1.4vw, 1.18rem); max-width: 610px; color: #5e7164; }
+.hero-logo { filter: drop-shadow(0 18px 24px rgba(49,84,66,.13)); }
+.btn { border-radius: 999px; padding: .85rem 1.35rem; font-weight: 800; transition: transform .2s ease, box-shadow .2s ease, background .2s ease; }
+.btn:hover { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(49,84,66,.13); }
+.btn.gold { background: #f5c45c; color: #344632; }
+.btn.alt { border: 1px solid #d7e2d5; background: rgba(255,255,255,.76); color: #315442; }
+.stair { border-radius: 18px; box-shadow: 0 10px 22px rgba(49,84,66,.07); border: 1px solid rgba(255,255,255,.8); }
+.st1 { background: #fce4df; } .st2 { background: #f9edc5; } .st3 { background: #dcefe1; } .st4 { background: #e8e0f5; }
+.sec-title { color: #315442; }
+.fmt-card, .book-card, .product-card, .age-card, .gift-card, .feature-card { border-radius: 22px; overflow: hidden; box-shadow: 0 10px 30px rgba(49,84,66,.07); border: 1px solid rgba(234,223,206,.9); transition: transform .22s ease, box-shadow .22s ease; }
+.book-card:hover, .product-card:hover, .age-card:hover, .gift-card:hover, .feature-card:hover { transform: translateY(-4px); box-shadow: 0 18px 38px rgba(49,84,66,.13); }
+.fmt-card { background: linear-gradient(145deg, #fff 0%, #fffaf2 100%); }
+input, select, textarea { border-radius: 12px; }
+button, a { -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 3px solid #e9a45f; outline-offset: 3px; }
+@media (max-width: 720px) {
+  .wrap, .container { padding-left: 18px; padding-right: 18px; }
+  .hero .hg { gap: 22px; }
+  .hero h1 { font-size: clamp(2.2rem, 10vw, 3.2rem); }
+  .hero-logo { max-width: min(82%, 340px); height: auto; margin-inline: auto; }
+  .acts { flex-wrap: wrap; gap: 10px; }
+  .acts .btn { flex: 1 1 180px; text-align: center; }
 }
-.page-header:not(.page-header--photo) {
-  background:
-    linear-gradient(105deg, rgba(23,34,79,.90), rgba(23,34,79,.68)),
-    url('https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=1800&q=80') center 48%/cover;
-  border-bottom: 0;
-  color: #fff;
-  padding: 42px 0 36px;
-  border-radius: 0 0 28px 28px;
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
-.page-header:not(.page-header--photo) h1,
-.page-header:not(.page-header--photo) p {
-  color: #fff;
+
+/* === Kiddie Bloom Storybook Boutique redesign (implemented) === */
+:root {
+  --primary: #286747;
+  --primary-light: #3c8058;
+  --accent: #f3f5e8;
+  --bg: #fffaf0;
+  --card-bg: #fffef9;
+  --text: #183d2c;
+  --text-muted: #65766a;
+  --border: #dce6d5;
+  --shadow: 0 10px 30px rgba(31, 76, 50, .09);
+  --radius: 20px;
+  --radius-sm: 13px;
+  --ink: #183d2c;
+  --sun: #f6d978;
+  --pink: #e99b8b;
+  --sky: #c9dfd2;
+  --mint: #8ab99a;
+  --orange: #e9b46b;
+  --purple: #c9bee0;
+  --pink-soft: #fff0e9;
+  --sky-soft: #edf5eb;
+  --stitch: #dce6d5;
+  --mut: #65766a;
+  --line: #dce6d5;
 }
-.page-header:not(.page-header--photo) button {
-  color: #f6eaf2 !important;
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); }
+button, input, select, textarea { font: inherit; }
+button, [role="button"], a { -webkit-tap-highlight-color: transparent; }
+button, .btn, a.button { transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease; }
+button:hover, .btn:hover, a.button:hover { transform: translateY(-1px); }
+:focus-visible { outline: 3px solid #e6b85e; outline-offset: 3px; }
+header, nav, .header, .navbar { backdrop-filter: blur(14px); }
+article, .card, .product-card, .category-card, .book-card, .toy-card, .gift-card,
+[class*="product-card"], [class*="ProductCard"], [class*="category-card"] {
+  border-color: var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
 }
-.page-header--photo {
-  min-height: 190px;
-  display: flex;
-  align-items: center;
-  box-shadow: inset 0 -1px rgba(255,255,255,.16);
+input, select, textarea { border-radius: 12px; border-color: var(--border); }
+img { max-width: 100%; }
+@media (max-width: 640px) {
+  :root { --radius: 16px; --radius-sm: 11px; }
+  body { overflow-x: hidden; }
+  button, .btn { min-height: 40px; }
 }
-.page-header--photo .container {
-  width: 100%;
-}
-.empty-state, .auth-panel {
-  background: rgba(255,255,255,.9);
-  border: 1px solid var(--border);
-  border-radius: 26px;
-  box-shadow: 0 16px 45px rgba(23,34,79,.09);
-}
-@media (max-width: 700px) {
-  #find, #formats { padding: 32px 0 38px !important; }
-  .page-header:not(.page-header--photo) { padding: 30px 0 28px; border-radius: 0 0 20px 20px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
