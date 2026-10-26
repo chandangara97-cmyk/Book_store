@@ -9,12 +9,17 @@ export const AdminView: React.FC = () => {
     orders,
     addOrUpdateProduct,
     resetCatalogToDefault,
+    fetchCatalogFromFirebase,
+    pushCatalogToFirebase,
+    firebaseConfigured,
     user,
     setView,
     showToast
   } = useStore();
 
   const [activeTab, setActiveTab] = useState<'book' | 'toy'>('book');
+  const [syncBusy, setSyncBusy] = useState(false);
+  const [syncError, setSyncError] = useState('');
 
   // Form fields
   const [title, setTitle] = useState('');
@@ -104,6 +109,14 @@ export const AdminView: React.FC = () => {
 
   return (
     <div className="admin-shell">
+      {!user?.isAdmin && (
+        <section className="admin-panel" style={{ maxWidth: 720, margin: '40px auto', textAlign: 'center' }}>
+          <h2>Admin sign-in required</h2>
+          <p>Sign in with a verified Firebase account whose email is included in the configured admin allowlist.</p>
+          <button type="button" className="btn gold" onClick={() => setView('auth')}>Sign in to Admin</button>
+        </section>
+      )}
+      {user?.isAdmin && <>
       {/* Top Banner */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
         <div>
@@ -145,6 +158,17 @@ export const AdminView: React.FC = () => {
           </strong>
           <small style={{ opacity: 0.85 }}>{user?.email || 'admin@readingnook.com'}</small>
         </div>
+      </section>
+
+      <section className="admin-panel" style={{ margin: '18px 0' }}>
+        <h2 style={{ marginTop: 0 }}>Firebase data control</h2>
+        <p style={{ color: 'var(--mut)' }}>{firebaseConfigured ? 'Firebase configuration detected. Fetch downloads the live catalog; Push replaces the books and toys catalog in the database with the current admin workspace.' : 'Firebase is not configured yet. Copy .env.example to .env.local and add your Firebase web app settings.'}</p>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <button type="button" className="btn sm btn-secondary" disabled={!firebaseConfigured || syncBusy} onClick={async () => { setSyncBusy(true); setSyncError(''); try { await fetchCatalogFromFirebase(); } catch (e) { setSyncError(e instanceof Error ? e.message : 'Fetch failed'); } finally { setSyncBusy(false); } }}>⬇ Fetch from Firebase</button>
+          <button type="button" className="btn sm gold" disabled={!firebaseConfigured || syncBusy} onClick={async () => { if (!window.confirm('Push the current books and toys catalog to Firebase? This replaces both catalog branches.')) return; setSyncBusy(true); setSyncError(''); try { await pushCatalogToFirebase(); } catch (e) { setSyncError(e instanceof Error ? e.message : 'Push failed'); } finally { setSyncBusy(false); } }}>⬆ Push catalog to Firebase</button>
+        </div>
+        {syncBusy && <p role="status">Syncing catalog…</p>}
+        {syncError && <p role="alert" style={{ color: '#b42318', marginTop: 10 }}>{syncError}</p>}
       </section>
 
       {/* Stats */}
@@ -451,6 +475,7 @@ export const AdminView: React.FC = () => {
           Return to storefront →
         </button>
       </div>
+      </>}
     </div>
   );
 };

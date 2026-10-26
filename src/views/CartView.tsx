@@ -77,7 +77,7 @@ export const CartView: React.FC = () => {
       </div>
 
       <div className="container" style={{ paddingBottom: '70px' }}>
-        <div style={{ overflowX: 'auto' }}>
+        <div className="cart-table-wrap">
           <table className="cart-table">
             <thead>
               <tr>
@@ -94,7 +94,7 @@ export const CartView: React.FC = () => {
 
                 return (
                   <tr key={item.id}>
-                    <td>
+                    <td data-label="Item">
                       <div className="cart-item-info">
                         <div className="cart-item-cover">
                           <CoverImage cover={item.cover} alt={item.title} />
@@ -112,9 +112,9 @@ export const CartView: React.FC = () => {
                       </div>
                     </td>
 
-                    <td>{isGift ? 'FREE' : `₹${item.price}`}</td>
+                    <td data-label="Price">{isGift ? 'FREE' : `₹${item.price}`}</td>
 
-                    <td>
+                    <td data-label="Qty">
                       {isGift ? (
                         <span>1</span>
                       ) : (
@@ -123,6 +123,7 @@ export const CartView: React.FC = () => {
                             type="button"
                             onClick={() => updateCartQty(item.id, item.qty - 1)}
                             disabled={item.qty <= 1}
+                            aria-label="Decrease quantity"
                           >
                             −
                           </button>
@@ -131,10 +132,12 @@ export const CartView: React.FC = () => {
                             value={item.qty}
                             min={1}
                             onChange={(e) => updateCartQty(item.id, parseInt(e.target.value) || 1)}
+                            aria-label="Quantity"
                           />
                           <button
                             type="button"
                             onClick={() => updateCartQty(item.id, item.qty + 1)}
+                            aria-label="Increase quantity"
                           >
                             +
                           </button>
@@ -142,11 +145,11 @@ export const CartView: React.FC = () => {
                       )}
                     </td>
 
-                    <td>
+                    <td data-label="Subtotal">
                       <strong>{isGift ? 'FREE' : `₹${item.price * item.qty}`}</strong>
                     </td>
 
-                    <td>
+                    <td data-label="">
                       <button
                         type="button"
                         className="btn btn-sm btn-outline"

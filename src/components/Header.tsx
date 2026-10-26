@@ -1,3 +1,4 @@
+import { asset } from '../utils/images';
 import React, { useState } from 'react';
 import { useStore } from '../context/StoreContext';
 
@@ -37,7 +38,7 @@ export const Header: React.FC = () => {
             navigateTo('home');
           }}
         >
-          <img className="brand-logo" src="/img/kiddie-bloom-logo-sm.png" alt="" width="56" height="56" />
+          <img className="brand-logo" src={asset('/img/kiddie-bloom-logo-sm.png')} alt="Kiddie Bloom logo" width="56" height="56" />
           <div className="brand-text">
             <h1 aria-label="Kiddie Bloom">
               {['K','i','d','d','i','e'].map((c, i) => (
@@ -100,7 +101,7 @@ export const Header: React.FC = () => {
         <div className="header-actions">
           <button
             type="button"
-            className="admin-tag-btn"
+            className="admin-tag-btn mobile-hide"
             title="Studio Admin"
             onClick={() => navigateTo('admin')}
           >
@@ -140,7 +141,7 @@ export const Header: React.FC = () => {
 
           <button
             type="button"
-            className="icon-btn theme-toggle-btn"
+            className="icon-btn theme-toggle-btn mobile-hide"
             title={theme === 'dark' ? 'Switch to light day mode' : 'Switch to cozy night mode'}
             aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
             onClick={toggleTheme}
@@ -163,60 +164,28 @@ export const Header: React.FC = () => {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div style={{
-          background: 'var(--card-bg)',
-          borderBottom: '1px solid var(--border)',
-          padding: '16px 24px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '12px',
-        }}>
-          <button
-            style={{ textAlign: 'left', background: 'none', border: 'none', padding: '8px 0', fontSize: '16px', fontWeight: 600, color: 'var(--ink)', cursor: 'pointer' }}
-            onClick={() => navigateTo('library')}
-          >
+        <div className="mobile-drawer" role="navigation" aria-label="Mobile menu">
+          <button type="button" className="mobile-drawer-link" onClick={() => navigateTo('library')}>
             📚 Shop all books
           </button>
-          <button
-            style={{ textAlign: 'left', background: 'none', border: 'none', padding: '8px 0', fontSize: '16px', fontWeight: 600, color: 'var(--ink)', cursor: 'pointer' }}
-            onClick={() => scrollToSection('find')}
-          >
+          <button type="button" className="mobile-drawer-link" onClick={() => scrollToSection('find')}>
             🔍 Find by age
           </button>
-          <button
-            style={{ textAlign: 'left', background: 'none', border: 'none', padding: '8px 0', fontSize: '16px', fontWeight: 600, color: 'var(--ink)', cursor: 'pointer' }}
-            onClick={() => navigateTo('toys')}
-          >
+          <button type="button" className="mobile-drawer-link" onClick={() => scrollToSection('how')}>
+            🧾 How to buy
+          </button>
+          <button type="button" className="mobile-drawer-link" onClick={() => navigateTo('toys')}>
             🧸 Toys & Learning Kits
           </button>
-          <button
-            style={{ textAlign: 'left', background: 'none', border: 'none', padding: '8px 0', fontSize: '16px', fontWeight: 600, color: 'var(--ink)', cursor: 'pointer' }}
-            onClick={() => navigateTo('gift-finder')}
-          >
+          <button type="button" className="mobile-drawer-link" onClick={() => navigateTo('gift-finder')}>
             🎁 Gift Finder
           </button>
-          <button
-            style={{ textAlign: 'left', background: 'none', border: 'none', padding: '8px 0', fontSize: '16px', fontWeight: 600, color: 'var(--ink)', cursor: 'pointer' }}
-            onClick={() => navigateTo('admin')}
-          >
+          <button type="button" className="mobile-drawer-link" onClick={() => navigateTo('admin')}>
             ⚙️ Studio Admin
           </button>
           <button
-            style={{
-              textAlign: 'left',
-              background: 'var(--accent)',
-              border: '1px solid var(--border)',
-              borderRadius: '12px',
-              padding: '10px 14px',
-              fontSize: '15px',
-              fontWeight: 700,
-              color: 'var(--ink)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              marginTop: '6px'
-            }}
+            type="button"
+            className="mobile-drawer-theme"
             onClick={() => {
               toggleTheme();
               setMobileMenuOpen(false);

@@ -7,6 +7,8 @@ export const LibraryView: React.FC = () => {
   const [sortBy, setSortBy] = useState<string>('title-asc');
   const [search, setSearch] = useState<string>('');
   const sortSelectId = useId();
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const activeFilters = (selectedCategory !== 'all' ? 1 : 0) + (sortBy !== 'title-asc' ? 1 : 0);
 
   // Filter
   const filtered = books.filter((book) => {
@@ -43,7 +45,7 @@ export const LibraryView: React.FC = () => {
 
   return (
     <div>
-      <div className="page-header page-header--photo" style={{ backgroundImage: "linear-gradient(100deg, rgba(18,28,47,0.88), rgba(18,28,47,0.45)), url('https://loremflickr.com/1600/400/301?lock=301')" }}>
+      <div className="page-header page-header--photo" style={{ backgroundImage: "linear-gradient(100deg, rgba(18,28,47,0.88), rgba(18,28,47,0.45)), url('https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=1800&q=85')" }}>
         <div className="container">
           <button
             type="button"
@@ -69,8 +71,27 @@ export const LibraryView: React.FC = () => {
       </div>
 
       <div className="container" style={{ paddingBottom: '70px' }}>
-        {/* Controls Bar */}
-        <div className="controls-bar">
+        {/* Mobile: search + Filters button (filters stay hidden until tapped) */}
+        <div className="mobile-filter-bar">
+          <input
+            type="search"
+            placeholder="Search books…"
+            aria-label="Search books"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <button type="button" className="filter-toggle" onClick={() => setFiltersOpen(true)}>
+            ⚙️ Filters{activeFilters > 0 && <span className="ft-badge">{activeFilters}</span>}
+          </button>
+        </div>
+        {filtersOpen && <div className="sheet-backdrop" onClick={() => setFiltersOpen(false)} />}
+
+        {/* Controls Bar (side sheet on mobile) */}
+        <div className={`controls-bar ${filtersOpen ? 'open' : ''}`}>
+          <div className="sheet-head">
+            <strong>Filters</strong>
+            <button type="button" className="sheet-close" onClick={() => setFiltersOpen(false)} aria-label="Close filters">✕</button>
+          </div>
           <div className="filter-group">
             <label>Filter by Category</label>
             <div className="filter-buttons">
@@ -113,7 +134,7 @@ export const LibraryView: React.FC = () => {
           </div>
 
           <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
-            <div className="form-group" style={{ marginBottom: 0 }}>
+            <div className="form-group search-desktop" style={{ marginBottom: 0 }}>
               <label htmlFor="bookSearch" style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--primary)', marginBottom: '6px', display: 'block' }}>
                 Search
               </label>
@@ -150,6 +171,10 @@ export const LibraryView: React.FC = () => {
                 <option value="category">Category</option>
               </select>
             </div>
+          </div>
+          <div className="sheet-actions">
+            <button type="button" className="btn btn-secondary" onClick={() => { setSelectedCategory('all'); setSortBy('title-asc'); }}>Reset</button>
+            <button type="button" className="btn" onClick={() => setFiltersOpen(false)}>Show {sorted.length} {sorted.length === 1 ? 'book' : 'books'}</button>
           </div>
         </div>
 
