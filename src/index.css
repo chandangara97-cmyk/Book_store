@@ -196,6 +196,17 @@ header.header {
   gap: 8px;
 }
 
+/* Hidden on desktop; shown via media query on small screens */
+.mobile-menu-btn {
+  display: none;
+}
+
+.cart-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .icon-btn {
   position: relative;
   display: grid;
@@ -2215,4 +2226,545 @@ img, video, svg { max-width: 100%; }
     max-width: 100%; max-height: 92vh; border-radius: 26px 26px 0 0;
     padding: 22px 18px calc(22px + env(safe-area-inset-bottom, 0px));
   }
+}
+
+/* =====================================================================
+   PROFESSIONAL RESPONSIVE SYSTEM — all screens
+   Clean, fluid, no overflow, polished touch targets
+   ===================================================================== */
+
+/* Global safety: never allow horizontal scroll */
+html {
+  overflow-x: clip;
+  width: 100%;
+}
+body {
+  overflow-x: clip;
+  width: 100%;
+  min-width: 0;
+}
+img, svg, video, canvas, iframe {
+  max-width: 100%;
+  height: auto;
+}
+.container, .wrap {
+  width: 100%;
+  max-width: 1140px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: clamp(16px, 4vw, 28px);
+  padding-right: clamp(16px, 4vw, 28px);
+  box-sizing: border-box;
+}
+
+/* Fluid type scale */
+h1 { font-size: clamp(1.75rem, 4.5vw, 2.75rem); }
+h2 { font-size: clamp(1.35rem, 3.2vw, 2rem); }
+h3 { font-size: clamp(1.1rem, 2.4vw, 1.35rem); }
+.lead { font-size: clamp(1rem, 2.2vw, 1.2rem); line-height: 1.55; }
+
+/* Touch-friendly defaults */
+button, .btn, .icon-btn, .filter-btn, .bn-tab {
+  min-height: 44px;
+}
+.icon-btn {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* ---------- Large desktop (1200+) already good; tighten mid sizes ---------- */
+
+@media (max-width: 1100px) {
+  .hero .hg {
+    grid-template-columns: 1fr 0.85fr;
+    gap: 28px;
+  }
+  .story-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+  .toy-promo-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .toy-promo-grid > * {
+    min-height: auto;
+  }
+  .book-grid {
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 18px;
+  }
+}
+
+/* ---------- Tablet (≤900px) ---------- */
+@media (max-width: 900px) {
+  .hero {
+    min-height: auto;
+  }
+  .hero .hg {
+    grid-template-columns: 1fr;
+    grid-template-areas: "copy" "logo" "stairs";
+    padding: 28px 0 36px;
+    gap: 24px;
+  }
+  .hero .hg > div:first-child {
+    grid-area: copy;
+    padding: 8px 0 0;
+  }
+  .hero-logo {
+    grid-area: logo;
+    width: min(72%, 320px);
+    margin: 0 auto;
+    display: block;
+  }
+  .stairs {
+    grid-area: stairs;
+    height: auto;
+    min-height: 160px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .stair {
+    min-height: 88px;
+    border-radius: 16px;
+    padding: 14px 12px;
+  }
+  .stair b { font-size: 1.05rem; }
+  .stair span { font-size: 0.85rem; }
+
+  .two-cols,
+  .steps-grid,
+  .checkout-grid,
+  .admin-layout {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .story-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .fmt-card {
+    padding: 22px;
+  }
+
+  .finder {
+    padding: 26px 20px;
+  }
+
+  .cart-summary {
+    max-width: 100%;
+    margin-left: 0;
+  }
+
+  .admin-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  /* Book covers scale down a bit on tablet */
+  .book-cover {
+    height: 200px;
+  }
+}
+
+/* ---------- Compact tablet / large phone (≤720px) ---------- */
+@media (max-width: 720px) {
+  .nav-links {
+    display: none !important;
+  }
+  .mobile-menu-btn {
+    display: grid !important;
+    place-items: center;
+  }
+
+  .story-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .book-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  .book-card {
+    padding: 12px !important;
+    border-radius: 16px !important;
+  }
+  .book-cover {
+    height: 160px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+  }
+  .book-info h3 {
+    font-size: 0.95rem;
+    line-height: 1.25;
+  }
+  .book-info .author {
+    font-size: 0.8rem;
+  }
+  .book-info .desc {
+    display: none;
+  }
+  .book-info .price {
+    font-size: 1rem;
+    margin-bottom: 8px;
+  }
+  .book-actions-row {
+    gap: 6px;
+  }
+  .book-actions-row .btn {
+    flex: 1;
+    min-width: 0;
+    padding: 8px 10px;
+    font-size: 0.82rem;
+  }
+
+  /* Cart: convert table to stacked cards */
+  .cart-table,
+  .cart-table thead,
+  .cart-table tbody,
+  .cart-table th,
+  .cart-table td,
+  .cart-table tr {
+    display: block;
+    width: 100%;
+  }
+  .cart-table thead {
+    display: none;
+  }
+  .cart-table {
+    border: 0;
+    background: transparent;
+    overflow: visible;
+  }
+  .cart-table tr {
+    background: var(--card-bg, #fff);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 12px;
+    box-shadow: 0 6px 18px rgba(23, 34, 79, 0.06);
+  }
+  .cart-table td {
+    border: 0;
+    padding: 6px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .cart-table td:first-child {
+    display: block;
+    padding-bottom: 10px;
+    margin-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .cart-table td:not(:first-child)::before {
+    content: attr(data-label);
+    font-weight: 700;
+    font-size: 0.82rem;
+    color: var(--mut);
+    flex-shrink: 0;
+  }
+  /* Fallback labels via nth when no data-label */
+  .cart-table td:nth-child(2)::before { content: "Price"; }
+  .cart-table td:nth-child(3)::before { content: "Qty"; }
+  .cart-table td:nth-child(4)::before { content: "Subtotal"; }
+  .cart-table td:nth-child(5)::before { content: ""; }
+  .cart-table td:nth-child(5) {
+    justify-content: flex-end;
+    padding-top: 8px;
+  }
+
+  .cart-item-info {
+    gap: 12px;
+  }
+  .cart-item-cover {
+    width: 56px;
+    height: 72px;
+  }
+
+  .gift-rewards {
+    padding: 18px 16px;
+  }
+  .reward-line {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .cart-summary {
+    padding: 18px 16px;
+  }
+
+  /* Checkout forms */
+  .checkout-section {
+    padding: 18px 16px;
+  }
+  .checkout-section h2 {
+    font-size: 1.2rem;
+  }
+
+  /* Hero acts buttons stack */
+  .acts {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .acts .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Page headers */
+  .page-header h1 {
+    font-size: 1.55rem;
+  }
+  .page-header p {
+    font-size: 0.95rem;
+  }
+
+  /* Age finder */
+  .fh {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .fh .age-display {
+    font-size: clamp(42px, 14vw, 64px);
+  }
+  .fh .stage-label {
+    font-size: 1.1rem;
+  }
+
+  /* Modal already bottom-sheet at 720; ensure readable */
+  .modal-content {
+    width: 100%;
+  }
+
+  /* Admin */
+  .admin-shell {
+    padding: 16px 0 40px;
+  }
+  .admin-hero {
+    padding: 20px 16px;
+  }
+  .admin-panel {
+    padding: 16px;
+  }
+
+  /* Footer links when visible (desktop-ish) */
+  footer.footer .footer-inner {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+  .footer-links {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+/* ---------- Small phones (≤480px) ---------- */
+@media (max-width: 480px) {
+  .brand-text span { display: none !important; }
+  .brand-text h1 { font-size: 1.2rem !important; }
+  .brand-logo { width: 40px !important; height: 40px !important; }
+
+  .header-inner {
+    height: 54px;
+    padding: 0 10px;
+  }
+
+  .book-grid {
+    gap: 10px !important;
+  }
+  .book-card {
+    padding: 10px !important;
+  }
+  .book-cover {
+    height: 140px;
+  }
+  .book-info h3 {
+    font-size: 0.88rem;
+  }
+  .book-actions-row .btn {
+    font-size: 0.78rem;
+    padding: 7px 8px;
+  }
+
+  .stairs {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .stair {
+    min-height: 76px;
+    padding: 10px 8px;
+  }
+  .stair b { font-size: 0.95rem; }
+  .stair span { font-size: 0.75rem; }
+
+  .fmt-card {
+    padding: 18px 14px;
+  }
+
+  .bn-label {
+    font-size: 10px;
+  }
+  .bn-icon {
+    font-size: 20px;
+  }
+
+  /* Single column on very small if needed for readability */
+  .story-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Very small (≤360px) ---------- */
+@media (max-width: 360px) {
+  .book-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .book-cover {
+    height: 180px;
+  }
+  .container, .wrap {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+
+/* ---------- Landscape phones ---------- */
+@media (max-height: 480px) and (orientation: landscape) {
+  .hero {
+    min-height: auto;
+  }
+  .hero .hg {
+    padding-top: 16px;
+    padding-bottom: 16px;
+  }
+  .stairs {
+    min-height: 100px;
+  }
+  .bottom-nav {
+    height: calc(52px + env(safe-area-inset-bottom, 0px));
+  }
+  body {
+    padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Ensure sticky header doesn't cover content */
+@media (max-width: 720px) {
+  main#main,
+  .app-shell > div[style*="flex"] {
+    min-width: 0;
+  }
+}
+
+/* High-DPI / retina polish */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .book-card,
+  .fmt-card,
+  .cart-summary,
+  .checkout-section {
+    border-width: 0.5px;
+  }
+}
+
+/* Prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Print already handled; ensure containers don't overflow */
+@media print {
+  .container, .wrap {
+    max-width: 100%;
+    padding: 0;
+  }
+  .book-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile drawer polish */
+.mobile-drawer {
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: 0 16px 30px rgba(23, 34, 79, 0.12);
+  border-radius: 0 0 20px 20px;
+  animation: drawerIn 0.2s ease;
+}
+@keyframes drawerIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: none; }
+}
+.mobile-drawer-link {
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 12px 10px;
+  font-size: 1rem;
+  font-weight: 650;
+  color: var(--ink);
+  cursor: pointer;
+  border-radius: 12px;
+  transition: background 0.15s;
+  min-height: 44px;
+}
+.mobile-drawer-link:hover,
+.mobile-drawer-link:active {
+  background: var(--pink-soft, #ffe3ef);
+}
+.mobile-drawer-theme {
+  text-align: left;
+  background: var(--accent);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ink);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  min-height: 48px;
+}
+.mobile-drawer-theme:hover {
+  filter: brightness(0.98);
+}
+
+/* Header position relative for drawer */
+header.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* Ensure header is relative for absolute drawer positioning */
+.header-inner {
+  position: relative;
 }

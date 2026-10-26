@@ -164,66 +164,28 @@ export const Header: React.FC = () => {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="mobile-drawer" style={{
-          background: 'var(--card-bg)',
-          borderBottom: '1px solid var(--border)',
-          padding: '16px 24px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '12px',
-        }}>
-          <button
-            style={{ textAlign: 'left', background: 'none', border: 'none', padding: '8px 0', fontSize: '16px', fontWeight: 600, color: 'var(--ink)', cursor: 'pointer' }}
-            onClick={() => navigateTo('library')}
-          >
+        <div className="mobile-drawer" role="navigation" aria-label="Mobile menu">
+          <button type="button" className="mobile-drawer-link" onClick={() => navigateTo('library')}>
             📚 Shop all books
           </button>
-          <button
-            style={{ textAlign: 'left', background: 'none', border: 'none', padding: '8px 0', fontSize: '16px', fontWeight: 600, color: 'var(--ink)', cursor: 'pointer' }}
-            onClick={() => scrollToSection('find')}
-          >
+          <button type="button" className="mobile-drawer-link" onClick={() => scrollToSection('find')}>
             🔍 Find by age
           </button>
-          <button
-            style={{ textAlign: 'left', background: 'none', border: 'none', padding: '8px 0', fontSize: '16px', fontWeight: 600, color: 'var(--ink)', cursor: 'pointer' }}
-            onClick={() => scrollToSection('how')}
-          >
+          <button type="button" className="mobile-drawer-link" onClick={() => scrollToSection('how')}>
             🧾 How to buy
           </button>
-          <button
-            style={{ textAlign: 'left', background: 'none', border: 'none', padding: '8px 0', fontSize: '16px', fontWeight: 600, color: 'var(--ink)', cursor: 'pointer' }}
-            onClick={() => navigateTo('toys')}
-          >
+          <button type="button" className="mobile-drawer-link" onClick={() => navigateTo('toys')}>
             🧸 Toys & Learning Kits
           </button>
-          <button
-            style={{ textAlign: 'left', background: 'none', border: 'none', padding: '8px 0', fontSize: '16px', fontWeight: 600, color: 'var(--ink)', cursor: 'pointer' }}
-            onClick={() => navigateTo('gift-finder')}
-          >
+          <button type="button" className="mobile-drawer-link" onClick={() => navigateTo('gift-finder')}>
             🎁 Gift Finder
           </button>
-          <button
-            style={{ textAlign: 'left', background: 'none', border: 'none', padding: '8px 0', fontSize: '16px', fontWeight: 600, color: 'var(--ink)', cursor: 'pointer' }}
-            onClick={() => navigateTo('admin')}
-          >
+          <button type="button" className="mobile-drawer-link" onClick={() => navigateTo('admin')}>
             ⚙️ Studio Admin
           </button>
           <button
-            style={{
-              textAlign: 'left',
-              background: 'var(--accent)',
-              border: '1px solid var(--border)',
-              borderRadius: '12px',
-              padding: '10px 14px',
-              fontSize: '15px',
-              fontWeight: 700,
-              color: 'var(--ink)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              marginTop: '6px'
-            }}
+            type="button"
+            className="mobile-drawer-theme"
             onClick={() => {
               toggleTheme();
               setMobileMenuOpen(false);
