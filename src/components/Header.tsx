@@ -37,15 +37,15 @@ export const Header: React.FC = () => {
             navigateTo('home');
           }}
         >
-          <span className="logo-graphic" aria-hidden="true">
-            <i></i>
-            <i></i>
-            <i></i>
-            <i></i>
-          </span>
+          <img className="brand-logo" src="/img/kiddie-bloom-logo-sm.png" alt="" width="56" height="56" />
           <div className="brand-text">
-            <h1>THE READING NOOK</h1>
-            <span>Books · Ideas · Possibilities</span>
+            <h1 aria-label="Kiddie Bloom">
+              {['K','i','d','d','i','e'].map((c, i) => (
+                <span key={i} className={`wm wm${i}`}>{c}</span>
+              ))}{' '}
+              <span className="wm-bloom">Bloom</span>
+            </h1>
+            <span>Preschool Worksheets</span>
           </div>
         </a>
 

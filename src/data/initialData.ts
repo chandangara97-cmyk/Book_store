@@ -45,7 +45,7 @@ export const TUTORIAL_BOOKS: Book[] = [
   {
     id: 'my-first-words',
     title: 'My First Words',
-    author: 'The Reading Nook Studio',
+    author: 'Kiddie Bloom Studio',
     price: 299,
     printedPrice: 299,
     digitalPrice: 149,
@@ -62,7 +62,7 @@ export const TUTORIAL_BOOKS: Book[] = [
   {
     id: 'little-hands-big-ideas',
     title: 'Little Hands, Big Ideas',
-    author: 'The Reading Nook Studio',
+    author: 'Kiddie Bloom Studio',
     price: 349,
     printedPrice: 349,
     digitalPrice: 179,
@@ -79,7 +79,7 @@ export const TUTORIAL_BOOKS: Book[] = [
   {
     id: 'learn-and-play-4-7',
     title: 'Learn and Play 4 to 7',
-    author: 'The Reading Nook Studio',
+    author: 'Kiddie Bloom Studio',
     price: 399,
     printedPrice: 399,
     digitalPrice: 199,
@@ -96,7 +96,7 @@ export const TUTORIAL_BOOKS: Book[] = [
   {
     id: 'reading-steps',
     title: 'Reading Steps',
-    author: 'The Reading Nook Studio',
+    author: 'Kiddie Bloom Studio',
     price: 379,
     printedPrice: 379,
     digitalPrice: 189,
@@ -113,7 +113,7 @@ export const TUTORIAL_BOOKS: Book[] = [
   {
     id: 'think-and-solve',
     title: 'Think and Solve',
-    author: 'The Reading Nook Studio',
+    author: 'Kiddie Bloom Studio',
     price: 449,
     printedPrice: 449,
     digitalPrice: 229,
@@ -130,7 +130,7 @@ export const TUTORIAL_BOOKS: Book[] = [
   {
     id: 'explore-the-world',
     title: 'Explore the World',
-    author: 'The Reading Nook Studio',
+    author: 'Kiddie Bloom Studio',
     price: 429,
     printedPrice: 429,
     digitalPrice: 219,
@@ -147,7 +147,7 @@ export const TUTORIAL_BOOKS: Book[] = [
   {
     id: 'study-smart',
     title: 'Study Smart',
-    author: 'The Reading Nook Studio',
+    author: 'Kiddie Bloom Studio',
     price: 499,
     printedPrice: 499,
     digitalPrice: 249,
@@ -164,7 +164,7 @@ export const TUTORIAL_BOOKS: Book[] = [
   {
     id: 'skills-for-tomorrow',
     title: 'Skills for Tomorrow',
-    author: 'The Reading Nook Studio',
+    author: 'Kiddie Bloom Studio',
     price: 479,
     printedPrice: 479,
     digitalPrice: 239,
@@ -423,7 +423,7 @@ export const INITIAL_TOYS: Book[] = [
   {
     id: 'art-kit',
     title: 'Colouring & Art Kit',
-    author: 'The Reading Nook Studio',
+    author: 'Kiddie Bloom Studio',
     price: 249,
     cover: 'https://images.unsplash.com/photo-1516627145497-ae6968895b74?auto=format&fit=crop&w=700&q=80',
     category: 'toys',
@@ -435,7 +435,7 @@ export const INITIAL_TOYS: Book[] = [
   {
     id: 'thinker-puzzle',
     title: 'Little Thinker Puzzle',
-    author: 'The Reading Nook Studio',
+    author: 'Kiddie Bloom Studio',
     price: 399,
     cover: 'https://images.unsplash.com/photo-1599623560574-39d485900c95?auto=format&fit=crop&w=700&q=80',
     category: 'toys',
@@ -447,7 +447,7 @@ export const INITIAL_TOYS: Book[] = [
   {
     id: 'storytime-toy',
     title: 'Storytime Mini Toy',
-    author: 'The Reading Nook Studio',
+    author: 'Kiddie Bloom Studio',
     price: 499,
     cover: 'https://images.unsplash.com/photo-1560961911-ba7ef651a56c?auto=format&fit=crop&w=700&q=80',
     category: 'toys',
@@ -459,7 +459,7 @@ export const INITIAL_TOYS: Book[] = [
   {
     id: 'imagine-set',
     title: 'Make & Imagine Set',
-    author: 'The Reading Nook Studio',
+    author: 'Kiddie Bloom Studio',
     price: 599,
     cover: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=700&q=80',
     category: 'toys',

@@ -13,8 +13,9 @@ export const Footer: React.FC = () => {
   return (
     <footer className="footer">
       <div className="wrap footer-inner">
-        <div>
-          &copy; {new Date().getFullYear()} <strong>The Reading Nook</strong>. All rights reserved.
+        <div className="footer-brand">
+          <img src="/img/kiddie-bloom-logo-sm.png" alt="" width="44" height="44" />
+          <span>&copy; {new Date().getFullYear()} <strong>Kiddie Bloom</strong>. All rights reserved.</span>
         </div>
         <div className="footer-links">
           <button type="button" onClick={() => navigateTo('library', 'all')}>All Books</button>

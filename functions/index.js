@@ -83,7 +83,7 @@ exports.api = onRequest({ secrets: [KEY_ID, KEY_SECRET, PAYPAL_CLIENT_ID, PAYPAL
       const safeRef = String(orderRef || ('RN-' + Date.now())).replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40);
       const pr = await fetch(paypalBase() + '/v2/checkout/orders', {
         method: 'POST', headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json', 'PayPal-Request-Id': safeRef },
-        body: JSON.stringify({ intent: 'CAPTURE', purchase_units: [{ reference_id: safeRef, custom_id: safeRef, description: 'The Reading Nook book order', amount: { currency_code: currency, value: calc.amount } }], application_context: { brand_name: 'The Reading Nook', user_action: 'PAY_NOW', shipping_preference: 'NO_SHIPPING' } })
+        body: JSON.stringify({ intent: 'CAPTURE', purchase_units: [{ reference_id: safeRef, custom_id: safeRef, description: 'Kiddie Bloom book order', amount: { currency_code: currency, value: calc.amount } }], application_context: { brand_name: 'Kiddie Bloom', user_action: 'PAY_NOW', shipping_preference: 'NO_SHIPPING' } })
       });
       const pd = await pr.json();
       if (!pr.ok || !pd.id) throw new Error((pd && pd.message) || 'Could not create PayPal order.');

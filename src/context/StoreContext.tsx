@@ -240,7 +240,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         {
           id: item.id,
           title: item.title,
-          author: item.author || 'The Reading Nook',
+          author: item.author || 'Kiddie Bloom',
           price: item.price,
           cover: item.cover || '📖',
           category: item.category || 'General',
@@ -281,7 +281,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         addToCart({
           id: 'gift-colouring-kit',
           title: 'Complimentary Colouring Kit',
-          author: 'The Reading Nook',
+          author: 'Kiddie Bloom',
           price: 0,
           cover: '🎨',
           category: 'Gift',
@@ -294,7 +294,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         addToCart({
           id: 'gift-mini-toy',
           title: 'Complimentary Mini Toy',
-          author: 'The Reading Nook',
+          author: 'Kiddie Bloom',
           price: 0,
           cover: '🧸',
           category: 'Gift',
@@ -318,7 +318,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         {
           id: item.id,
           title: item.title,
-          author: item.author || 'The Reading Nook',
+          author: item.author || 'Kiddie Bloom',
           price: item.price,
           cover: item.cover || '📖',
           category: item.category || 'General',

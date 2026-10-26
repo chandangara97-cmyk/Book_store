@@ -81,11 +81,11 @@ export const AdminView: React.FC = () => {
     const newProduct: Book = {
       id: finalSlug,
       title: title.trim(),
-      author: author.trim() || 'The Reading Nook Studio',
+      author: author.trim() || 'Kiddie Bloom Studio',
       price: Number(price),
       category: activeTab === 'toy' ? 'toys' : category,
       cover: cover.trim() || (activeTab === 'toy' ? '🧸' : '📖'),
-      description: description.trim() || `Curated ${activeTab === 'toy' ? 'toy' : 'book'} from The Reading Nook.`,
+      description: description.trim() || `Curated ${activeTab === 'toy' ? 'toy' : 'book'} from Kiddie Bloom.`,
       tags: tags
         .split(',')
         .map((t) => t.trim())
@@ -115,7 +115,7 @@ export const AdminView: React.FC = () => {
           </h1>
           <p style={{ color: '#66746b', maxWidth: '640px', fontSize: '15px' }}>
             A calm, considered space to manage the books, playful gifts and products that make The
-            Reading Nook special.
+            Kiddie Bloom special.
           </p>
         </div>
 
@@ -442,7 +442,7 @@ export const AdminView: React.FC = () => {
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '36px', color: '#7a857d', fontSize: '13px' }}>
-        <span>© 2026 The Reading Nook · Private admin workspace</span>
+        <span>© 2026 Kiddie Bloom · Private admin workspace</span>
         <button
           type="button"
           onClick={() => setView('home')}

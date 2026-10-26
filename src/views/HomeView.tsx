@@ -31,10 +31,10 @@ export const HomeView: React.FC = () => {
       <div className="hero" id="top">
         <div className="wrap hg">
           <div>
-            <h1>Tutorial books that grow with your child.</h1>
+            <h1>Little learners bloom with every page.</h1>
             <p className="lead">
-              Self-made learning books for every stage from first words to age 15. Pick your
-              child's age, choose a printed or digital copy, and pay securely.
+              Fun, easy learning for every stage, from first words to age 15. Pick your child's
+              age, choose a printed or digital copy, and pay securely.
             </p>
             <div className="acts">
               <a
@@ -50,7 +50,6 @@ export const HomeView: React.FC = () => {
               <button
                 type="button"
                 className="btn alt"
-                style={{ color: '#fff', borderColor: 'rgba(255,255,255,0.7)' }}
                 onClick={() => {
                   setSelectedCategory('all');
                   setView('library');
@@ -60,6 +59,8 @@ export const HomeView: React.FC = () => {
               </button>
             </div>
           </div>
+
+          <img className="hero-logo" src="/img/kiddie-bloom-logo.png" alt="Kiddie Bloom: a girl and her teddy bear with an ABC notebook, crayons and a rainbow" width="520" height="512" />
 
           <div className="stairs" role="img" aria-label="Four stages of books, from ages 0 to 3 up to ages 13 to 15">
             <div
@@ -151,7 +152,7 @@ export const HomeView: React.FC = () => {
       <section className="toy-promo" id="toys">
         <div className="wrap toy-promo-grid">
           <div>
-            <span className="toy-kicker">PLAY · CREATE · DISCOVER</span>
+            <span className="toy-kicker">Play, create, discover</span>
             <h2 className="sec-title">Stories are even better with a little play.</h2>
             <p className="intro">
               Explore toys, puzzles and creative kits that turn reading time into hands-on
@@ -194,7 +195,7 @@ export const HomeView: React.FC = () => {
       {/* Visual Storytelling Section */}
       <section className="visual-story" aria-labelledby="story-title">
         <div className="wrap">
-          <h2 id="story-title" className="sec-title">Little readers. Big possibilities.</h2>
+          <h2 id="story-title" className="sec-title">Every little learner can bloom.</h2>
           <p className="intro">
             A welcoming place for every kind of learner — from first picture books to the ideas that
             inspire tomorrow.

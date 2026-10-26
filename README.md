@@ -1,10 +1,10 @@
-# The Reading Nook
+# Kiddie Bloom
 
 A modern, responsive React + TypeScript e-commerce and learning studio application for children's tutorial books, fiction, learning titles, toys, and gift finder recommendations.
 
 ## Overview
 
-The Reading Nook is built with React 19, TypeScript, and Vite. It preserves all original features and business logic:
+Kiddie Bloom is built with React 19, TypeScript, and Vite. It preserves all original features and business logic:
 - **Interactive Age Finder**: Slider from age 0 to 15 matching custom tutorial stages (Ages 0–3, 4–7, 8–12, 13–15) with dynamic preview images and instant Printed vs Digital edition format selection.
 - **Master Library & Search**: Complete catalog browsing with category filtering (Fiction & Stories, Learning & Growth, Children's Books, Gifts & Special Reads), search, and multiple sorting options.
 - **Toys & Learning Kits**: Creative craft kits, puzzles, plush toys, and pairing suggestions for reading corners.
@@ -34,4 +34,4 @@ npm run dev
 npm run build
 ```
 
-© 2026 The Reading Nook. All rights reserved.
+© 2026 Kiddie Bloom. All rights reserved.

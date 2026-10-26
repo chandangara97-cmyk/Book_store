@@ -1,52 +1,55 @@
 /* The Reading Nook - Complete Application Stylesheet */
 :root {
-  --primary: #1b2a4a;
-  --primary-light: #2e4270;
-  --accent: #e9f1ff;
-  --bg: #f4f8ff;
+  --primary: #17224f;
+  --primary-light: #2b3a7a;
+  --accent: #fff0f6;
+  --bg: #fffaf0;
   --card-bg: #ffffff;
-  --text: #1b2a4a;
-  --text-muted: #53607c;
-  --border: #dbe4f3;
-  --shadow: 0 8px 30px rgba(27, 42, 74, 0.08);
-  --radius: 18px;
-  --radius-sm: 12px;
+  --text: #17224f;
+  --text-muted: #5b6285;
+  --border: #f6d3e1;
+  --shadow: 0 8px 30px rgba(23, 34, 79, 0.08);
+  --radius: 22px;
+  --radius-sm: 14px;
 
-  /* Playful brand palette */
-  --ink: #1b2a4a;
-  --sun: #ffc83d;
-  --pink: #ff7aa2;
-  --sky: #6cb8ff;
-  --mint: #4fd6a6;
+  /* Kiddie Bloom palette, taken from the logo */
+  --ink: #17224f;
+  --sun: #ffd21f;
+  --pink: #ff4f9a;
+  --sky: #34a0ff;
+  --mint: #46c256;
+  --orange: #ff8a1f;
+  --purple: #8a5cf6;
+  --pink-soft: #ffe3ef;
+  --sky-soft: #e3f3ff;
+  --stitch: #f5b9d0;
   --w: #ffffff;
-  --mut: #53607c;
-  --line: #dbe4f3;
+  --mut: #5b6285;
+  --line: #f6d3e1;
 
-  /* Typography */
-  --d: 'Fredoka', 'Trebuchet MS', system-ui, sans-serif;
+  --d: 'Baloo 2', 'Fredoka', 'Trebuchet MS', system-ui, sans-serif;
   --b: 'Nunito', 'Segoe UI', system-ui, sans-serif;
-  --serif: 'Cormorant Garamond', Georgia, serif;
+  --serif: 'Baloo 2', Georgia, serif;
 }
 
 [data-theme="dark"] {
-  --primary: #9bb7e5;
-  --primary-light: #b9cfee;
-  --accent: #172740;
-  --bg: #0c1524;
-  --card-bg: #142034;
-  --text: #e2ecf9;
-  --text-muted: #8fa2bd;
-  --border: #233650;
+  --primary: #ffb3d1;
+  --primary-light: #ffd0e3;
+  --accent: #232d66;
+  --bg: #121a3d;
+  --card-bg: #1b2554;
+  --text: #fff3fa;
+  --text-muted: #b5bde0;
+  --border: #36438a;
   --shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
-
-  --ink: #e2ecf9;
-  --sun: #fbc238;
-  --pink: #ff7aa2;
-  --sky: #6cb8ff;
-  --mint: #4fd6a6;
-  --w: #142034;
-  --mut: #8fa2bd;
-  --line: #233650;
+  --ink: #fff3fa;
+  --sun: #ffd21f;
+  --pink-soft: #3a2254;
+  --sky-soft: #1d2f66;
+  --stitch: #5b4a8f;
+  --w: #1b2554;
+  --mut: #b5bde0;
+  --line: #36438a;
 }
 
 * {
@@ -99,7 +102,7 @@ header.header {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 250, 240, 0.95);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
 }
@@ -209,7 +212,7 @@ header.header {
 }
 
 .icon-btn:hover {
-  background: #edf3fc;
+  background: #ffe9f2;
   border-color: var(--line);
 }
 
@@ -271,17 +274,17 @@ header.header {
 }
 
 .btn.alt:hover, .btn.btn-outline:hover {
-  background: #eef4fe;
+  background: #ffe9f2;
 }
 
 .btn.btn-secondary {
-  background: #eef2f9;
-  border-color: #d6e0ee;
+  background: #ffe9f2;
+  border-color: #f6d3e1;
   color: var(--ink);
 }
 
 .btn.btn-secondary:hover {
-  background: #e0e9f7;
+  background: #ffd6e6;
 }
 
 .btn.sm, .btn.btn-sm {
@@ -295,7 +298,7 @@ header.header {
 
 .btn.gold {
   background: #ffc83d;
-  color: #1b2a4a;
+  color: #17224f;
   border-color: #ffc83d;
 }
 
@@ -351,7 +354,7 @@ header.header {
 .hero .btn.gold {
   background: var(--sun);
   border-color: var(--sun);
-  color: #1b2a4a;
+  color: #17224f;
 }
 
 .stairs {
@@ -556,7 +559,7 @@ h2.sec-title {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f0f4fa;
+  background: #fff0f6;
   margin-bottom: 14px;
 }
 
@@ -612,8 +615,8 @@ h2.sec-title {
 }
 
 .wish-icon-btn {
-  background: #f6f8fc;
-  border: 1px solid #d9e2ee;
+  background: #fff4f9;
+  border: 1px solid #f6d3e1;
   border-radius: 999px;
   padding: 6px 10px;
   cursor: pointer;
@@ -1051,7 +1054,7 @@ footer.footer {
 }
 
 .cart-table th {
-  background: #f8faff;
+  background: #fff4f9;
   padding: 14px 16px;
   text-align: left;
   font-family: var(--d);
@@ -1077,7 +1080,7 @@ footer.footer {
   height: 64px;
   border-radius: 6px;
   overflow: hidden;
-  background: #eef2f8;
+  background: #fff0f6;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1112,7 +1115,7 @@ footer.footer {
 }
 
 .qty-control button:hover {
-  background: #eef4fe;
+  background: #ffe9f2;
 }
 
 .qty-control input {
@@ -1263,7 +1266,7 @@ footer.footer {
 
 .payment-method.selected {
   border-color: var(--primary);
-  background: #f0f6ff;
+  background: #e3f3ff;
 }
 
 .payment-method .icon {
@@ -1281,7 +1284,7 @@ footer.footer {
 }
 
 .intl-note {
-  background: #e9f1ff;
+  background: #e3f3ff;
   border-radius: 10px;
   padding: 12px 14px;
   font-size: 0.86rem;
@@ -1358,7 +1361,7 @@ footer.footer {
   bottom: 28px;
   left: 50%;
   transform: translateX(-50%);
-  background: #1b2a4a;
+  background: #17224f;
   color: white;
   padding: 12px 24px;
   border-radius: 999px;
@@ -1880,7 +1883,7 @@ body, header.header, .book-card, .finder, .fmt-card, .cart-table, .checkout-sect
 
 /* Photo page headers (Library, Gift Finder) */
 .page-header--photo {
-  background-color: #1b2a4a;
+  background-color: #17224f;
   background-size: cover;
   background-position: center;
   border-bottom: none;
@@ -1894,5 +1897,115 @@ body, header.header, .book-card, .finder, .fmt-card, .cart-table, .checkout-sect
   color: #dbe7f5 !important;
 }
 [data-theme="dark"] .page-header--photo {
-  background-color: #1b2a4a;
+  background-color: #17224f;
 }
+
+/* ========================================================
+   KIDDIE BLOOM BRAND LAYER
+   Stitched-sticker look from the logo: cream cloud panels with
+   dashed stitching, puffy pressable buttons, one palette.
+   ======================================================== */
+body { background: var(--bg); }
+h1, h2, h3, h4 { letter-spacing: 0.1px; }
+
+/* Header + wordmark */
+header.header { border-bottom: 3px dashed var(--stitch); }
+.brand { gap: 10px; }
+.brand-logo { width: 56px; height: 56px; object-fit: contain; flex-shrink: 0; filter: drop-shadow(0 3px 6px rgba(255, 79, 154, 0.25)); }
+.brand-text h1 { font-size: 1.7rem; font-weight: 800; letter-spacing: 0; }
+.brand-text h1 .wm { display: inline-block; }
+.wm0 { color: #ff4f9a; } .wm1 { color: #ffb400; } .wm2 { color: #2f9bff; }
+.wm3 { color: #3fb83f; } .wm4 { color: #8a5cf6; } .wm5 { color: #ff8a1f; }
+.wm-bloom { color: var(--ink); }
+.brand-text span { font-size: 0.8rem; letter-spacing: 0.2px; text-transform: none; color: var(--mut); font-weight: 700; }
+.nav-links button:hover, .nav-links a:hover, .nav-links button.active { color: var(--pink); text-decoration-color: var(--sun); text-decoration-thickness: 3px; }
+.cart-badge { background: var(--pink); color: #fff; }
+.admin-tag-btn { background: var(--sky-soft); border-color: #bfe0ff; color: #1d5fa8; text-transform: none; letter-spacing: 0; font-size: 13px; }
+
+/* Puffy buttons */
+.btn { background: var(--pink); border: 3px solid var(--pink); color: #fff; box-shadow: 0 4px 0 #c42f72; font-weight: 700; }
+.btn:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #c42f72; }
+.btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #c42f72; }
+.btn.alt, .btn.btn-outline { background: #fff; color: var(--ink); border-color: var(--ink); box-shadow: 0 4px 0 var(--ink); }
+.btn.alt:hover, .btn.btn-outline:hover { background: var(--sky-soft); box-shadow: 0 6px 0 var(--ink); }
+.btn.btn-secondary { background: var(--sky-soft); border-color: #bfe0ff; color: #1d5fa8; box-shadow: 0 4px 0 #bfe0ff; }
+.btn.gold, .hero .btn.gold { background: var(--sun); border-color: var(--sun); color: var(--ink); box-shadow: 0 4px 0 #d9a900; }
+.btn.gold:hover { box-shadow: 0 6px 0 #d9a900; }
+[data-theme="dark"] .btn { background: var(--pink); border-color: var(--pink); color: #fff; box-shadow: 0 4px 0 #8c1e55; }
+[data-theme="dark"] .btn.alt, [data-theme="dark"] .btn.btn-outline { background: transparent; color: var(--ink); border-color: var(--ink); box-shadow: 0 4px 0 var(--border); }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 3px solid var(--sky); outline-offset: 3px; }
+
+/* Hero: sky, a stitched cream cloud for the message, the logo badge */
+.hero { min-height: 0; background: var(--sky-soft) radial-gradient(circle, #fff 2.5px, transparent 3px) 0 0 / 34px 34px; color: var(--ink); }
+.hero:before { display: none; }
+.hero .hg { min-height: 0; grid-template-columns: 1.15fr 0.85fr; grid-template-areas: "copy logo" "stairs stairs"; gap: 28px 40px; padding: 48px 0 44px; }
+.hero .hg > div:first-child { grid-area: copy; background: #fffdf4; border-radius: 40px; padding: 38px 40px; outline: 3px dashed #ffcf5c; outline-offset: -12px; box-shadow: 0 10px 0 rgba(255, 79, 154, 0.18); }
+.hero h1 { color: var(--ink); text-shadow: none; max-width: 15ch; font-size: clamp(34px, 5vw, 54px); font-weight: 800; }
+.hero .lead { color: var(--mut); font-size: 18px; }
+.hero-logo { grid-area: logo; width: min(100%, 420px); height: auto; justify-self: center; transform: rotate(-3deg); filter: drop-shadow(0 14px 18px rgba(23, 34, 79, 0.22)); }
+.stairs { grid-area: stairs; height: auto; align-items: stretch; gap: 14px; filter: none; }
+.stair { height: auto !important; min-height: 92px; border: 3px dashed rgba(255, 255, 255, 0.85); border-radius: 26px; justify-content: center; gap: 2px; box-shadow: 0 6px 0 rgba(23, 34, 79, 0.16); }
+.stair:hover { transform: translateY(-3px); }
+.stair b { font-size: 26px; }
+.st1 { background: var(--sun); } .st2 { background: var(--pink); color: #fff; } .st3 { background: var(--sky); color: #fff; } .st4 { background: var(--mint); color: #fff; }
+
+/* Stitched cards */
+.book-card, .fmt-card, .finder, .faq-item, .cart-summary, .checkout-section, .gift-rewards, .modal-content, .invoice, .step-card, .admin-panel {
+  outline: 2px dashed var(--stitch); outline-offset: -8px;
+}
+.book-card, .cart-summary, .checkout-section, .invoice { border-radius: 26px; border-color: transparent; }
+.book-card { padding: 24px; box-shadow: 0 6px 0 var(--pink-soft); }
+.book-card:hover { box-shadow: 0 10px 0 var(--pink-soft); }
+.book-cover { border-radius: 16px; background: var(--pink-soft); }
+.finder { border: 3px solid var(--pink); border-radius: 34px; outline-color: #ffcf5c; outline-offset: -12px; padding: 44px; }
+.fmt-card { border: 3px solid var(--ink); border-radius: 30px; }
+.fh .age-display { color: var(--pink); }
+.stage-btn { border-width: 3px; }
+.age-slider::-webkit-slider-thumb { background: var(--pink); }
+.age-slider::-moz-range-thumb { background: var(--pink); }
+.faq-item { border-color: transparent; background: #fffdf4; padding: 20px 28px; }
+.filter-btn:hover, .filter-btn.active { background: var(--pink); border-color: var(--pink); }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--pink); }
+.payment-method.selected { border-color: var(--pink); background: var(--pink-soft); }
+
+/* Section colour blocks */
+h2.sec-title { font-weight: 800; }
+.toy-promo { background: var(--pink-soft); }
+.toy-kicker { background: #fff; color: #c42f72; text-transform: none; letter-spacing: 0; font-size: 14px; border: 2px dashed var(--pink); }
+.visual-story { background: var(--sky-soft); }
+.story-copy span { background: var(--sun); }
+.pay-steps-section { background: var(--ink); }
+.step-card { outline-color: rgba(255, 255, 255, 0.25); border-radius: 26px; }
+.step-card:nth-child(1):before { background: var(--sun); }
+.step-card:nth-child(2):before { background: var(--pink); color: #fff; }
+.step-card:nth-child(3):before { background: var(--sky); color: #fff; }
+.help-banner { background: linear-gradient(135deg, #ffe680, var(--sun)); }
+.reward-strip, .reward-strip strong { color: #1e4530; }
+
+/* Inner page headers */
+.page-header { background: var(--sky-soft); border-bottom: 3px dashed var(--stitch); }
+.page-header--photo { background-image: none !important; background-color: var(--sky-soft); color: var(--ink); }
+.page-header--photo h1, .page-header--photo p { color: var(--ink); }
+.page-header--photo button { color: var(--ink) !important; }
+[data-theme="dark"] .page-header, [data-theme="dark"] .page-header--photo { background-color: #1d2f66; }
+[data-theme="dark"] .page-header--photo h1, [data-theme="dark"] .page-header--photo p { color: var(--ink); }
+[data-theme="dark"] .page-header--photo button { color: var(--ink) !important; }
+.admin-hero { background: linear-gradient(110deg, var(--ink), #2b3a7a); }
+.admin-stat strong { color: var(--pink); font-family: var(--d); }
+.admin-panel, .admin-stat { background: #fffdf4; border-color: var(--border); }
+.rn-toast { background: var(--ink); border: 3px solid var(--pink); }
+
+/* Footer */
+footer.footer { background: #fffdf4; border-top: 3px dashed var(--stitch); }
+.footer-brand { display: flex; align-items: center; gap: 12px; }
+.footer-links button:hover, .footer-links a:hover { color: var(--pink); }
+[data-theme="dark"] footer.footer { background: #0f1633; }
+
+@media (max-width: 900px) {
+  .hero .hg { grid-template-columns: 1fr; grid-template-areas: "logo" "copy" "stairs"; padding-top: 28px; }
+  .hero-logo { width: min(70%, 300px); }
+  .hero .hg > div:first-child { padding: 30px 26px; }
+  .stairs { display: grid; grid-template-columns: 1fr 1fr; }
+  .finder { padding: 28px 22px; }
+}
+@media (max-width: 480px) { .brand-text span { display: none; } .brand-text h1 { font-size: 1.4rem; } .brand-logo { width: 46px; height: 46px; } }

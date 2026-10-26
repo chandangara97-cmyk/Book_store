@@ -34,7 +34,7 @@ export const OrderSummaryView: React.FC = () => {
         <div className="invoice-head">
           <div>
             <h1>Order Summary</h1>
-            <div className="muted">The Reading Nook · Books, Ideas, Possibilities</div>
+            <div className="muted">Kiddie Bloom · Preschool Worksheets</div>
           </div>
           <div style={{ textAlign: 'right' }}>
             <strong style={{ fontSize: '18px', color: 'var(--ink)' }}>{orderId}</strong>

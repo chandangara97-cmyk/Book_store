@@ -140,7 +140,7 @@ export const CheckoutView: React.FC = () => {
       items: cart.map((item) => ({
         id: item.id,
         title: item.title,
-        author: item.author || 'The Reading Nook',
+        author: item.author || 'Kiddie Bloom',
         priceINR: Number(item.price) || 0,
         qty: Number(item.qty) || 1,
         lineTotalINR: (Number(item.price) || 0) * (Number(item.qty) || 1),
@@ -619,7 +619,7 @@ export const CheckoutView: React.FC = () => {
               </div>
 
               <p style={{ fontSize: '12px', color: '#737987', marginTop: '16px', textAlign: 'center' }}>
-                Encrypted checkout powered by The Reading Nook
+                Encrypted checkout powered by Kiddie Bloom
               </p>
             </div>
           </div>
