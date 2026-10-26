@@ -1,0 +1,15 @@
+{
+  "name": "Kiddie Bloom",
+  "short_name": "Kiddie Bloom",
+  "description": "Learning books and gifts for children aged 0 to 15",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fffaf0",
+  "theme_color": "#ff4f9a",
+  "icons": [
+    { "src": "img/kiddie-bloom-logo.png", "sizes": "720x709", "type": "image/png", "purpose": "any" },
+    { "src": "img/kiddie-bloom-logo-sm.png", "sizes": "160x157", "type": "image/png" }
+  ]
+}

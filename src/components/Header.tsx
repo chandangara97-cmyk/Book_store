@@ -101,7 +101,7 @@ export const Header: React.FC = () => {
         <div className="header-actions">
           <button
             type="button"
-            className="admin-tag-btn"
+            className="admin-tag-btn mobile-hide"
             title="Studio Admin"
             onClick={() => navigateTo('admin')}
           >
@@ -141,7 +141,7 @@ export const Header: React.FC = () => {
 
           <button
             type="button"
-            className="icon-btn theme-toggle-btn"
+            className="icon-btn theme-toggle-btn mobile-hide"
             title={theme === 'dark' ? 'Switch to light day mode' : 'Switch to cozy night mode'}
             aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
             onClick={toggleTheme}
@@ -164,7 +164,7 @@ export const Header: React.FC = () => {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div style={{
+        <div className="mobile-drawer" style={{
           background: 'var(--card-bg)',
           borderBottom: '1px solid var(--border)',
           padding: '16px 24px',
@@ -183,6 +183,12 @@ export const Header: React.FC = () => {
             onClick={() => scrollToSection('find')}
           >
             🔍 Find by age
+          </button>
+          <button
+            style={{ textAlign: 'left', background: 'none', border: 'none', padding: '8px 0', fontSize: '16px', fontWeight: 600, color: 'var(--ink)', cursor: 'pointer' }}
+            onClick={() => scrollToSection('how')}
+          >
+            🧾 How to buy
           </button>
           <button
             style={{ textAlign: 'left', background: 'none', border: 'none', padding: '8px 0', fontSize: '16px', fontWeight: 600, color: 'var(--ink)', cursor: 'pointer' }}
