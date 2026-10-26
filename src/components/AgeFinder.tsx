@@ -1,25 +1,26 @@
 import { CoverImage } from './CoverImage';
 import { asset, cleanSrc, imgFallback, isEmojiCover } from '../utils/images';
 import React, { useState, useId } from 'react';
-import { STAGES, TUTORIAL_BOOKS } from '../data/initialData';
+import { STAGES } from '../data/initialData';
 import { useStore } from '../context/StoreContext';
 import { Book } from '../types';
 
 export const AgeFinder: React.FC = () => {
   const [age, setAge] = useState<number>(6);
-  const { addToCart, toggleWishlist, isInWishlist } = useStore();
+  const { books, addToCart, toggleWishlist, isInWishlist, setSelectedBook } = useStore();
   const sliderId = useId();
 
   // Find active stage
   const currentStage = STAGES.find((s) => age >= s.minAge && age <= s.maxAge) || STAGES[1];
 
   // Filter books matching current age
-  const matchedBooks = TUTORIAL_BOOKS.filter(
+  // Real catalog books (including anything added in Admin / Firebase) whose age range includes this age
+  const matchedBooks = books.filter(
     (b) => b.minAge !== undefined && b.maxAge !== undefined && age >= b.minAge && age <= b.maxAge
   );
 
   const handleAddBookFormat = (book: Book, format: 'printed' | 'digital') => {
-    const price = format === 'digital' ? (book.digitalPrice || 149) : (book.printedPrice || book.price);
+    const price = format === 'digital' ? (book.digitalPrice as number) : (book.printedPrice || book.price);
     addToCart({
       id: `${book.id}-${format}`,
       title: `${book.title} (${format === 'printed' ? 'Printed Copy' : 'Digital eBook'})`,
@@ -109,7 +110,9 @@ export const AgeFinder: React.FC = () => {
               style={{ borderTop: `8px solid ${currentStage.hex}` }}
             >
               <div
+                onClick={() => setSelectedBook(book)}
                 style={{
+                  cursor: 'pointer',
                   height: '140px',
                   overflow: 'hidden',
                   borderRadius: '12px',
@@ -143,11 +146,14 @@ export const AgeFinder: React.FC = () => {
               </div>
 
               <div className="book-info">
-                <h3>{book.title}</h3>
+                <h3 onClick={() => setSelectedBook(book)} style={{ cursor: 'pointer' }}>{book.title}</h3>
                 <div className="author">by {book.author}</div>
-                <p className="desc">{book.blurb}</p>
+                <p className="desc">{book.blurb || book.description}</p>
 
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: 'auto' }}>
+                  <button type="button" className="btn sm gold" onClick={() => setSelectedBook(book)}>
+                    View details
+                  </button>
                   <button
                     type="button"
                     className="btn sm"
@@ -156,14 +162,16 @@ export const AgeFinder: React.FC = () => {
                   >
                     📖 Printed · ₹{book.printedPrice || book.price}
                   </button>
-                  <button
-                    type="button"
-                    className="btn sm alt"
-                    onClick={() => handleAddBookFormat(book, 'digital')}
-                    title="Download instant digital eBook copy"
-                  >
-                    📱 Digital · ₹{book.digitalPrice || 149}
-                  </button>
+                  {book.digitalPrice ? (
+                    <button
+                      type="button"
+                      className="btn sm alt"
+                      onClick={() => handleAddBookFormat(book, 'digital')}
+                      title="Download instant digital eBook copy"
+                    >
+                      📱 Digital · ₹{book.digitalPrice}
+                    </button>
+                  ) : null}
                   <button
                     type="button"
                     className={`wish-icon-btn ${inWish ? 'in-wishlist' : ''}`}
@@ -187,6 +195,11 @@ export const AgeFinder: React.FC = () => {
             </article>
           );
         })}
+        {matchedBooks.length === 0 && (
+          <p className="tip" style={{ gridColumn: '1 / -1' }}>
+            No books are tagged for age {age} yet. Add an age range to a book in Admin and it will appear here.
+          </p>
+        )}
       </div>
     </div>
   );

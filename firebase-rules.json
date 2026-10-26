@@ -1,23 +1,30 @@
 {
   "rules": {
-    "books": {
-      ".read": true,
-      ".write": "auth != null && auth.token.email_verified === true && auth.token.email === 'REPLACE-WITH-ADMIN-EMAIL@example.com'"
-    },
-    "toys": {
-      ".read": true,
-      ".write": "auth != null && auth.token.email_verified === true && auth.token.email === 'REPLACE-WITH-ADMIN-EMAIL@example.com'"
-    },
-    "orders": {
-      "$orderId": {
+    "bookstore": {
+      "books": {
+        ".read": true,
+        ".write": "auth != null && auth.token.email === 'REPLACE-WITH-ADMIN-EMAIL@example.com'"
+      },
+      "toys": {
+        ".read": true,
+        ".write": "auth != null && auth.token.email === 'REPLACE-WITH-ADMIN-EMAIL@example.com'"
+      },
+      "orders": {
         ".read": "auth != null && auth.token.email === 'REPLACE-WITH-ADMIN-EMAIL@example.com'",
-        ".write": false
-      }
-    },
-    "users": {
-      "$uid": {
-        ".read": "auth != null && auth.uid === $uid",
-        ".write": "auth != null && auth.uid === $uid"
+        "$orderId": {
+          ".write": "auth != null && !data.exists() && newData.child('uid').val() === auth.uid",
+          ".validate": "newData.hasChildren(['orderId', 'uid', 'items', 'totalsINR', 'createdAt'])",
+          "status": {
+            ".write": "auth != null && auth.token.email === 'REPLACE-WITH-ADMIN-EMAIL@example.com'"
+          }
+        }
+      },
+      "users": {
+        ".read": "auth != null && auth.token.email === 'REPLACE-WITH-ADMIN-EMAIL@example.com'",
+        "$uid": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": "auth != null && auth.uid === $uid"
+        }
       }
     }
   }

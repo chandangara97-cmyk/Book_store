@@ -29,6 +29,8 @@ export const AdminView: React.FC = () => {
   const [price, setPrice] = useState<number | ''>('');
   const [category, setCategory] = useState<Book['category']>('fiction');
   const [cover, setCover] = useState('');
+  const [minAge, setMinAge] = useState<number | ''>('');
+  const [maxAge, setMaxAge] = useState<number | ''>('');
   const [description, setDescription] = useState('');
   const [tags, setTags] = useState('');
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
@@ -57,6 +59,8 @@ export const AdminView: React.FC = () => {
     setPrice(item.price);
     setCategory(item.category);
     setCover(item.cover || '');
+    setMinAge(item.minAge ?? '');
+    setMaxAge(item.maxAge ?? '');
     setDescription(item.description || '');
     setTags(item.tags ? item.tags.join(', ') : '');
     window.scrollTo({ top: 320, behavior: 'smooth' });
@@ -70,6 +74,8 @@ export const AdminView: React.FC = () => {
     setPrice('');
     setCategory(activeTab === 'toy' ? 'toys' : 'fiction');
     setCover('');
+    setMinAge('');
+    setMaxAge('');
     setDescription('');
     setTags('');
     setFormSuccess(null);
@@ -95,6 +101,7 @@ export const AdminView: React.FC = () => {
         .split(',')
         .map((t) => t.trim())
         .filter(Boolean),
+      ...(minAge !== '' && maxAge !== '' ? { minAge: Number(minAge), maxAge: Number(maxAge) } : {}),
       type: activeTab === 'toy' ? 'toy' : 'book',
       pairNote: activeTab === 'toy' ? 'Pairs well with storybooks' : undefined
     };
@@ -318,6 +325,21 @@ export const AdminView: React.FC = () => {
                 />
               </div>
             </div>
+
+            {activeTab === 'book' && (
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Youngest age (0–15)</label>
+                  <input type="number" min={0} max={15} placeholder="e.g. 4" value={minAge}
+                    onChange={(e) => setMinAge(e.target.value === '' ? '' : Number(e.target.value))} />
+                </div>
+                <div className="form-group">
+                  <label>Oldest age (0–15)</label>
+                  <input type="number" min={0} max={15} placeholder="e.g. 7" value={maxAge}
+                    onChange={(e) => setMaxAge(e.target.value === '' ? '' : Number(e.target.value))} />
+                </div>
+              </div>
+            )}
 
             <div className="form-group">
               <label>Description</label>
