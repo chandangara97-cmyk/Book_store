@@ -1,0 +1,31 @@
+PASTE THIS INSIDE your existing "rules": { ... } object, as one more entry next to your current ones
+(add a comma after your last existing entry first). Do NOT replace your existing rules.
+Replace REPLACE-WITH-ADMIN-EMAIL@example.com (every place it appears) with your admin email.
+
+  "bookstore": {
+    "books": {
+      ".read": true,
+      ".write": "auth != null && auth.token.email === 'REPLACE-WITH-ADMIN-EMAIL@example.com'"
+    },
+    "toys": {
+      ".read": true,
+      ".write": "auth != null && auth.token.email === 'REPLACE-WITH-ADMIN-EMAIL@example.com'"
+    },
+    "orders": {
+      ".read": "auth != null && auth.token.email === 'REPLACE-WITH-ADMIN-EMAIL@example.com'",
+      "$orderId": {
+        ".write": "auth != null && !data.exists() && newData.child('uid').val() === auth.uid",
+        ".validate": "newData.hasChildren(['orderId', 'uid', 'items', 'totalsINR', 'createdAt'])",
+        "status": {
+          ".write": "auth != null && auth.token.email === 'REPLACE-WITH-ADMIN-EMAIL@example.com'"
+        }
+      }
+    },
+    "users": {
+      ".read": "auth != null && auth.token.email === 'REPLACE-WITH-ADMIN-EMAIL@example.com'",
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    }
+  }

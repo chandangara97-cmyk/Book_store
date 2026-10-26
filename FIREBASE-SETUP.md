@@ -19,20 +19,23 @@ Copy `.env.example` to `.env.local` and fill in `VITE_FIREBASE_API_KEY`, `VITE_F
 The admin allowlist in the frontend only controls the interface; **Realtime Database rules are the actual security boundary**. Do not deploy until the rules use your real admin email. If you need multiple admin accounts, expand the rules explicitly for each approved email.
 
 ## 4. Catalog data structure
-- `/books/{productId}` — public catalog book records
-- `/toys/{productId}` — public toy records
+- `/bookstore/books/{productId}` — public catalog book records
+- `/bookstore/toys/{productId}` — public toy records
 
 The storefront reads these branches on startup when Firebase is configured. If a branch is empty, the app continues showing local seed data. In Admin → Firebase data control:
 - **Fetch from Firebase** loads the remote books and toys into the current admin workspace.
 - **Push catalog to Firebase** replaces both `/books` and `/toys` with the current workspace. Confirm the prompt before pushing; this is a full catalog overwrite.
 - Editing/saving a product changes the current workspace/local browser cache. Push after editing to publish the full catalog to Firebase.
 
+## 4b. Sharing a Firebase project with other apps (e.g. PLFS)
+The store saves everything under a `bookstore/` folder (`bookstore/books`, `bookstore/toys`, `bookstore/users`, `bookstore/orders`), so it can live in a project that already holds other data. Do **not** replace your existing rules. In Realtime Database → Rules, add the block from `firebase-rules-ADD-bookstore-block.txt` as one more entry inside your current `"rules": { ... }` object, put your admin email in, and Publish. To use a different folder name, set `VITE_FIREBASE_DB_ROOT`.
+
 ## 5. Customer accounts: login, favourites, cart and purchases
 Customers register and sign in with Firebase Authentication (Email/Password). The password is kept only by Firebase Auth (hashed); it is never written to the database. After sign-up/sign-in the app saves:
-- `/users/{uid}/profile` — name, email, createdAt, lastLoginAt
-- `/users/{uid}/cart` and `/users/{uid}/wishlist` — saved automatically about half a second after every change, and loaded again on any device after login
-- `/users/{uid}/orders/{orderId}` — every purchase made by that customer
-- `/orders/{orderId}` — a copy of each purchase for the admin (customers can create it once but cannot read or change it afterwards; only the admin can update its `status`)
+- `/bookstore/users/{uid}/profile` — name, email, createdAt, lastLoginAt
+- `/bookstore/users/{uid}/cart` and `/bookstore/users/{uid}/wishlist` — saved automatically about half a second after every change, and loaded again on any device after login
+- `/bookstore/users/{uid}/orders/{orderId}` — every purchase made by that customer
+- `/bookstore/orders/{orderId}` — a copy of each purchase for the admin (customers can create it once but cannot read or change it afterwards; only the admin can update its `status`)
 
 Signing out clears the cart, favourites and orders from that device (they stay in the account). Publish the updated `firebase-rules.json` or none of this will save.
 
