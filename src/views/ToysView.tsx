@@ -3,7 +3,7 @@ import { useStore } from '../context/StoreContext';
 import { BookCard } from '../components/BookCard';
 import { Bot, ArrowLeft, Sparkles, Gift, BookOpen, ShoppingBag, CheckCircle2 } from 'lucide-react';
 
-const TOY_HERO_IMG = '/src/assets/images/futuristic_learning_toy_1793017195881.jpg';
+import TOY_HERO_IMG from '../assets/images/futuristic_learning_toy_1793017195881.jpg';
 
 export const ToysView: React.FC = () => {
   const { toys, setView, setSelectedCategory, formatPrice } = useStore();

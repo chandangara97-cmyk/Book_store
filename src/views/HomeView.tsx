@@ -19,9 +19,9 @@ import {
 
 import HERO_BANNER from '../assets/images/kiddie_bloom_banner.jpg';
 
-const HERO_IMG = '/src/assets/images/hero_futuristic_book_1793017194843.jpg';
-const TOY_IMG = '/src/assets/images/futuristic_learning_toy_1793017195881.jpg';
-const TABLET_IMG = '/src/assets/images/digital_holo_tablet_1793017195631.jpg';
+import HERO_IMG from '../assets/images/hero_futuristic_book_1793017194843.jpg';
+import TOY_IMG from '../assets/images/futuristic_learning_toy_1793017195881.jpg';
+import TABLET_IMG from '../assets/images/digital_holo_tablet_1793017195631.jpg';
 
 export const HomeView: React.FC = () => {
   const { setView, setSelectedCategory, books, setSelectedBook } = useStore();

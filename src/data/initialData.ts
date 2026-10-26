@@ -1,5 +1,6 @@
 import { Book, StageInfo } from '../types';
 import { bookCover, photo } from '../utils/images';
+import TOY_COVER from '../assets/images/futuristic_learning_toy_1793017195881.jpg';
 
 export const STAGES: StageInfo[] = [
   {
@@ -449,7 +450,7 @@ export const INITIAL_TOYS: Book[] = [
     title: 'Colouring & Art Kit',
     author: 'Kiddie Bloom Studio',
     price: 249,
-    cover: '/src/assets/images/futuristic_learning_toy_1793017195881.jpg',
+    cover: TOY_COVER,
     category: 'toys',
     description: 'Colour pencils, creative prompts and space to bring story characters to life.',
     pairNote: 'Pairs well with picture books',
@@ -461,7 +462,7 @@ export const INITIAL_TOYS: Book[] = [
     title: 'Little Thinker Puzzle',
     author: 'Kiddie Bloom Studio',
     price: 399,
-    cover: '/src/assets/images/futuristic_learning_toy_1793017195881.jpg',
+    cover: TOY_COVER,
     category: 'toys',
     description: 'A playful wooden puzzle to practise patience, matching and problem-solving.',
     pairNote: 'Pairs well with learning books',
