@@ -106,3 +106,11 @@ export interface StageInfo {
   description: string;
   image: string;
 }
+
+
+export type LearningSection = 'worksheet' | 'activity' | 'puzzle' | 'cut-and-paste' | 'coloring';
+export interface LearningResource {
+  id: string; title: string; section: LearningSection; minAge: number; maxAge: number;
+  description: string; pdfUrl: string; thumbnailUrl?: string; price: number;
+  featured?: boolean; active: boolean; createdAt: string;
+}

@@ -25,6 +25,10 @@
           ".read": "auth != null && auth.uid === $uid",
           ".write": "auth != null && auth.uid === $uid"
         }
+      },
+      "learningResources": {
+        ".read": true,
+        ".write": "auth != null && auth.token.email === 'REPLACE-WITH-ADMIN-EMAIL@example.com'"
       }
     }
   }

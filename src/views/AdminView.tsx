@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../context/StoreContext';
-import { Book } from '../types';
+import { Book, LearningResource, LearningSection } from '../types';
 
 export const AdminView: React.FC = () => {
   const {
@@ -11,6 +11,7 @@ export const AdminView: React.FC = () => {
     resetCatalogToDefault,
     fetchCatalogFromFirebase,
     pushCatalogToFirebase,
+    learningResources, addOrUpdateLearningResource, fetchLearningResources, pushLearningResources,
     firebaseConfigured,
     user,
     setView,
@@ -20,6 +21,14 @@ export const AdminView: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'book' | 'toy'>('book');
   const [syncBusy, setSyncBusy] = useState(false);
   const [syncError, setSyncError] = useState('');
+  const [resourceTitle, setResourceTitle] = useState('');
+  const [resourceSection, setResourceSection] = useState<LearningSection>('worksheet');
+  const [resourceMinAge, setResourceMinAge] = useState(3);
+  const [resourceMaxAge, setResourceMaxAge] = useState(5);
+  const [resourceDescription, setResourceDescription] = useState('');
+  const [resourcePdfUrl, setResourcePdfUrl] = useState('');
+  const [resourceThumbnail, setResourceThumbnail] = useState('');
+  const [resourcePrice, setResourcePrice] = useState<number>(0);
 
   // Form fields
   const [title, setTitle] = useState('');
@@ -177,6 +186,27 @@ export const AdminView: React.FC = () => {
         {syncBusy && <p role="status">Syncing catalog…</p>}
         {syncError && <p role="alert" style={{ color: '#b42318', marginTop: 10 }}>{syncError}</p>}
       </section>
+
+      {user?.isAdmin && <section className="admin-panel" style={{ margin: '24px 0' }}>
+        <h2 style={{ fontFamily: 'var(--serif)', color: '#214c3d' }}>🖍️ Printable learning library</h2>
+        <p style={{ color: 'var(--mut)' }}>Publish PDFs by section and age. Store the PDF file in Firebase Storage and paste its download URL below; only its metadata is saved in Realtime Database.</p>
+        <form onSubmit={(e) => { e.preventDefault(); const id = resourceTitle.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); if (!id || !resourcePdfUrl.trim() || resourceMinAge > resourceMaxAge) { showToast('Add a title, valid age range, and PDF URL.'); return; } const resource: LearningResource = { id, title: resourceTitle.trim(), section: resourceSection, minAge: resourceMinAge, maxAge: resourceMaxAge, description: resourceDescription.trim(), pdfUrl: resourcePdfUrl.trim(), ...(resourceThumbnail.trim() ? { thumbnailUrl: resourceThumbnail.trim() } : {}), price: Math.max(0, Number(resourcePrice) || 0), active: true, createdAt: new Date().toISOString() }; addOrUpdateLearningResource(resource); setResourceTitle(''); setResourceDescription(''); setResourcePdfUrl(''); setResourceThumbnail(''); setResourcePrice(0); }}>
+          <div className="form-row">
+            <div className="form-group"><label>Printable title *</label><input required value={resourceTitle} onChange={e => setResourceTitle(e.target.value)} placeholder="e.g. Alphabet tracing fun" /></div>
+            <div className="form-group"><label>Section *</label><select value={resourceSection} onChange={e => setResourceSection(e.target.value as LearningSection)}><option value="worksheet">Worksheet</option><option value="activity">Activity</option><option value="puzzle">Puzzle</option><option value="cut-and-paste">Cut and paste</option><option value="coloring">Coloring</option></select></div>
+          </div>
+          <div className="form-row">
+            <div className="form-group"><label>Minimum age</label><input type="number" min="0" max="15" value={resourceMinAge} onChange={e => setResourceMinAge(Number(e.target.value))} /></div>
+            <div className="form-group"><label>Maximum age</label><input type="number" min="0" max="15" value={resourceMaxAge} onChange={e => setResourceMaxAge(Number(e.target.value))} /></div>
+            <div className="form-group"><label>Price (₹, 0 = free)</label><input type="number" min="0" value={resourcePrice} onChange={e => setResourcePrice(Number(e.target.value))} /></div>
+          </div>
+          <div className="form-group"><label>Description</label><textarea value={resourceDescription} onChange={e => setResourceDescription(e.target.value)} placeholder="What will children practise?" /></div>
+          <div className="form-group"><label>PDF download URL * (Firebase Storage URL recommended)</label><input type="url" required value={resourcePdfUrl} onChange={e => setResourcePdfUrl(e.target.value)} placeholder="https://firebasestorage.googleapis.com/..." /></div>
+          <div className="form-group"><label>Optional thumbnail image URL</label><input type="url" value={resourceThumbnail} onChange={e => setResourceThumbnail(e.target.value)} placeholder="https://..." /></div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 16 }}><button className="btn gold" type="submit">Save printable record</button><button className="btn alt" type="button" disabled={!firebaseConfigured} onClick={async () => { try { await pushLearningResources(); } catch (e) { showToast(e instanceof Error ? e.message : 'Could not publish resources'); } }}>Publish printables to Firebase</button><button className="btn alt" type="button" disabled={!firebaseConfigured} onClick={async () => { try { await fetchLearningResources(); } catch (e) { showToast(e instanceof Error ? e.message : 'Could not fetch resources'); } }}>Fetch live printables</button></div>
+        </form>
+        <div style={{ marginTop: 22 }}><strong>{learningResources.length} printable records</strong>{learningResources.length > 0 && <ul>{learningResources.slice(0, 8).map(r => <li key={r.id}>{r.title} · {r.section} · ages {r.minAge}–{r.maxAge} · {r.active ? 'Published/active' : 'Hidden'}</li>)}</ul>}</div>
+      </section>}
 
       {/* Stats */}
       <section className="admin-stats">

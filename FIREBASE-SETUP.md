@@ -46,3 +46,25 @@ The site is built by GitHub Actions, so it needs the values too. In the repo go 
 - Orders and checkout payment flows are not moved by the catalog sync buttons. Payment endpoints/secrets still require the existing secure Cloud Functions setup described in `PAYMENTS-SETUP.md`.
 - Do not put Firebase service-account JSON or payment secrets in the frontend or GitHub.
 - The database URL and project ID are project-specific; they cannot be safely guessed. This package intentionally uses placeholders until you provide your Firebase web config.
+
+## Kiddie Bloom printable learning library
+
+The portal supports five printable sections (`worksheet`, `activity`, `puzzle`, `cut-and-paste`, `coloring`) plus the separate Fun Zone for toys. Printable metadata is stored at `bookstore/learningResources` in Realtime Database; records include `id`, `title`, `section`, `minAge`, `maxAge`, `description`, `pdfUrl`, optional `thumbnailUrl`, `price`, `active`, and `createdAt`.
+
+### Recommended PDF storage
+
+- **Store PDF files in Firebase Storage, not Realtime Database.** RTDB should hold only the searchable metadata and the Storage object path/download URL. PDFs are binary files and would make RTDB backups, reads and writes unnecessarily large if embedded as Base64.
+- Use a predictable object path such as `learning-resources/worksheet/ages-4-5/alphabet-tracing-v1.pdf`. Keep filenames stable and use version suffixes when replacing content.
+- Use a thumbnail/cover image for catalogue cards, rather than loading PDF bytes into the listing page.
+- For free PDFs, a Firebase Storage download URL is acceptable if public sharing is intended. For paid PDFs, do **not** expose a permanent public download URL in a public database record. Store the Storage object path privately and issue a short-lived download URL only after the backend verifies the paid order. The current frontend intentionally does not open paid PDF links; purchase verification/signed-link delivery must be implemented server-side before selling downloads.
+- In Firebase Storage Rules, allow upload/delete only to authenticated admin accounts. Do not use globally public write rules. Test the rules with the Firebase Rules Playground before deployment.
+
+### Publish records
+
+1. Sign in with an account whose exact email is included in `VITE_FIREBASE_ADMIN_EMAILS`.
+2. Open **Admin → Printable learning library**.
+3. Enter title, section, age range, PDF URL, optional thumbnail and price, then select **Save printable record**.
+4. Select **Publish printables to Firebase**. The public printable page reads active records from `bookstore/learningResources`.
+5. Ensure the deployed Realtime Database rules include the `learningResources` rule in `firebase-rules.json`. Replace the example admin email with the real admin email before deploying rules.
+
+Age ranges overlap deliberately: a resource is shown when its age range overlaps the selected age band.

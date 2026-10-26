@@ -11,6 +11,10 @@ Replace REPLACE-WITH-ADMIN-EMAIL@example.com (every place it appears) with your 
       ".read": true,
       ".write": "auth != null && auth.token.email === 'REPLACE-WITH-ADMIN-EMAIL@example.com'"
     },
+    "learningResources": {
+      ".read": true,
+      ".write": "auth != null && auth.token.email === 'REPLACE-WITH-ADMIN-EMAIL@example.com'"
+    },
     "orders": {
       ".read": "auth != null && auth.token.email === 'REPLACE-WITH-ADMIN-EMAIL@example.com'",
       "$orderId": {

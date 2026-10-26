@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Book, CartItem, WishlistItem, Order, User } from '../types';
+import { Book, CartItem, WishlistItem, Order, User, LearningResource } from '../types';
 import { INITIAL_BOOKS, INITIAL_TOYS } from '../data/initialData';
 import { cloudUid, loadAllOrders, loadUserData, mergeById, mergeOrders, saveCart, saveOrderCloud, saveProfile, saveWishlist } from '../userCloud';
 import { databaseRequest, firebaseSignIn, firebaseSignUp, firebaseSignOut, isFirebaseAdmin, refreshFirebaseToken, firebaseConfigured } from '../firebaseClient';
@@ -31,6 +31,12 @@ interface StoreContextType {
   fetchCatalogFromFirebase: () => Promise<void>;
   pushCatalogToFirebase: () => Promise<void>;
   firebaseConfigured: boolean;
+
+  // Printable learning library
+  learningResources: LearningResource[];
+  addOrUpdateLearningResource: (resource: LearningResource) => void;
+  fetchLearningResources: () => Promise<void>;
+  pushLearningResources: () => Promise<void>;
 
   // Cart
   cart: CartItem[];
@@ -98,6 +104,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [ageFilter, setAgeFilter] = useState<number | null>(null);
+  const [learningResources, setLearningResources] = useState<LearningResource[]>(() => { try { return JSON.parse(localStorage.getItem('kbLearningResources') || '[]'); } catch { return []; } });
 
   // Catalog State
   const [books, setBooks] = useState<Book[]>(() => {
@@ -198,12 +205,14 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     (async () => {
       try {
         await refreshFirebaseToken();
-        const [remoteBooks, remoteToys] = await Promise.all([
+        const [remoteBooks, remoteToys, remoteResources] = await Promise.all([
           databaseRequest<Record<string, Book> | Book[]>('books'),
-          databaseRequest<Record<string, Book> | Book[]>('toys')
+          databaseRequest<Record<string, Book> | Book[]>('toys'),
+          databaseRequest<Record<string, LearningResource> | LearningResource[]>('learningResources')
         ]);
         if (remoteBooks) { const list = Array.isArray(remoteBooks) ? remoteBooks : Object.values(remoteBooks); if (list.length) setBooks(withAges(list)); }
         if (remoteToys) { const list = Array.isArray(remoteToys) ? remoteToys : Object.values(remoteToys); if (list.length) setToys(list); }
+        if (remoteResources) { const list = Array.isArray(remoteResources) ? remoteResources : Object.values(remoteResources); setLearningResources(list); localStorage.setItem('kbLearningResources', JSON.stringify(list)); }
       } catch (error) { console.warn('Firebase catalog fetch failed; using local catalog.', error); }
     })();
   }, []);
@@ -480,6 +489,22 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     showToast('Books and toys pushed to Firebase successfully.');
   };
 
+  const addOrUpdateLearningResource = (resource: LearningResource) => {
+    setLearningResources(prev => { const next = prev.some(r => r.id === resource.id) ? prev.map(r => r.id === resource.id ? resource : r) : [resource, ...prev]; localStorage.setItem('kbLearningResources', JSON.stringify(next)); return next; });
+    showToast(`“${resource.title}” saved locally. Push learning resources to Firebase to publish.`);
+  };
+  const fetchLearningResources = async () => {
+    const remote = await databaseRequest<Record<string, LearningResource> | LearningResource[]>('learningResources');
+    const list = remote ? (Array.isArray(remote) ? remote : Object.values(remote)) : [];
+    setLearningResources(list); localStorage.setItem('kbLearningResources', JSON.stringify(list));
+    showToast(`Fetched ${list.length} learning resources.`);
+  };
+  const pushLearningResources = async () => {
+    if (!user?.isAdmin) throw new Error('This account is not on the Firebase admin allowlist.');
+    await databaseRequest('learningResources', 'PUT', Object.fromEntries(learningResources.map(item => [item.id, item])));
+    showToast(`${learningResources.length} learning resources published to Firebase.`);
+  };
+
   const resetCatalogToDefault = () => {
     if (!window.confirm('Restore the local catalog to defaults? This does not change Firebase until you press Push to Firebase.')) return;
     setBooks(INITIAL_BOOKS); setToys(INITIAL_TOYS);
@@ -505,6 +530,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         fetchCatalogFromFirebase,
         pushCatalogToFirebase,
         firebaseConfigured,
+        learningResources, addOrUpdateLearningResource, fetchLearningResources, pushLearningResources,
         cart,
         addToCart,
         removeFromCart,

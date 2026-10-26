@@ -62,6 +62,11 @@ export const Header: React.FC = () => {
               </button>
             </li>
             <li>
+              <button type="button" className={view === 'printables' ? 'active' : ''} onClick={() => navigateTo('printables')}>
+                Printables
+              </button>
+            </li>
+            <li>
               <button
                 type="button"
                 onClick={() => scrollToSection('find')}
@@ -168,6 +173,7 @@ export const Header: React.FC = () => {
           <button type="button" className="mobile-drawer-link" onClick={() => navigateTo('library')}>
             📚 Shop all books
           </button>
+          <button type="button" className="mobile-drawer-link" onClick={() => navigateTo('printables')}>🖍️ Printables: Worksheets & Activities</button>
           <button type="button" className="mobile-drawer-link" onClick={() => scrollToSection('find')}>
             🔍 Find by age
           </button>

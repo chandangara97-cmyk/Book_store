@@ -14,6 +14,7 @@ import { OrderSummaryView } from './views/OrderSummaryView';
 import { WishlistView } from './views/WishlistView';
 import { AuthView } from './views/AuthView';
 import { AdminView } from './views/AdminView';
+import { LearningView } from './views/LearningView';
 
 export const AppContent: React.FC = () => {
   const { view, selectedBook, setSelectedBook, toastMessage } = useStore();
@@ -24,6 +25,8 @@ export const AppContent: React.FC = () => {
         return <HomeView />;
       case 'library':
         return <LibraryView />;
+      case 'printables':
+        return <LearningView />;
       case 'toys':
         return <ToysView />;
       case 'gift-finder':
