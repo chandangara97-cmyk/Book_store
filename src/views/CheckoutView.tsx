@@ -131,7 +131,7 @@ export const CheckoutView: React.FC = () => {
   };
 
   const finalizeOrder = (isPaid: boolean = false, paymentId?: string) => {
-    const orderId = 'RN-' + Date.now().toString().slice(-8);
+    const orderId = 'RN-' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2, 5).toUpperCase();
     const order: Order = {
       orderId,
       createdAt: new Date().toISOString(),
