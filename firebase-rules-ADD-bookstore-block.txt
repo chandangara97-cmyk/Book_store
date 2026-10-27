@@ -11,6 +11,20 @@ Replace REPLACE-WITH-ADMIN-EMAIL@example.com (every place it appears) with your 
       ".read": true,
       ".write": "auth != null && auth.token.email === 'REPLACE-WITH-ADMIN-EMAIL@example.com'"
     },
+    "learningPrivate": {
+      ".read": "auth != null && auth.token.email === 'REPLACE-WITH-ADMIN-EMAIL@example.com'",
+      ".write": "auth != null && auth.token.email === 'REPLACE-WITH-ADMIN-EMAIL@example.com'"
+    },
+    "entitlements": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": false
+      }
+    },
+    "printableOrders": {
+      ".read": "auth != null && auth.token.email === 'REPLACE-WITH-ADMIN-EMAIL@example.com'",
+      ".write": false
+    },
     "learningResources": {
       ".read": true,
       ".write": "auth != null && auth.token.email === 'REPLACE-WITH-ADMIN-EMAIL@example.com'"

@@ -1,5 +1,7 @@
 # Kiddie Bloom
 
+> **Digital-only store.** Customers browse five printable sections (worksheets, activities, puzzles, cut-and-paste, coloring) by age, pay with PayPal and download the PDF, which is delivered from a private Google Drive folder ("Kiddie Bloom PDFs"). See `PRINTABLES-SETUP.md`. The older book/toy/cart code is kept in the repo but is no longer reachable from the site.
+
 A modern, responsive React + TypeScript e-commerce and learning studio application for children's tutorial books, fiction, learning titles, toys, and gift finder recommendations.
 
 ## Overview

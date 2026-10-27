@@ -100,7 +100,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   });
 
   // View Routing
-  const [view, setView] = useState<string>('home');
+  const [view, setView] = useState<string>('printables');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [ageFilter, setAgeFilter] = useState<number | null>(null);

@@ -2,6 +2,7 @@ const { onRequest } = require('firebase-functions/v2/https');
 const { defineSecret, defineString } = require('firebase-functions/params');
 const admin = require('firebase-admin');
 const crypto = require('crypto');
+const { GoogleAuth } = require('google-auth-library');
 const Razorpay = require('razorpay');
 const PRICES = require('./catalog');
 const GIFT_THRESHOLDS = PRICES.GIFTS || {};
@@ -13,6 +14,12 @@ const KEY_SECRET = defineSecret('RAZORPAY_KEY_SECRET');
 const PAYPAL_CLIENT_ID = defineSecret('PAYPAL_CLIENT_ID');
 const PAYPAL_CLIENT_SECRET = defineSecret('PAYPAL_CLIENT_SECRET');
 const PAYPAL_ENVIRONMENT = defineString('PAYPAL_ENVIRONMENT', { default: 'sandbox' });
+// Google service-account JSON key (as a secret). The Drive folder holding the PDFs must be shared with its client_email.
+const DRIVE_SA_KEY = defineSecret('DRIVE_SA_KEY');
+// Must match VITE_FIREBASE_DB_ROOT in the website (default 'bookstore').
+const DB_ROOT = defineString('DB_ROOT', { default: 'bookstore' });
+// Comma-separated admin emails (same as VITE_FIREBASE_ADMIN_EMAILS). Admins can download any printable for checking.
+const ADMIN_EMAILS = defineString('ADMIN_EMAILS', { default: '' });
 // Keep these the same as js/payments.js. Confirm the percentages in your Razorpay dashboard.
 const CFG = { feeDomestic: 2, feeInternational: 3, gst: 18, passFee: true, freeFrom: 499, shipping: 49 };
 const CURRENCIES = ['INR', 'USD', 'EUR', 'GBP', 'AED', 'SGD', 'AUD', 'CAD'];
@@ -69,7 +76,49 @@ async function calculateCheckout(items, currency, country) {
   return { subtotal, shipping, base, totalINR: Math.round(totalINR * 100) / 100, rate, amount: amount.toFixed(2), currency };
 }
 
-exports.api = onRequest({ secrets: [KEY_ID, KEY_SECRET, PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET], cors: ALLOWED_ORIGINS, region: 'us-central1' }, async (req, res) => {
+
+// ---------- Printable PDFs: paid downloads from Google Drive ----------
+const root = () => DB_ROOT.value().replace(/^\/|\/$/g, '');
+const db = (path) => admin.database().ref(root() + '/' + path);
+function httpErr(status, message) { const e = new Error(message); e.status = status; return e; }
+async function authUser(req) {
+  const m = (req.get('Authorization') || '').match(/^Bearer (.+)$/);
+  if (!m) throw httpErr(401, 'Please sign in first.');
+  try { return await admin.auth().verifyIdToken(m[1]); } catch (e) { throw httpErr(401, 'Your session expired. Please sign in again.'); }
+}
+const isAdminEmail = (email) => !!email && ADMIN_EMAILS.value().split(',').map(v => v.trim().toLowerCase()).filter(Boolean).includes(String(email).toLowerCase());
+async function loadPrintables(ids) {
+  if (!Array.isArray(ids) || !ids.length || ids.length > 20) throw httpErr(400, 'No printables selected.');
+  const uniq = [...new Set(ids.map(String))];
+  const out = [];
+  for (const id of uniq) {
+    if (!/^[a-z0-9-]{1,80}$/.test(id)) throw httpErr(400, 'Invalid printable.');
+    const r = (await db('learningResources/' + id).once('value')).val();
+    if (!r || r.active === false) throw httpErr(404, 'This printable is no longer available.');
+    const priv = (await db('learningPrivate/' + id + '/driveFileId').once('value')).val();
+    out.push({ id, title: String(r.title || id).slice(0, 100), price: Math.max(0, Number(r.price) || 0), hasFile: !!priv });
+  }
+  return out;
+}
+async function calculatePrintables(items, currency) {
+  if (!CURRENCIES.includes(currency) || currency === 'INR') throw httpErr(400, 'PayPal needs USD, EUR, GBP, AED, SGD, AUD or CAD.');
+  const subtotal = items.reduce((t, i) => t + i.price, 0);
+  if (!(subtotal > 0)) throw httpErr(400, 'Free printables do not need payment.');
+  const eff = (CFG.feeInternational / 100) * (1 + CFG.gst / 100); // no shipping: digital goods
+  const totalINR = CFG.passFee ? subtotal / (1 - eff) : subtotal;
+  const rate = await liveRate(currency);
+  const amount = (Math.round(totalINR * rate * 100) / 100).toFixed(2);
+  return { subtotal, totalINR: Math.round(totalINR * 100) / 100, rate, amount, currency };
+}
+async function driveFile(fileId) {
+  const auth = new GoogleAuth({ credentials: JSON.parse(DRIVE_SA_KEY.value()), scopes: ['https://www.googleapis.com/auth/drive.readonly'] });
+  const { token } = await (await auth.getClient()).getAccessToken();
+  const r = await fetch('https://www.googleapis.com/drive/v3/files/' + encodeURIComponent(fileId) + '?alt=media&supportsAllDrives=true', { headers: { Authorization: 'Bearer ' + token } });
+  if (!r.ok) { console.error('Drive error', r.status, await r.text().catch(() => '')); throw httpErr(502, 'The file could not be fetched from Google Drive. Check the file ID and that the folder is shared with the service account.'); }
+  return Buffer.from(await r.arrayBuffer());
+}
+
+exports.api = onRequest({ secrets: [KEY_ID, KEY_SECRET, PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET, DRIVE_SA_KEY], cors: ALLOWED_ORIGINS, region: 'us-central1' }, async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
   try {
     if (req.path === '/paypalConfig') {
@@ -129,6 +178,60 @@ exports.api = onRequest({ secrets: [KEY_ID, KEY_SECRET, PAYPAL_CLIENT_ID, PAYPAL
       snap.forEach(c => c.ref.update({ status: 'paid', paymentId: p, paidAt: admin.database.ServerValue.TIMESTAMP }));
       return res.json({ ok: true });
     }
+
+    if (req.path === '/createPrintableOrder') {
+      const user = await authUser(req);
+      const { resourceIds, currency } = req.body || {};
+      const items = await loadPrintables(resourceIds);
+      for (const it of items) {
+        if (!it.hasFile) throw httpErr(400, '"' + it.title + '" is not ready for sale yet.');
+        if (it.price > 0 && (await db('entitlements/' + user.uid + '/' + it.id).once('value')).exists()) throw httpErr(400, 'You already own "' + it.title + '".');
+      }
+      const paid = items.filter(i => i.price > 0);
+      const calc = await calculatePrintables(paid, currency);
+      const token = await paypalToken();
+      const ref = 'PR-' + Date.now() + '-' + crypto.randomBytes(3).toString('hex');
+      const pr = await fetch(paypalBase() + '/v2/checkout/orders', {
+        method: 'POST', headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json', 'PayPal-Request-Id': ref },
+        body: JSON.stringify({ intent: 'CAPTURE', purchase_units: [{ reference_id: ref, custom_id: ref, description: 'Kiddie Bloom printable PDF', amount: { currency_code: currency, value: calc.amount } }], application_context: { brand_name: 'Kiddie Bloom', user_action: 'PAY_NOW', shipping_preference: 'NO_SHIPPING' } })
+      });
+      const pd = await pr.json();
+      if (!pr.ok || !pd.id) throw new Error((pd && pd.message) || 'Could not create PayPal order.');
+      await db('printableOrders/' + ref).set({ uid: user.uid, email: user.email || '', paypalOrderId: pd.id, status: 'created', currency, rate: calc.rate, totalINR: calc.totalINR, amount: calc.amount, items: paid.map(i => ({ id: i.id, title: i.title, priceINR: i.price })), createdAt: admin.database.ServerValue.TIMESTAMP });
+      return res.json({ id: pd.id, orderRef: ref, currency, amount: calc.amount });
+    }
+    if (req.path === '/capturePrintableOrder') {
+      const user = await authUser(req);
+      const { orderRef, paypalOrderId } = req.body || {};
+      if (!/^PR-[a-zA-Z0-9-]{1,40}$/.test(String(orderRef || ''))) throw httpErr(400, 'Invalid order.');
+      const oref = db('printableOrders/' + orderRef);
+      const order = (await oref.once('value')).val();
+      if (!order || order.uid !== user.uid || order.paypalOrderId !== paypalOrderId) throw httpErr(404, 'Order not found.');
+      const ids = order.items.map(i => i.id);
+      if (order.status === 'paid') return res.json({ ok: true, resourceIds: ids });
+      const token = await paypalToken();
+      let cr = await fetch(paypalBase() + '/v2/checkout/orders/' + encodeURIComponent(paypalOrderId) + '/capture', { method: 'POST', headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' } });
+      if (!cr.ok) cr = await fetch(paypalBase() + '/v2/checkout/orders/' + encodeURIComponent(paypalOrderId), { headers: { Authorization: 'Bearer ' + token } }); // already captured? re-check
+      const cd = await cr.json();
+      const cap = cd && cd.purchase_units && cd.purchase_units[0] && cd.purchase_units[0].payments && cd.purchase_units[0].payments.captures && cd.purchase_units[0].payments.captures[0];
+      if (cd.status !== 'COMPLETED' || !cap || cap.status !== 'COMPLETED' || cap.amount.currency_code !== order.currency || Number(cap.amount.value) !== Number(order.amount)) throw httpErr(400, 'PayPal payment could not be confirmed.');
+      const updates = { ['printableOrders/' + orderRef + '/status']: 'paid', ['printableOrders/' + orderRef + '/paymentId']: cap.id, ['printableOrders/' + orderRef + '/paidAt']: admin.database.ServerValue.TIMESTAMP };
+      ids.forEach(id => { updates['entitlements/' + user.uid + '/' + id] = { orderRef, paidAt: admin.database.ServerValue.TIMESTAMP }; });
+      await admin.database().ref(root()).update(updates);
+      return res.json({ ok: true, resourceIds: ids });
+    }
+    if (req.path === '/download') {
+      const user = await authUser(req);
+      const { resourceId } = req.body || {};
+      const [item] = await loadPrintables([resourceId]);
+      if (item.price > 0 && !isAdminEmail(user.email) && !(await db('entitlements/' + user.uid + '/' + item.id).once('value')).exists()) throw httpErr(403, 'Please purchase this printable to download it.');
+      const fileId = (await db('learningPrivate/' + item.id + '/driveFileId').once('value')).val();
+      if (!fileId) throw httpErr(404, 'This printable has no file yet.');
+      const pdf = await driveFile(String(fileId));
+      if (pdf.length > 30 * 1024 * 1024) throw httpErr(413, 'File is too large to deliver. Keep PDFs under 30 MB.');
+      res.set({ 'Content-Type': 'application/pdf', 'Content-Disposition': 'attachment; filename="' + (item.title.replace(/[^a-zA-Z0-9 _-]/g, '').trim() || item.id) + '.pdf"', 'Cache-Control': 'private, no-store' });
+      return res.send(pdf);
+    }
     res.status(404).json({ error: 'Not found' });
-  } catch (e) { console.error(e); res.status(500).json({ error: e.message || 'Server error' }); }
+  } catch (e) { console.error(e); res.status(e.status || 500).json({ error: e.message || 'Server error' }); }
 });

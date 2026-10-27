@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../context/StoreContext';
 import { Book, LearningResource, LearningSection } from '../types';
+import { databaseRequest } from '../firebaseClient';
+
+const driveId = (v: string) => { const t = v.trim(); const m = t.match(/\/d\/([A-Za-z0-9_-]{10,})/) || t.match(/[?&]id=([A-Za-z0-9_-]{10,})/); return m ? m[1] : /^[A-Za-z0-9_-]{10,}$/.test(t) ? t : ''; };
 
 export const AdminView: React.FC = () => {
   const {
@@ -189,8 +192,8 @@ export const AdminView: React.FC = () => {
 
       {user?.isAdmin && <section className="admin-panel" style={{ margin: '24px 0' }}>
         <h2 style={{ fontFamily: 'var(--serif)', color: '#214c3d' }}>🖍️ Printable learning library</h2>
-        <p style={{ color: 'var(--mut)' }}>Publish PDFs by section and age. Store the PDF file in Firebase Storage and paste its download URL below; only its metadata is saved in Realtime Database.</p>
-        <form onSubmit={(e) => { e.preventDefault(); const id = resourceTitle.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); if (!id || !resourcePdfUrl.trim() || resourceMinAge > resourceMaxAge) { showToast('Add a title, valid age range, and PDF URL.'); return; } const resource: LearningResource = { id, title: resourceTitle.trim(), section: resourceSection, minAge: resourceMinAge, maxAge: resourceMaxAge, description: resourceDescription.trim(), pdfUrl: resourcePdfUrl.trim(), ...(resourceThumbnail.trim() ? { thumbnailUrl: resourceThumbnail.trim() } : {}), price: Math.max(0, Number(resourcePrice) || 0), active: true, createdAt: new Date().toISOString() }; addOrUpdateLearningResource(resource); setResourceTitle(''); setResourceDescription(''); setResourcePdfUrl(''); setResourceThumbnail(''); setResourcePrice(0); }}>
+        <p style={{ color: 'var(--mut)' }}>Publish PDFs by section and age. Upload the PDF to your private Google Drive folder and paste its share link or file ID. Only metadata is public; the Drive file ID is kept in an admin-only branch and the PDF is delivered by the server after payment.</p>
+        <form onSubmit={(e) => { e.preventDefault(); const id = resourceTitle.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); const fileId = driveId(resourcePdfUrl); if (!id || !fileId || resourceMinAge > resourceMaxAge) { showToast('Add a title, valid age range, and a Google Drive link or file ID.'); return; } const resource: LearningResource = { id, title: resourceTitle.trim(), section: resourceSection, minAge: resourceMinAge, maxAge: resourceMaxAge, description: resourceDescription.trim(), ...(resourceThumbnail.trim() ? { thumbnailUrl: resourceThumbnail.trim() } : {}), price: Math.max(0, Number(resourcePrice) || 0), active: true, createdAt: new Date().toISOString() }; addOrUpdateLearningResource(resource); if (firebaseConfigured) databaseRequest('learningPrivate/' + id, 'PUT', { driveFileId: fileId }).then(() => showToast('Drive file linked. Now press Publish printables to Firebase.')).catch(err => showToast('Could not save the Drive file ID: ' + (err instanceof Error ? err.message : 'error'))); else showToast('Firebase is not configured; the Drive file ID was not saved.'); setResourceTitle(''); setResourceDescription(''); setResourcePdfUrl(''); setResourceThumbnail(''); setResourcePrice(0); }}>
           <div className="form-row">
             <div className="form-group"><label>Printable title *</label><input required value={resourceTitle} onChange={e => setResourceTitle(e.target.value)} placeholder="e.g. Alphabet tracing fun" /></div>
             <div className="form-group"><label>Section *</label><select value={resourceSection} onChange={e => setResourceSection(e.target.value as LearningSection)}><option value="worksheet">Worksheet</option><option value="activity">Activity</option><option value="puzzle">Puzzle</option><option value="cut-and-paste">Cut and paste</option><option value="coloring">Coloring</option></select></div>
@@ -201,7 +204,7 @@ export const AdminView: React.FC = () => {
             <div className="form-group"><label>Price (₹, 0 = free)</label><input type="number" min="0" value={resourcePrice} onChange={e => setResourcePrice(Number(e.target.value))} /></div>
           </div>
           <div className="form-group"><label>Description</label><textarea value={resourceDescription} onChange={e => setResourceDescription(e.target.value)} placeholder="What will children practise?" /></div>
-          <div className="form-group"><label>PDF download URL * (Firebase Storage URL recommended)</label><input type="url" required value={resourcePdfUrl} onChange={e => setResourcePdfUrl(e.target.value)} placeholder="https://firebasestorage.googleapis.com/..." /></div>
+          <div className="form-group"><label>Google Drive PDF link or file ID *</label><input required value={resourcePdfUrl} onChange={e => setResourcePdfUrl(e.target.value)} placeholder="https://drive.google.com/file/d/…/view" /></div>
           <div className="form-group"><label>Optional thumbnail image URL</label><input type="url" value={resourceThumbnail} onChange={e => setResourceThumbnail(e.target.value)} placeholder="https://..." /></div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 16 }}><button className="btn gold" type="submit">Save printable record</button><button className="btn alt" type="button" disabled={!firebaseConfigured} onClick={async () => { try { await pushLearningResources(); } catch (e) { showToast(e instanceof Error ? e.message : 'Could not publish resources'); } }}>Publish printables to Firebase</button><button className="btn alt" type="button" disabled={!firebaseConfigured} onClick={async () => { try { await fetchLearningResources(); } catch (e) { showToast(e instanceof Error ? e.message : 'Could not fetch resources'); } }}>Fetch live printables</button></div>
         </form>

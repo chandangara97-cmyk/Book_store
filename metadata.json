@@ -1,6 +1,6 @@
 {
   "name": "Kiddie Bloom",
-  "description": "Tutorial books and learning gifts for children aged 0 to 15, with multi-currency checkout and interactive age finder.",
+  "description": "Digital printable PDFs (worksheets, activities, puzzles, cut-and-paste, coloring) for children, sold with PayPal and delivered instantly.",
   "prompt": "Kiddie Bloom bookstore and learning studio",
   "capabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

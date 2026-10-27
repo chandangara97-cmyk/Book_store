@@ -2,15 +2,12 @@ import React from 'react';
 import { useStore } from '../context/StoreContext';
 
 const TABS = [
-  { view: 'home', icon: '🏠', label: 'Home' },
-  { view: 'library', icon: '📚', label: 'Books' },
-  { view: 'toys', icon: '🧸', label: 'Toys' },
-  { view: 'gift-finder', icon: '🎁', label: 'Gifts' },
-  { view: 'cart', icon: '🛒', label: 'Cart' },
+  { view: 'printables', icon: '🖍️', label: 'Printables' },
+  { view: 'auth', icon: '👤', label: 'Account' },
 ];
 
 export const BottomNav: React.FC = () => {
-  const { view, setView, setSelectedCategory, cartCount } = useStore();
+  const { view, setView, setSelectedCategory } = useStore();
 
   if (view === 'checkout' || view === 'order-summary') return null;
 
@@ -26,13 +23,13 @@ export const BottomNav: React.FC = () => {
         <button
           key={t.view}
           type="button"
-          className={`bn-tab ${view === t.view ? 'active' : ''}`}
+          className={`bn-tab ${(view === t.view || (t.view === 'printables' && view === 'home')) ? 'active' : ''}`}
           onClick={() => go(t.view)}
-          aria-current={view === t.view ? 'page' : undefined}
+          aria-current={(view === t.view || (t.view === 'printables' && view === 'home')) ? 'page' : undefined}
         >
           <span className="bn-icon">
             {t.icon}
-            {t.view === 'cart' && cartCount > 0 && <span className="bn-badge">{cartCount}</span>}
+            
           </span>
           <span className="bn-label">{t.label}</span>
         </button>

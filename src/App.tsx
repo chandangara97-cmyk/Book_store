@@ -3,48 +3,21 @@ import { useStore } from './context/StoreContext';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { BottomNav } from './components/BottomNav';
-import { BookDetailModal } from './components/BookDetailModal';
-import { HomeView } from './views/HomeView';
-import { LibraryView } from './views/LibraryView';
-import { ToysView } from './views/ToysView';
-import { GiftFinderView } from './views/GiftFinderView';
-import { CartView } from './views/CartView';
-import { CheckoutView } from './views/CheckoutView';
-import { OrderSummaryView } from './views/OrderSummaryView';
-import { WishlistView } from './views/WishlistView';
 import { AuthView } from './views/AuthView';
 import { AdminView } from './views/AdminView';
 import { LearningView } from './views/LearningView';
 
 export const AppContent: React.FC = () => {
-  const { view, selectedBook, setSelectedBook, toastMessage } = useStore();
+  const { view, toastMessage } = useStore();
 
   const renderView = () => {
     switch (view) {
-      case 'home':
-        return <HomeView />;
-      case 'library':
-        return <LibraryView />;
-      case 'printables':
-        return <LearningView />;
-      case 'toys':
-        return <ToysView />;
-      case 'gift-finder':
-        return <GiftFinderView />;
-      case 'cart':
-        return <CartView />;
-      case 'checkout':
-        return <CheckoutView />;
-      case 'order-summary':
-        return <OrderSummaryView />;
-      case 'wishlist':
-        return <WishlistView />;
       case 'auth':
         return <AuthView />;
       case 'admin':
         return <AdminView />;
       default:
-        return <HomeView />;
+        return <LearningView />;
     }
   };
 
@@ -54,14 +27,6 @@ export const AppContent: React.FC = () => {
       <div style={{ flex: 1 }}>{renderView()}</div>
       <Footer />
       <BottomNav />
-
-      {/* Book details modal */}
-      {selectedBook && (
-        <BookDetailModal
-          book={selectedBook}
-          onClose={() => setSelectedBook(null)}
-        />
-      )}
 
       {/* Toast popup */}
       {toastMessage && (

@@ -46,58 +46,15 @@ export const Header: React.FC = () => {
               ))}{' '}
               <span className="wm-bloom">Bloom</span>
             </h1>
-            <span>Preschool Worksheets</span>
+            <span>Digital Printables</span>
           </div>
         </a>
 
         <nav aria-label="Main Navigation">
           <ul className="nav-links">
             <li>
-              <button
-                type="button"
-                className={view === 'library' ? 'active' : ''}
-                onClick={() => navigateTo('library')}
-              >
-                Shop all books
-              </button>
-            </li>
-            <li>
-              <button type="button" className={view === 'printables' ? 'active' : ''} onClick={() => navigateTo('printables')}>
-                Printables
-              </button>
-            </li>
-            <li>
-              <button
-                type="button"
-                onClick={() => scrollToSection('find')}
-              >
-                Find by age
-              </button>
-            </li>
-            <li>
-              <button
-                type="button"
-                className={view === 'toys' ? 'active' : ''}
-                onClick={() => navigateTo('toys')}
-              >
-                Toys & Gifts
-              </button>
-            </li>
-            <li>
-              <button
-                type="button"
-                className={view === 'gift-finder' ? 'active' : ''}
-                onClick={() => navigateTo('gift-finder')}
-              >
-                Gift Finder
-              </button>
-            </li>
-            <li>
-              <button
-                type="button"
-                onClick={() => scrollToSection('how')}
-              >
-                How to buy
+              <button type="button" className={view === 'printables' || view === 'home' ? 'active' : ''} onClick={() => navigateTo('printables')}>
+                All printables
               </button>
             </li>
           </ul>
@@ -121,27 +78,6 @@ export const Header: React.FC = () => {
             onClick={() => navigateTo('auth')}
           >
             👤
-          </button>
-
-          <button
-            type="button"
-            className="icon-btn"
-            title="Wishlist"
-            aria-label="Wishlist"
-            onClick={() => navigateTo('wishlist')}
-          >
-            ♡
-          </button>
-
-          <button
-            type="button"
-            className="icon-btn"
-            title="Cart"
-            aria-label="Cart"
-            onClick={() => navigateTo('cart')}
-          >
-            🛒
-            {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
           </button>
 
           <button
@@ -170,22 +106,7 @@ export const Header: React.FC = () => {
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
         <div className="mobile-drawer" role="navigation" aria-label="Mobile menu">
-          <button type="button" className="mobile-drawer-link" onClick={() => navigateTo('library')}>
-            📚 Shop all books
-          </button>
           <button type="button" className="mobile-drawer-link" onClick={() => navigateTo('printables')}>🖍️ Printables: Worksheets & Activities</button>
-          <button type="button" className="mobile-drawer-link" onClick={() => scrollToSection('find')}>
-            🔍 Find by age
-          </button>
-          <button type="button" className="mobile-drawer-link" onClick={() => scrollToSection('how')}>
-            🧾 How to buy
-          </button>
-          <button type="button" className="mobile-drawer-link" onClick={() => navigateTo('toys')}>
-            🧸 Toys & Learning Kits
-          </button>
-          <button type="button" className="mobile-drawer-link" onClick={() => navigateTo('gift-finder')}>
-            🎁 Gift Finder
-          </button>
           <button type="button" className="mobile-drawer-link" onClick={() => navigateTo('admin')}>
             ⚙️ Studio Admin
           </button>
