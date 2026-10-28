@@ -27,6 +27,7 @@ interface StoreContextType {
   books: Book[];
   toys: Book[];
   addOrUpdateProduct: (product: Book) => void;
+  deleteProduct: (id: string, type: 'book' | 'toy') => void;
   resetCatalogToDefault: () => void;
   fetchCatalogFromFirebase: () => Promise<void>;
   pushCatalogToFirebase: () => Promise<void>;
@@ -474,6 +475,16 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     showToast(`Product “${product.title}” saved locally. Use Push to Firebase to publish it.`);
   };
 
+  const deleteProduct = (id: string, type: 'book' | 'toy') => {
+    if (!user?.isAdmin) { showToast('Admin access is required to remove a product.'); return; }
+    if (type === 'toy') {
+      setToys(prev => { const updated = prev.filter(item => item.id !== id); localStorage.setItem(CATALOG_TOYS_KEY, JSON.stringify(updated)); return updated; });
+    } else {
+      setBooks(prev => { const updated = prev.filter(item => item.id !== id); localStorage.setItem(CATALOG_BOOKS_KEY, JSON.stringify(updated)); return updated; });
+    }
+    showToast('Product removed from the local workspace. Press Push catalog to Firebase to publish the change.');
+  };
+
   const fetchCatalogFromFirebase = async () => {
     const [remoteBooks, remoteToys] = await Promise.all([databaseRequest<Record<string, Book> | Book[]>('books'), databaseRequest<Record<string, Book> | Book[]>('toys')]);
     const bookList = withAges(remoteBooks ? (Array.isArray(remoteBooks) ? remoteBooks : Object.values(remoteBooks)) : []);
@@ -526,6 +537,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         books,
         toys,
         addOrUpdateProduct,
+        deleteProduct,
         resetCatalogToDefault,
         fetchCatalogFromFirebase,
         pushCatalogToFirebase,

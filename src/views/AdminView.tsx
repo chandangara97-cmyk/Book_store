@@ -11,6 +11,7 @@ export const AdminView: React.FC = () => {
     toys,
     orders,
     addOrUpdateProduct,
+    deleteProduct,
     resetCatalogToDefault,
     fetchCatalogFromFirebase,
     pushCatalogToFirebase,
@@ -22,6 +23,7 @@ export const AdminView: React.FC = () => {
   } = useStore();
 
   const [activeTab, setActiveTab] = useState<'book' | 'toy'>('book');
+  const [catalogSearch, setCatalogSearch] = useState('');
   const [syncBusy, setSyncBusy] = useState(false);
   const [syncError, setSyncError] = useState('');
   const [resourceTitle, setResourceTitle] = useState('');
@@ -124,7 +126,8 @@ export const AdminView: React.FC = () => {
     handleClear();
   };
 
-  const recentItems: Book[] = [...books, ...toys].slice(-10).reverse();
+  const allItems: Book[] = [...books, ...toys];
+  const filteredItems = allItems.filter((item) => `${item.title} ${item.author} ${item.category} ${item.id}`.toLowerCase().includes(catalogSearch.trim().toLowerCase()));
 
   return (
     <div className="admin-shell">
@@ -440,26 +443,18 @@ export const AdminView: React.FC = () => {
         {/* Right: Recently Added & Tools */}
         <aside className="admin-panel">
           <h2 style={{ fontFamily: 'var(--serif)', fontSize: '24px', color: '#214c3d', marginBottom: '4px' }}>
-            Recently added
+            Book & product manager
           </h2>
-          <p style={{ fontSize: '14px', color: '#778278', marginBottom: '18px' }}>
-            The latest products currently stored in your studio catalogue.
+          <p style={{ fontSize: '14px', color: '#778278', marginBottom: '14px' }}>
+            Search the complete catalogue, edit details, or remove products. Changes stay in this workspace until published to Firebase.
           </p>
+          <label className="admin-search-label" htmlFor="catalog-search">Search catalogue</label>
+          <input id="catalog-search" className="admin-catalog-search" value={catalogSearch} onChange={(e) => setCatalogSearch(e.target.value)} placeholder="Search by title, author, category or ID…" />
+          <div className="admin-catalog-count">Showing {filteredItems.length} of {allItems.length} products</div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '420px', overflowY: 'auto' }}>
-            {recentItems.map((p) => (
-              <div
-                key={p.id}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '12px 14px',
-                  border: '1px solid var(--border)',
-                  borderRadius: '14px',
-                  background: 'var(--card-bg)'
-                }}
-              >
+          <div className="admin-product-list">
+            {filteredItems.map((p) => (
+              <div key={`${p.type || 'book'}-${p.id}`} className="admin-product-row">
                 <div>
                   <strong style={{ display: 'block', fontSize: '14.5px', color: 'var(--ink)' }}>
                     {p.title}
@@ -469,24 +464,13 @@ export const AdminView: React.FC = () => {
                   </small>
                 </div>
 
-                <button
-                  type="button"
-                  style={{
-                    border: '1px solid var(--border)',
-                    borderRadius: '99px',
-                    background: 'var(--accent)',
-                    padding: '6px 12px',
-                    cursor: 'pointer',
-                    color: 'var(--ink)',
-                    fontWeight: 700,
-                    fontSize: '13px'
-                  }}
-                  onClick={() => handleEditItem(p)}
-                >
-                  Edit
-                </button>
+                <div className="admin-product-actions">
+                  <button type="button" className="btn sm btn-secondary" onClick={() => handleEditItem(p)}>Edit</button>
+                  <button type="button" className="btn sm admin-delete-btn" onClick={() => { if (window.confirm(`Remove “${p.title}” from this catalogue workspace? You must push the catalog to publish this deletion.`)) deleteProduct(p.id, p.type === 'toy' ? 'toy' : 'book'); }}>Remove</button>
+                </div>
               </div>
             ))}
+            {filteredItems.length === 0 && <p className="admin-empty-state">No products match that search. Try a different title or ID.</p>}
           </div>
 
           {/* Seed Tools */}
