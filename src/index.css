@@ -2810,3 +2810,129 @@ header.header {
 .hero-banner img { display: block; width: 100%; height: auto; border-radius: 32px; border: 4px solid #fff; box-shadow: 0 10px 0 rgba(255, 79, 154, 0.18), 0 14px 30px rgba(23, 34, 79, 0.12); background: #fff; }
 .hero .hero-banner + .hg { padding-top: 32px; }
 @media (max-width: 720px) { .hero-banner { padding-top: 18px; } .hero-banner img { border-radius: 20px; } }
+
+/* Kiddie Bloom storefront refinement: clearer hierarchy, polished cards and mobile controls */
+.printables-page { max-width: 1240px; }
+.printables-hero { position: relative; isolation: isolate; overflow: hidden; border: 1px solid rgba(255,255,255,.8); box-shadow: 0 18px 48px rgba(35,76,61,.10); }
+.printables-hero:after { content: ''; position: absolute; width: 240px; height: 240px; border: 32px solid rgba(255,210,31,.20); border-radius: 50%; right: -90px; bottom: -135px; z-index: -1; }
+.printables-hero > span { display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 999px; background: rgba(255,255,255,.78); font-size: 11px; letter-spacing: 1.6px !important; }
+.printables-hero h1 { max-width: 760px; letter-spacing: -.035em; }
+.printables-hero p { font-size: clamp(15px, 1.6vw, 18px); color: #52675b; }
+.printables-hero .pill { display: inline-flex; align-items: center; padding: 9px 13px; border: 1px solid rgba(37,80,60,.10); border-radius: 999px; background: rgba(255,255,255,.75); font-size: 13px; font-weight: 800; box-shadow: 0 3px 10px rgba(30,60,40,.04); }
+.printables-section-heading { margin: 8px 0 18px; }
+.printables-section-heading .eyebrow { display: block; color: #a66a32; font-size: 11px; letter-spacing: 1.7px; font-weight: 900; margin-bottom: 6px; }
+.printables-section-heading .sec-title { margin-bottom: 8px; font-size: clamp(25px, 3vw, 34px); }
+.printables-section-heading p { color: var(--mut); margin: 0; }
+.printables-categories { grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)) !important; }
+.printables-categories .btn { min-height: 48px; border-radius: 15px; font-weight: 800; transition: transform .18s ease, box-shadow .18s ease; }
+.printables-categories .btn:hover { transform: translateY(-2px); box-shadow: 0 7px 18px rgba(23,34,79,.10); }
+.printables-toolbar { padding: 15px; border: 1px solid var(--border); border-radius: 18px; background: var(--card-bg); box-shadow: 0 6px 22px rgba(23,34,79,.035); }
+.printables-toolbar input, .printables-toolbar select { min-height: 44px; border-radius: 12px !important; border: 1px solid #d7dfd5 !important; outline: none; }
+.printables-toolbar input { flex: 1 1 250px; }
+.printables-toolbar input:focus, .printables-toolbar select:focus { border-color: #46a77b !important; box-shadow: 0 0 0 3px rgba(70,167,123,.14); }
+.printables-grid { align-items: stretch; }
+.printable-card { display: flex; flex-direction: column; min-width: 0; transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; box-shadow: 0 8px 24px rgba(38,75,55,.07) !important; }
+.printable-card:hover { transform: translateY(-4px); box-shadow: 0 16px 34px rgba(38,75,55,.13) !important; border-color: #c9dfcf !important; }
+.printable-card-art { height: 175px !important; position: relative; overflow: hidden; }
+.printable-card-art:after { content: 'PDF • INSTANT ACCESS'; position: absolute; left: 12px; bottom: 12px; padding: 5px 9px; border-radius: 999px; background: rgba(255,255,255,.92); color: #285740; font-size: 9px; font-weight: 900; letter-spacing: .8px; box-shadow: 0 3px 10px rgba(0,0,0,.06); }
+.printable-card-art img { transition: transform .35s ease; }
+.printable-card:hover .printable-card-art img { transform: scale(1.035); }
+.printable-card > div:nth-child(2) { display: flex; flex: 1; flex-direction: column; }
+.printable-card h3 { font-size: 20px; line-height: 1.25; }
+.printable-card p { font-size: 14px; line-height: 1.55; }
+.printable-card .btn { min-height: 42px; border-radius: 12px; white-space: nowrap; }
+.printable-card strong { font-size: 18px; color: #214c3d; }
+[data-theme="dark"] .printables-hero { background: linear-gradient(120deg,#1c2a36,#1c302b 65%,#1b2b40) !important; border-color: var(--border); }
+[data-theme="dark"] .printables-hero p { color: #c0d0c5; }
+[data-theme="dark"] .printables-hero .pill { background: rgba(255,255,255,.08); color: var(--text); border-color: var(--border); }
+[data-theme="dark"] .printable-card { background: var(--card-bg) !important; border-color: var(--border) !important; }
+[data-theme="dark"] .printable-card h3, [data-theme="dark"] .printable-card strong { color: var(--text); }
+[data-theme="dark"] .printable-card p { color: var(--text-muted) !important; }
+@media (max-width: 720px) {
+  .printables-page { padding-top: 18px !important; padding-bottom: 90px !important; }
+  .printables-hero { border-radius: 22px !important; padding: 25px 20px !important; margin-bottom: 25px !important; }
+  .printables-hero h1 { font-size: clamp(31px, 8vw, 42px) !important; }
+  .printables-hero .pill { font-size: 11px; padding: 8px 10px; }
+  .printables-categories { grid-template-columns: repeat(2, minmax(0,1fr)) !important; gap: 9px !important; }
+  .printables-categories .btn { padding: 10px 8px; font-size: 12px; }
+  .printables-toolbar { align-items: stretch !important; padding: 12px; }
+  .printables-toolbar > div { width: 100%; }
+  .printables-toolbar input { width: 100%; min-width: 0 !important; }
+  .printables-grid { grid-template-columns: repeat(2, minmax(0,1fr)) !important; gap: 12px !important; }
+  .printable-card { border-radius: 16px !important; }
+  .printable-card-art { height: 125px !important; font-size: 42px !important; }
+  .printable-card-art:after { left: 7px; bottom: 7px; font-size: 7px; padding: 4px 6px; }
+  .printable-card > div:nth-child(2) { padding: 12px !important; }
+  .printable-card h3 { font-size: 15px; }
+  .printable-card p { min-height: 0 !important; font-size: 12px; }
+  .printable-card .btn { font-size: 11px; padding: 9px 8px; white-space: normal; }
+  .printable-card strong { font-size: 15px; }
+}
+@media (max-width: 360px) { .printables-grid { grid-template-columns: 1fr !important; } .printable-card-art { height: 160px !important; } }
+@media (prefers-reduced-motion: reduce) { .printable-card, .printable-card-art img, .printables-categories .btn { transition: none !important; } }
+
+
+/* Site-wide finish: improve readability and consistency without changing the home hero artwork. */
+:root { scroll-padding-top: 88px; }
+html { scroll-behavior: smooth; }
+body { text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 3px solid rgba(59, 130, 246, .55);
+  outline-offset: 3px;
+}
+.header-inner { max-width: 1440px; }
+.header-actions .icon-btn { transition: background .18s ease, transform .18s ease, border-color .18s ease; }
+.header-actions .icon-btn:hover { background: var(--sky-soft, #f2f7ff); border-color: var(--border); transform: translateY(-1px); }
+.nav-links button, .footer-links button { transition: color .18s ease, background .18s ease; }
+.page-header, .page-header--photo { position: relative; }
+.page-header .container, .page-header--photo .container { max-width: 1240px; }
+.page-header h1, .page-header--photo h1 { text-wrap: balance; }
+.page-header p, .page-header--photo p { max-width: 68ch; line-height: 1.7; }
+.book-grid { align-items: stretch; }
+.book-card { min-width: 0; display: flex; flex-direction: column; transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+.book-card .book-info { display: flex; flex: 1; flex-direction: column; min-width: 0; }
+.book-card .desc { line-height: 1.55; }
+.book-card .price { margin-top: auto; padding-top: 8px; }
+.book-card .book-actions-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.book-card .book-actions-row .btn { flex: 1 1 auto; min-height: 42px; }
+.book-cover img { transition: transform .25s ease; }
+.book-card:hover .book-cover img { transform: scale(1.025); }
+.btn { transition: transform .16s ease, box-shadow .16s ease, background .16s ease; }
+.btn:focus-visible { outline-offset: 3px; }
+.controls-bar, .checkout-section, .cart-summary, .admin-panel, .modal-content { box-shadow: 0 12px 36px rgba(25, 39, 69, .07); }
+.form-group input, .form-group select, .form-group textarea,
+.controls-bar input, .controls-bar select, .checkout-section input, .checkout-section select,
+.checkout-section textarea { max-width: 100%; border-radius: 12px; }
+.filter-btn, .filter-toggle, .sort-select { transition: background .16s ease, border-color .16s ease, transform .16s ease; }
+.filter-btn:hover { transform: translateY(-1px); }
+.modal-overlay { backdrop-filter: blur(5px); }
+.modal-content { max-height: min(90dvh, 900px); overflow-y: auto; overscroll-behavior: contain; }
+.footer-inner { gap: 20px; }
+.footer-brand span { line-height: 1.6; }
+img { max-width: 100%; }
+@media (min-width: 1100px) {
+  .book-grid { gap: 24px; }
+  .book-card { padding: 22px; }
+}
+@media (max-width: 720px) {
+  :root { scroll-padding-top: 68px; }
+  .header-inner { min-width: 0; }
+  .header-actions .icon-btn:hover { transform: none; }
+  .book-card .book-actions-row .btn { min-width: 0; }
+  .book-card .book-actions-row { gap: 6px; }
+  .modal-content { max-height: 92dvh; }
+  .page-header p, .page-header--photo p { font-size: 14px; }
+  .footer-inner { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 380px) {
+  .brand-logo { flex-shrink: 0; }
+  .brand-text h1 { font-size: 1.05rem !important; }
+  .header-actions .icon-btn { width: 34px; height: 34px; }
+  .book-grid { grid-template-columns: 1fr !important; }
+  .book-cover { height: 190px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}

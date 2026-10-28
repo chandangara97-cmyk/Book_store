@@ -43,6 +43,10 @@
       "learningResources": {
         ".read": true,
         ".write": "auth != null && auth.token.email === 'REPLACE-WITH-ADMIN-EMAIL@example.com'"
+      },
+      "downloadTokens": {
+        ".read": false,
+        ".write": false
       }
     }
   }

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useStore } from '../context/StoreContext';
 import { LearningResource } from '../types';
-import { capturePrintableOrder, createPrintableOrder, getPayPalConfig, loadPayPalSdk } from '../printablesApi';
+import { API_URL, capturePrintableOrder, createPrintableOrder, getPayPalConfig, loadPayPalSdk } from '../printablesApi';
 
 const CURRENCIES = ['USD', 'EUR', 'GBP', 'AED', 'SGD', 'AUD', 'CAD'];
 
@@ -11,6 +11,7 @@ export const PrintablePayModal: React.FC<{ resource: LearningResource; onClose: 
   const [currency, setCurrency] = useState('USD');
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [error, setError] = useState('');
+  const [downloadLink, setDownloadLink] = useState('');
 
   useEffect(() => {
     let cancelled = false;
@@ -27,7 +28,10 @@ export const PrintablePayModal: React.FC<{ resource: LearningResource; onClose: 
           onApprove: async (data: { orderID: string }) => {
             try {
               const done = await capturePrintableOrder((box.current as any).__ref, data.orderID);
-              showToast('Payment received. Your PDF is ready to download!');
+              const token = done.downloadTokens?.[resource.id];
+              if (!token) throw new Error('Payment was confirmed, but the download link could not be created. Please contact support with your order reference.');
+              setDownloadLink(`${API_URL}/downloadOnce?token=${encodeURIComponent(token)}`);
+              showToast('Payment verified. Your one-time PDF link is ready.');
               onPaid(done.resourceIds);
             } catch (e) { setError(e instanceof Error ? e.message : 'Payment could not be confirmed.'); }
           },
@@ -43,7 +47,8 @@ export const PrintablePayModal: React.FC<{ resource: LearningResource; onClose: 
     <div className="modal-content" style={{ maxWidth: 440 }} onClick={e => e.stopPropagation()}>
       <button className="close-modal-btn" onClick={onClose}>✕</button>
       <h2 style={{ fontSize: 24, marginBottom: 8, color: 'var(--ink)' }}>{resource.title}</h2>
-      <p style={{ color: '#5c6472', fontSize: 14, marginBottom: 16 }}>Digital download (PDF) · no shipping · ₹{resource.price.toFixed(0)} (charged in your chosen currency at today’s rate, including payment fees). The download unlocks right after payment.</p>
+      <p style={{ color: '#5c6472', fontSize: 14, marginBottom: 16 }}>Digital download (PDF) · no shipping · ₹{resource.price.toFixed(0)}. After verified payment, your private download link works once and expires after 24 hours.</p>
+      {downloadLink && <div role="status" style={{ background: '#edf7f0', border: '1px solid #cfe4d4', borderRadius: 14, padding: 16, marginBottom: 16 }}><strong style={{ display: 'block', color: '#214c3d', marginBottom: 8 }}>Payment approved — your PDF is ready</strong><a href={downloadLink} onClick={() => { setTimeout(() => setDownloadLink(''), 1200); }} style={{ display: 'inline-block', background: '#214c3d', color: 'white', padding: '11px 16px', borderRadius: 10, fontWeight: 700, textDecoration: 'none' }}>Download PDF once ↓</a><p style={{ fontSize: 12, color: '#5c6472', margin: '10px 0 0' }}>Keep this link private. It expires after one successful download or 24 hours.</p></div>}
       <label htmlFor="pp-cur" style={{ fontWeight: 700, marginRight: 8 }}>Pay in</label>
       <select id="pp-cur" value={currency} onChange={e => setCurrency(e.target.value)} style={{ padding: '8px 12px', borderRadius: 10, marginBottom: 16 }}>{CURRENCIES.map(c => <option key={c}>{c}</option>)}</select>
       {status === 'loading' && <p>Loading secure checkout…</p>}

@@ -118,9 +118,43 @@ async function driveFile(fileId) {
   return Buffer.from(await r.arrayBuffer());
 }
 
+async function makeDownloadTokens(orderRef, uid, items) {
+  const tokens = {};
+  const now = Date.now();
+  for (const item of items) {
+    const raw = crypto.randomBytes(32).toString('hex');
+    const tokenHash = crypto.createHash('sha256').update(raw).digest('hex');
+    tokens[item.id] = raw;
+    // The token is a bearer secret. Only its hash is stored in the database.
+    await db('downloadTokens/' + tokenHash).set({ resourceId: item.id, uid, orderRef, createdAt: now, expiresAt: now + 24 * 60 * 60 * 1000, used: false });
+  }
+  return tokens;
+}
+
 exports.api = onRequest({ secrets: [KEY_ID, KEY_SECRET, PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET, DRIVE_SA_KEY], cors: ALLOWED_ORIGINS, region: 'us-central1' }, async (req, res) => {
-  if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
   try {
+    // One-time links are bearer links, so they deliberately do not require a signed-in session.
+    // A database transaction makes each token single-use even for simultaneous requests.
+    if (req.method === 'GET' && req.path === '/downloadOnce') {
+      const raw = String((req.query && req.query.token) || '');
+      if (!/^[a-f0-9]{64}$/.test(raw)) throw httpErr(400, 'Invalid download link.');
+      const tokenHash = crypto.createHash('sha256').update(raw).digest('hex');
+      const tokenRef = db('downloadTokens/' + tokenHash);
+      const tx = await tokenRef.transaction(current => {
+        if (!current || current.used || Number(current.expiresAt) < Date.now()) return;
+        return { ...current, used: true, usedAt: Date.now() };
+      });
+      if (!tx.committed || !tx.snapshot || !tx.snapshot.val()) throw httpErr(410, 'This download link has expired or has already been used.');
+      const grant = tx.snapshot.val();
+      const [item] = await loadPrintables([grant.resourceId]);
+      const fileId = (await db('learningPrivate/' + item.id + '/driveFileId').once('value')).val();
+      if (!fileId) throw httpErr(404, 'This printable has no file yet.');
+      const pdf = await driveFile(String(fileId));
+      if (pdf.length > 30 * 1024 * 1024) throw httpErr(413, 'File is too large to deliver. Keep PDFs under 30 MB.');
+      res.set({ 'Content-Type': 'application/pdf', 'Content-Disposition': 'attachment; filename="' + (item.title.replace(/[^a-zA-Z0-9 _-]/g, '').trim() || item.id) + '.pdf"', 'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff' });
+      return res.send(pdf);
+    }
+    if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
     if (req.path === '/paypalConfig') {
       return res.json({ clientId: PAYPAL_CLIENT_ID.value(), environment: PAYPAL_ENVIRONMENT.value() });
     }
@@ -208,23 +242,28 @@ exports.api = onRequest({ secrets: [KEY_ID, KEY_SECRET, PAYPAL_CLIENT_ID, PAYPAL
       const order = (await oref.once('value')).val();
       if (!order || order.uid !== user.uid || order.paypalOrderId !== paypalOrderId) throw httpErr(404, 'Order not found.');
       const ids = order.items.map(i => i.id);
-      if (order.status === 'paid') return res.json({ ok: true, resourceIds: ids });
+      if (order.status === 'paid') return res.json({ ok: true, resourceIds: ids, downloadTokens: order.downloadTokens || {} });
       const token = await paypalToken();
       let cr = await fetch(paypalBase() + '/v2/checkout/orders/' + encodeURIComponent(paypalOrderId) + '/capture', { method: 'POST', headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' } });
       if (!cr.ok) cr = await fetch(paypalBase() + '/v2/checkout/orders/' + encodeURIComponent(paypalOrderId), { headers: { Authorization: 'Bearer ' + token } }); // already captured? re-check
       const cd = await cr.json();
       const cap = cd && cd.purchase_units && cd.purchase_units[0] && cd.purchase_units[0].payments && cd.purchase_units[0].payments.captures && cd.purchase_units[0].payments.captures[0];
       if (cd.status !== 'COMPLETED' || !cap || cap.status !== 'COMPLETED' || cap.amount.currency_code !== order.currency || Number(cap.amount.value) !== Number(order.amount)) throw httpErr(400, 'PayPal payment could not be confirmed.');
-      const updates = { ['printableOrders/' + orderRef + '/status']: 'paid', ['printableOrders/' + orderRef + '/paymentId']: cap.id, ['printableOrders/' + orderRef + '/paidAt']: admin.database.ServerValue.TIMESTAMP };
-      ids.forEach(id => { updates['entitlements/' + user.uid + '/' + id] = { orderRef, paidAt: admin.database.ServerValue.TIMESTAMP }; });
+      const downloadTokens = await makeDownloadTokens(orderRef, user.uid, order.items);
+      const updates = { ['printableOrders/' + orderRef + '/status']: 'paid', ['printableOrders/' + orderRef + '/paymentId']: cap.id, ['printableOrders/' + orderRef + '/paidAt']: admin.database.ServerValue.TIMESTAMP, ['printableOrders/' + orderRef + '/downloadTokens']: downloadTokens };
+      ids.forEach(id => { updates['entitlements/' + user.uid + '/' + id] = { orderRef, paidAt: admin.database.ServerValue.TIMESTAMP, downloadLimit: 1 }; });
       await admin.database().ref(root()).update(updates);
-      return res.json({ ok: true, resourceIds: ids });
+      return res.json({ ok: true, resourceIds: ids, downloadTokens });
     }
     if (req.path === '/download') {
       const user = await authUser(req);
       const { resourceId } = req.body || {};
       const [item] = await loadPrintables([resourceId]);
-      if (item.price > 0 && !isAdminEmail(user.email) && !(await db('entitlements/' + user.uid + '/' + item.id).once('value')).exists()) throw httpErr(403, 'Please purchase this printable to download it.');
+      if (item.price > 0 && !isAdminEmail(user.email)) {
+        const entitlement = await db('entitlements/' + user.uid + '/' + item.id).once('value');
+        if (!entitlement.exists()) throw httpErr(403, 'Please purchase this printable to download it.');
+        throw httpErr(403, 'Paid PDFs use a one-time download link. Open the link provided after payment; this direct download route cannot be reused.');
+      }
       const fileId = (await db('learningPrivate/' + item.id + '/driveFileId').once('value')).val();
       if (!fileId) throw httpErr(404, 'This printable has no file yet.');
       const pdf = await driveFile(String(fileId));

@@ -94,7 +94,6 @@ export const Header: React.FC = () => {
           <button
             type="button"
             className="icon-btn mobile-menu-btn"
-            style={{ display: 'none' }}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle navigation menu"
           >

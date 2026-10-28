@@ -14,6 +14,7 @@ const refOf = p => ({
   once: async () => { const v = getAt(p); return { val: () => (v === undefined ? null : JSON.parse(JSON.stringify(v))), exists: () => v !== undefined }; },
   set: async v => setAt(p, resolve(v)),
   update: async u => { for (const [k, v] of Object.entries(u)) setAt(p + '/' + k, resolve(v)); },
+  transaction: async updater => { const current = getAt(p); const next = updater(current === undefined ? null : JSON.parse(JSON.stringify(current))); if (next === undefined) return { committed: false, snapshot: { val: () => current ?? null } }; setAt(p, resolve(next)); return { committed: true, snapshot: { val: () => JSON.parse(JSON.stringify(getAt(p))) } }; },
 });
 const tokens = { 'tok-alice': { uid: 'alice', email: 'alice@x.com' }, 'tok-bob': { uid: 'bob', email: 'bob@x.com' }, 'tok-admin': { uid: 'adm', email: 'admin@x.com' } };
 const admin = { initializeApp() {}, database: Object.assign(() => ({ ref: refOf }), { ServerValue: { TIMESTAMP: TS } }), auth: () => ({ verifyIdToken: async t => { if (!tokens[t]) throw new Error('bad'); return tokens[t]; } }) };
@@ -47,7 +48,7 @@ require(require('path').join(__dirname, '..', 'index.js'));
 
 // ---- harness ----
 async function call(p, body, token) {
-  const req = { method: 'POST', path: p, body, get: h => (h === 'Authorization' && token ? 'Bearer ' + token : '') };
+  const req = { method: p === '/downloadOnce' ? 'GET' : 'POST', path: p, query: body || {}, body, get: h => (h === 'Authorization' && token ? 'Bearer ' + token : '') };
   const res = { code: 200, headers: {}, body: null, status(c) { this.code = c; return this; }, json(b) { this.body = b; return this; }, send(b) { this.body = b; return this; }, set(h) { Object.assign(this.headers, h); return this; } };
   await handler(req, res); return res;
 }
@@ -83,8 +84,12 @@ async function t(name, fn) { seed(); try { await fn(); pass++; console.log('PASS
     assert.ok(tree.bookstore.entitlements.alice['abc-tracing']);
     assert.equal(tree.bookstore.printableOrders[o.body.orderRef].status, 'paid');
     const d = await call('/download', { resourceId: 'abc-tracing' }, 'tok-alice');
-    assert.equal(d.code, 200); assert.equal(d.headers['Content-Type'], 'application/pdf'); assert.match(d.headers['Content-Disposition'], /ABC Tracing\.pdf/); assert.match(d.headers['Cache-Control'], /no-store/);
-    assert.ok(Buffer.isBuffer(d.body) && d.body.toString().startsWith('%PDF'));
+    assert.equal(d.code, 403);
+    const raw = c.body.downloadTokens['abc-tracing'];
+    const once = await call('/downloadOnce', { token: raw });
+    assert.equal(once.code, 200); assert.equal(once.headers['Content-Type'], 'application/pdf'); assert.match(once.headers['Content-Disposition'], /ABC Tracing\.pdf/); assert.match(once.headers['Cache-Control'], /no-store/);
+    assert.ok(Buffer.isBuffer(once.body) && once.body.toString().startsWith('%PDF'));
+    assert.equal((await call('/downloadOnce', { token: raw })).code, 410);
   });
   await t("other customer cannot download alice's purchase", async () => {
     const o = await call('/createPrintableOrder', { resourceIds: ['abc-tracing'], currency: 'USD' }, 'tok-alice');
@@ -133,6 +138,7 @@ async function t(name, fn) { seed(); try { await fn(); pass++; console.log('PASS
   await t('admin can download paid file for checking', async () => { assert.equal((await call('/download', { resourceId: 'abc-tracing' }, 'tok-admin')).code, 200); });
   await t('Drive failure gives a clear 502, no crash', async () => { const r = await call('/download', { resourceId: 'badfile' }, 'tok-admin'); assert.equal(r.code, 502); assert.match(r.body.error, /Google Drive/); });
   await t('Drive URL never returned to the client', async () => { const r = await call('/download', { resourceId: 'abc-tracing' }, 'tok-admin'); assert.ok(!JSON.stringify(r.headers).includes('FILE123')); });
+  await t('one-time link rejects invalid token', async () => { assert.equal((await call('/downloadOnce', { token: 'bad' })).code, 400); });
   await t('non-POST rejected', async () => { const res = { code: 0, status(c) { this.code = c; return this; }, json() { return this; } }; await handler({ method: 'GET', path: '/download', get: () => '' }, res); assert.equal(res.code, 405); });
   console.log(`\n${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);
 })();

@@ -27,7 +27,7 @@ export async function loadOwnedPrintables(): Promise<string[]> {
 export const createPrintableOrder = (resourceIds: string[], currency: string) =>
   postJson<{ id: string; orderRef: string; currency: string; amount: string }>('/createPrintableOrder', { resourceIds, currency });
 export const capturePrintableOrder = (orderRef: string, paypalOrderId: string) =>
-  postJson<{ ok: boolean; resourceIds: string[] }>('/capturePrintableOrder', { orderRef, paypalOrderId });
+  postJson<{ ok: boolean; resourceIds: string[]; downloadTokens: Record<string, string> }>('/capturePrintableOrder', { orderRef, paypalOrderId });
 export const getPayPalConfig = () => postJson<{ clientId: string; environment: string }>('/paypalConfig', {});
 
 /** Fetches the PDF through the server (which checks payment) and saves it on the device. */

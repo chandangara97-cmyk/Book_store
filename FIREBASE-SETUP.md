@@ -68,3 +68,12 @@ The portal supports five printable sections (`worksheet`, `activity`, `puzzle`, 
 5. Ensure the deployed Realtime Database rules include the `learningResources` rule in `firebase-rules.json`. Replace the example admin email with the real admin email before deploying rules.
 
 Age ranges overlap deliberately: a resource is shown when its age range overlaps the selected age band.
+
+
+## One-time paid PDF links
+
+Paid printable PDFs are delivered through a server-generated bearer link after PayPal capture is verified. The link expires after 24 hours and is consumed in a Realtime Database transaction, so only one request can use it successfully. The raw token is not exposed in the URL until the payment is confirmed; the token hash is stored in `bookstore/downloadTokens`. The database rules deny client reads/writes to this collection.
+
+The paid PDF direct-download endpoint is intentionally blocked for customers; they must use the one-time link shown in the payment-success modal. Admins may still test downloads. Free printable behavior is unchanged.
+
+Before launch, deploy the Cloud Function, configure `ALLOWED_ORIGINS`, set the PayPal live credentials only after testing, and confirm that `VITE_API_URL` points at the deployed `api` function. The website build requires a clean `npm ci`; do not deploy if TypeScript/build checks fail.
