@@ -1,8 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useStore } from '../context/StoreContext';
 import { LearningResource, LearningSection } from '../types';
 import { PrintablePayModal } from '../components/PrintablePayModal';
 import { downloadPrintable, loadOwnedPrintables } from '../printablesApi';
+import { asset } from '../utils/images';
 
 const sections: { id: LearningSection; label: string; emoji: string; text: string }[] = [
   { id: 'worksheet', label: 'Worksheets', emoji: '✏️', text: 'Build skills one little step at a time.' },
@@ -11,41 +12,148 @@ const sections: { id: LearningSection; label: string; emoji: string; text: strin
   { id: 'cut-and-paste', label: 'Cut & Paste', emoji: '✂️', text: 'Create, sort and assemble.' },
   { id: 'coloring', label: 'Coloring', emoji: '🖍️', text: 'Big ideas, bright colors.' },
 ];
-const ageBands = [{ label: 'All ages', min: 0, max: 99 }, { label: 'Ages 2–3', min: 2, max: 3 }, { label: 'Ages 4–5', min: 4, max: 5 }, { label: 'Ages 6–8', min: 6, max: 8 }, { label: 'Ages 9–12', min: 9, max: 12 }, { label: 'Ages 13–15', min: 13, max: 15 }];
+const ageBands = [
+  { label: 'Ages 2–3', emoji: '🧸', min: 2, max: 3 },
+  { label: 'Ages 4–5', emoji: '🎒', min: 4, max: 5 },
+  { label: 'Ages 6–8', emoji: '📚', min: 6, max: 8 },
+  { label: 'Ages 9–12', emoji: '🔬', min: 9, max: 12 },
+  { label: 'Ages 13–15', emoji: '🚀', min: 13, max: 15 },
+];
+type PriceChoice = 'any' | 'free' | 'paid';
+const chipStyle: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 13px', borderRadius: 999, border: '1px solid #cfe0d3', background: 'white', color: '#214c3d', fontWeight: 800, fontSize: 13, cursor: 'pointer' };
 export const LearningView: React.FC = () => {
   const { learningResources, user, setView, showToast } = useStore();
   const [owned, setOwned] = useState<string[]>([]);
-  const [buying, setBuying] = useState<LearningResource | null>(null);
+  const [checkoutItems, setCheckoutItems] = useState<LearningResource[] | null>(null);
+  const [basketOpen, setBasketOpen] = useState(false);
+  const [basketIds, setBasketIds] = useState<string[]>(() => { try { return JSON.parse(localStorage.getItem('kbPrintableBasket') || '[]'); } catch { return []; } });
+  useEffect(() => { try { localStorage.setItem('kbPrintableBasket', JSON.stringify(basketIds)); } catch { /* ignore */ } }, [basketIds]);
   const [busy, setBusy] = useState('');
   const [mineOnly, setMineOnly] = useState(false);
   useEffect(() => { if (user) loadOwnedPrintables().then(setOwned); else setOwned([]); }, [user?.email]);
   const needLogin = () => { showToast('Please sign in to buy or download printables.'); setView('auth'); };
   const download = async (r: LearningResource) => { if (r.pdfUrl && r.price <= 0) { window.open(r.pdfUrl, '_blank', 'noopener'); return; } if (!user) return needLogin(); setBusy(r.id); try { await downloadPrintable(r.id, r.title); } catch (e) { showToast(e instanceof Error ? e.message : 'Download failed'); } setBusy(''); };
+
+  // Guided questions: nothing is listed until the questions are answered.
+  const [step, setStep] = useState(0);
+  const [done, setDone] = useState(false);
+  const [ageIdx, setAgeIdx] = useState<number | null>(null); // null = any age
   const [section, setSection] = useState<LearningSection | 'all'>('all');
-  const [ageBand, setAgeBand] = useState(0);
+  const [priceChoice, setPriceChoice] = useState<PriceChoice>('any');
   const [query, setQuery] = useState('');
-  const visible = useMemo(() => learningResources.filter(r => r.active !== false && (!mineOnly || owned.includes(r.id)) && (section === 'all' || r.section === section) && r.minAge <= ageBands[ageBand].max && r.maxAge >= ageBands[ageBand].min && `${r.title} ${r.description}`.toLowerCase().includes(query.toLowerCase())), [learningResources, section, ageBand, query, mineOnly, owned]);
-  return <main className="wrap printables-page" style={{ paddingTop: 32, paddingBottom: 64 }}>
-    <section className="printables-hero" style={{ borderRadius: 28, padding: 'clamp(24px,5vw,54px)', background: 'linear-gradient(120deg,#fff4e6,#f2f8ee 65%,#e8f4ff)', marginBottom: 30 }}>
-      <span style={{ color: '#a66a32', fontWeight: 800, letterSpacing: 2, textTransform: 'uppercase' }}>Kiddie Bloom Printables</span>
-      <h1 style={{ fontFamily: 'var(--serif)', color: '#214c3d', fontSize: 'clamp(34px,5vw,54px)', margin: '10px 0' }}>Little hands. Big discoveries.</h1>
-      <p style={{ maxWidth: 660, lineHeight: 1.7 }}>Find printable worksheets, playful activities, puzzles, cut-and-paste projects and coloring pages, all organised by your child’s age.</p>
-      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 18 }}><span className="pill">📄 Instant printable PDFs</span><span className="pill">🌱 Age-friendly learning</span><span className="pill">💛 Learn through play</span></div>
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const toggleBasket = (r: LearningResource) => { const has = basketIds.includes(r.id); setBasketIds(b => has ? b.filter(x => x !== r.id) : [...b, r.id]); showToast(has ? `${r.title} removed from basket` : `${r.title} added to basket`); };
+
+  const active = useMemo(() => learningResources.filter(r => r.active !== false), [learningResources]);
+  const hasFree = active.some(r => r.price <= 0), hasPaid = active.some(r => r.price > 0);
+  const basket = useMemo(() => basketIds.map(id => active.find(r => r.id === id)).filter((r): r is LearningResource => !!r && r.price > 0 && !owned.includes(r.id)), [basketIds, active, owned]);
+  const basketTotal = basket.reduce((n, r) => n + r.price, 0);
+  const askPrice = hasFree && hasPaid;
+  const totalSteps = askPrice ? 3 : 2;
+  const fitsAge = (r: LearningResource, i: number | null) => i === null || (r.minAge <= ageBands[i].max && r.maxAge >= ageBands[i].min);
+  const fitsPrice = (r: LearningResource, c: PriceChoice) => c === 'any' || (c === 'free' ? r.price <= 0 : r.price > 0);
+  const countFor = (sec: LearningSection) => active.filter(r => r.section === sec && fitsAge(r, ageIdx)).length;
+
+  const visible = useMemo(() => active.filter(r =>
+    (!mineOnly || owned.includes(r.id)) && fitsAge(r, ageIdx) && (section === 'all' || r.section === section) && fitsPrice(r, priceChoice) &&
+    `${r.title} ${r.description}`.toLowerCase().includes(query.toLowerCase())), [active, mineOnly, owned, ageIdx, section, priceChoice, query]);
+
+  useEffect(() => { if (done) resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, [done, mineOnly]);
+  const finish = () => { setQuery(''); setDone(true); };
+  const next = () => { if (step + 1 >= totalSteps) finish(); else setStep(step + 1); };
+  const restart = () => { setDone(false); setMineOnly(false); setStep(0); setAgeIdx(null); setSection('all'); setPriceChoice('any'); setQuery(''); };
+  const editStep = (n: number) => { setMineOnly(false); setDone(false); setStep(n); };
+  const showMine = () => { setMineOnly(true); setAgeIdx(null); setSection('all'); setPriceChoice('any'); setQuery(''); setDone(true); };
+
+  const optionBtn = (key: string, label: string, sub: string | undefined, onClick: () => void, disabled = false, selected = false) =>
+    <button key={key} type="button" disabled={disabled} onClick={onClick} className={`btn ${selected ? 'gold' : 'alt'}`} style={{ minHeight: 64, borderRadius: 16, fontWeight: 800, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2, opacity: disabled ? .45 : 1 }}>
+      <span>{label}</span>{sub && <small style={{ fontWeight: 600, opacity: .8 }}>{sub}</small>}
+    </button>;
+
+  const answerChips = <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+    {mineOnly ? <span style={{ ...chipStyle, cursor: 'default' }}>📥 My purchases</span> : <>
+      <button type="button" style={chipStyle} onClick={() => editStep(0)}>{ageIdx === null ? '🌈 Any age' : `${ageBands[ageIdx].emoji} ${ageBands[ageIdx].label}`} ✎</button>
+      <button type="button" style={chipStyle} onClick={() => editStep(1)}>{section === 'all' ? '✨ Anything fun' : `${sections.find(s => s.id === section)!.emoji} ${sections.find(s => s.id === section)!.label}`} ✎</button>
+      {askPrice && <button type="button" style={chipStyle} onClick={() => editStep(2)}>{priceChoice === 'any' ? '💛 Free & paid' : priceChoice === 'free' ? '🎁 Free only' : '⭐ Paid only'} ✎</button>}
+    </>}
+    <button type="button" className="btn alt" style={{ borderRadius: 999, padding: '8px 14px', fontSize: 13 }} onClick={restart}>↺ Start over</button>
+  </div>;
+
+  return <main className="wrap printables-page" style={{ paddingTop: 20, paddingBottom: 64 }}>
+    <section className="printables-hero" style={{ borderRadius: 28, padding: 0, background: '#fff', marginBottom: 30 }}>
+      <img src={asset('/img/kiddie-bloom-hero.jpg')} alt="Kiddie Bloom – a giraffe, bunny, panda, bear and squirrel with books, crayons and an open storybook" width={1600} height={593} style={{ display: 'block', width: '100%', height: 'auto' }} />
+      <div style={{ padding: 'clamp(18px,3.5vw,34px)', textAlign: 'center', background: 'linear-gradient(120deg,#fff4e6,#f2f8ee 65%,#e8f4ff)' }}>
+        <h1 style={{ fontFamily: 'var(--serif)', color: '#214c3d', fontSize: 'clamp(26px,4vw,40px)', margin: '0 auto 8px' }}>Little hands. Big discoveries.</h1>
+        <p style={{ maxWidth: 620, margin: '0 auto', lineHeight: 1.6 }}>Answer a few quick questions and we’ll show the printable worksheets, activities, puzzles and colouring pages that fit your child.</p>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center', marginTop: 14 }}><span className="pill">📄 Instant printable PDFs</span><span className="pill">🌱 Age-friendly learning</span><span className="pill">💛 Learn through play</span></div>
+      </div>
     </section>
-    <div className="printables-section-heading"><span className="eyebrow">EXPLORE THE COLLECTION</span><h2 className="sec-title">Choose a fun section</h2><p>Pick a learning style, filter by age, and find the right activity for today.</p></div>
-    <div className="printables-categories" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 12, margin: '18px 0 28px' }}>
-      <button className={`btn ${section === 'all' ? 'gold' : 'alt'}`} onClick={() => setSection('all')}>✨ All printables</button>
-      {user && <button className={`btn ${mineOnly ? 'gold' : 'alt'}`} onClick={() => setMineOnly(m => !m)}>📥 My purchases</button>}
-      {sections.map(s => <button key={s.id} className={`btn ${section === s.id ? 'gold' : 'alt'}`} onClick={() => setSection(s.id)}>{s.emoji} {s.label}</button>)}
+
+    {!active.length ? <div style={{ textAlign: 'center', padding: '48px 20px', borderRadius: 20, background: '#f7f8f3' }}><div style={{ fontSize: 42 }}>🌼</div><h3>New discoveries are on the way</h3><p>Our printables are being prepared. Please check back soon.</p></div> :
+    !done ? <section aria-live="polite" style={{ maxWidth: 760, margin: '0 auto', padding: 'clamp(18px,4vw,32px)', borderRadius: 24, background: 'white', border: '1px solid #e5e9e1', boxShadow: '0 10px 30px #264b3712', textAlign: 'center' }}>
+      <span className="eyebrow">QUESTION {step + 1} OF {totalSteps}</span>
+      <div aria-hidden style={{ display: 'flex', gap: 6, justifyContent: 'center', margin: '10px 0 14px' }}>{Array.from({ length: totalSteps }, (_, i) => <span key={i} style={{ width: i === step ? 28 : 10, height: 10, borderRadius: 99, background: i <= step ? '#ff7aa2' : '#e5e9e1', transition: 'width .2s' }} />)}</div>
+      {step === 0 && <>
+        <h2 className="sec-title">How old is your little learner?</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(130px,1fr))', gap: 12, marginTop: 18 }}>
+          {ageBands.map((a, i) => optionBtn(a.label, `${a.emoji} ${a.label}`, `${active.filter(r => fitsAge(r, i)).length} printables`, () => { setAgeIdx(i); next(); }, !active.some(r => fitsAge(r, i)), ageIdx === i))}
+          {optionBtn('any-age', '🌈 Any age', 'Show me all ages', () => { setAgeIdx(null); next(); }, false, false)}
+        </div></>}
+      {step === 1 && <>
+        <h2 className="sec-title">What would you like to do today?</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(130px,1fr))', gap: 12, marginTop: 18 }}>
+          {sections.map(sc => optionBtn(sc.id, `${sc.emoji} ${sc.label}`, countFor(sc.id) ? sc.text : 'Coming soon', () => { setSection(sc.id); next(); }, countFor(sc.id) === 0, section === sc.id))}
+          {optionBtn('all', '✨ Surprise me', 'Show everything', () => { setSection('all'); next(); })}
+        </div></>}
+      {step === 2 && <>
+        <h2 className="sec-title">Free downloads or premium packs?</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(130px,1fr))', gap: 12, marginTop: 18 }}>
+          {optionBtn('free', '🎁 Free', 'Download right away', () => { setPriceChoice('free'); finish(); })}
+          {optionBtn('paid', '⭐ Premium', 'Complete packs', () => { setPriceChoice('paid'); finish(); })}
+          {optionBtn('both', '💛 Show both', undefined, () => { setPriceChoice('any'); finish(); })}
+        </div></>}
+      <div style={{ display: 'flex', justifyContent: 'center', gap: 10, flexWrap: 'wrap', marginTop: 20 }}>
+        {step > 0 && <button type="button" className="btn alt" onClick={() => setStep(step - 1)}>← Back</button>}
+        {user && owned.length > 0 && <button type="button" className="btn alt" onClick={showMine}>📥 My purchases</button>}
+      </div>
+    </section> :
+    <div ref={resultsRef} style={{ scrollMarginTop: 80 }}>
+      <div className="printables-section-heading" style={{ marginBottom: 14 }}><span className="eyebrow">{mineOnly ? 'YOUR LIBRARY' : 'PICKED FOR YOU'}</span><h2 className="sec-title">{visible.length} printable{visible.length === 1 ? '' : 's'} {mineOnly ? 'purchased' : 'ready for you'}</h2></div>
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', marginBottom: 22 }}>
+        {answerChips}
+        <input aria-label="Search these printables" placeholder="Search within results…" value={query} onChange={e => setQuery(e.target.value)} style={{ padding: '10px 14px', borderRadius: 12, border: '1px solid #d7dfd5', minWidth: 200 }} />
+      </div>
+      {visible.length ? <div className="printables-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 18 }}>{visible.map(r => { const meta = sections.find(s => s.id === r.section)!; return <article className="printable-card" key={r.id} style={{ border: '1px solid #e5e9e1', borderRadius: 20, overflow: 'hidden', background: 'white', boxShadow: '0 8px 24px #264b3710' }}>
+      <div className="printable-card-art" style={{ ...(r.thumbnailUrl ? { aspectRatio: '1 / 1.414' } : { height: 135 }), background: 'linear-gradient(135deg,#fff2dd,#edf7f0)', display: 'grid', placeItems: 'center', fontSize: 52 }}>{r.thumbnailUrl ? <img src={asset(r.thumbnailUrl)} alt={`${r.title} cover`} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : meta.emoji}</div>
+      <div style={{ padding: 18 }}><small style={{ color: '#a66a32', fontWeight: 800 }}>{meta.label.toUpperCase()} · AGES {r.minAge}–{r.maxAge}</small><h3 style={{ color: '#214c3d', margin: '9px 0' }}>{r.title}</h3><p style={{ color: '#68756c', minHeight: 42 }}>{r.description}</p><div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginTop: 16 }}><strong>{r.price > 0 ? `₹${r.price.toFixed(0)}` : 'Free'}</strong>{r.price > 0 && !owned.includes(r.id) ? <button className={`btn ${basketIds.includes(r.id) ? 'alt' : 'gold'}`} onClick={() => toggleBasket(r)}>{basketIds.includes(r.id) ? '✓ In basket · Remove' : '🧺 Add to basket'}</button> : r.price > 0 ? <span style={{ color: '#214c3d', fontWeight: 700, fontSize: 12 }}>✓ Purchased · one-time link</span> : <button className="btn gold" disabled={busy === r.id} onClick={() => download(r)}>{busy === r.id ? 'Preparing…' : 'Download PDF ⬇'}</button>}</div></div>
+    </article>; })}</div> : <div style={{ textAlign: 'center', padding: '48px 20px', borderRadius: 20, background: '#f7f8f3' }}><div style={{ fontSize: 42 }}>🌼</div><h3>Nothing matches just yet</h3><p>Try a different age or activity — new printables are added regularly.</p><button type="button" className="btn gold" onClick={restart}>↺ Answer the questions again</button></div>}
+    </div>}
+  {basket.length > 0 && !basketOpen && !checkoutItems && <div style={{ position: 'fixed', left: 0, right: 0, bottom: 'calc(env(safe-area-inset-bottom, 0px) + 74px)', display: 'flex', justifyContent: 'center', zIndex: 40, pointerEvents: 'none' }}>
+    <button type="button" className="btn gold" onClick={() => setBasketOpen(true)} style={{ pointerEvents: 'auto', borderRadius: 999, padding: '13px 22px', fontWeight: 800, boxShadow: '0 10px 28px rgba(0,0,0,.22)' }}>🧺 Basket ({basket.length}) · ₹{basketTotal.toFixed(0)} — Review & checkout</button>
+  </div>}
+  {basketOpen && <div className="modal-overlay" onClick={() => setBasketOpen(false)}>
+    <div className="modal-content" role="dialog" aria-label="Your basket" style={{ maxWidth: 520, maxHeight: '90vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
+      <button className="close-modal-btn" onClick={() => setBasketOpen(false)}>✕</button>
+      <h2 style={{ fontSize: 24, marginBottom: 4, color: 'var(--ink)' }}>🧺 Your basket</h2>
+      <p style={{ color: '#5c6472', fontSize: 14, margin: '0 0 14px' }}>Check everything you’ve selected before you pay.</p>
+      {basket.length ? <>
+        <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'grid', gap: 10 }}>
+          {basket.map(r => { const meta = sections.find(x => x.id === r.section); return <li key={r.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 10, border: '1px solid #e5e9e1', borderRadius: 14 }}>
+            <div style={{ width: 52, flex: 'none', aspectRatio: '1 / 1.414', borderRadius: 8, overflow: 'hidden', background: '#edf7f0', display: 'grid', placeItems: 'center', fontSize: 26 }}>{r.thumbnailUrl ? <img src={asset(r.thumbnailUrl)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : meta?.emoji}</div>
+            <div style={{ flex: 1, minWidth: 0 }}><strong style={{ display: 'block', color: '#214c3d', lineHeight: 1.3 }}>{r.title}</strong><small style={{ color: '#68756c' }}>{meta?.label} · Ages {r.minAge}–{r.maxAge}</small></div>
+            <div style={{ textAlign: 'right' }}><strong>₹{r.price.toFixed(0)}</strong><button type="button" onClick={() => setBasketIds(b => b.filter(x => x !== r.id))} style={{ display: 'block', background: 'none', border: 0, color: '#b3261e', fontWeight: 700, fontSize: 12, cursor: 'pointer', padding: '4px 0 0', marginLeft: 'auto' }}>Remove</button></div>
+          </li>; })}
+        </ul>
+        <p style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: 18, margin: '16px 0 4px' }}><span>Total ({basket.length} item{basket.length === 1 ? '' : 's'})</span><span>₹{basketTotal.toFixed(0)}</span></p>
+        <p style={{ color: '#5c6472', fontSize: 12, margin: '0 0 14px' }}>Digital PDFs · no shipping · pay securely with PayPal in your choice of currency.</p>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <button type="button" className="btn gold" style={{ flex: 1, minWidth: 160 }} onClick={() => { if (!user) { setBasketOpen(false); needLogin(); return; } setBasketOpen(false); setCheckoutItems(basket); }}>Checkout · ₹{basketTotal.toFixed(0)}</button>
+          <button type="button" className="btn alt" onClick={() => setBasketOpen(false)}>Keep browsing</button>
+        </div>
+        {!user && <p style={{ fontSize: 12, color: '#5c6472', marginTop: 10 }}>You’ll be asked to sign in first. Your basket is saved.</p>}
+      </> : <p style={{ textAlign: 'center', padding: '24px 0' }}>Your basket is empty. Tap “Add to basket” on any printable.</p>}
     </div>
-    <div className="printables-toolbar" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}><label htmlFor="printable-age" style={{ alignSelf: 'center', fontWeight: 700 }}>Child’s age</label><select id="printable-age" value={ageBand} onChange={e => setAgeBand(Number(e.target.value))} style={{ padding: '11px 14px', borderRadius: 12, border: '1px solid #d7dfd5', background: 'white' }}>{ageBands.map((a, i) => <option key={a.label} value={i}>{a.label}</option>)}</select></div>
-      <input aria-label="Search printables" placeholder="Search activities…" value={query} onChange={e => setQuery(e.target.value)} style={{ padding: '12px 15px', borderRadius: 12, border: '1px solid #d7dfd5', minWidth: 220 }} />
-    </div>
-    {visible.length ? <div className="printables-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))', gap: 18 }}>{visible.map(r => { const meta = sections.find(s => s.id === r.section)!; return <article className="printable-card" key={r.id} style={{ border: '1px solid #e5e9e1', borderRadius: 20, overflow: 'hidden', background: 'white', boxShadow: '0 8px 24px #264b3710' }}>
-      <div className="printable-card-art" style={{ height: 135, background: 'linear-gradient(135deg,#fff2dd,#edf7f0)', display: 'grid', placeItems: 'center', fontSize: 52 }}>{r.thumbnailUrl ? <img src={r.thumbnailUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : meta.emoji}</div>
-      <div style={{ padding: 18 }}><small style={{ color: '#a66a32', fontWeight: 800 }}>{meta.label.toUpperCase()} · AGES {r.minAge}–{r.maxAge}</small><h3 style={{ color: '#214c3d', margin: '9px 0' }}>{r.title}</h3><p style={{ color: '#68756c', minHeight: 42 }}>{r.description}</p><div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginTop: 16 }}><strong>{r.price > 0 ? `₹${r.price.toFixed(0)}` : 'Free'}</strong>{r.price > 0 && !owned.includes(r.id) ? <button className="btn gold" onClick={() => user ? setBuying(r) : needLogin()}>Buy & download</button> : r.price > 0 ? <span style={{ color: '#214c3d', fontWeight: 700, fontSize: 12 }}>✓ Purchased · one-time link</span> : <button className="btn gold" disabled={busy === r.id} onClick={() => download(r)}>{busy === r.id ? 'Preparing…' : 'Download PDF ⬇'}</button>}</div></div>
-    </article>; })}</div> : <div style={{ textAlign: 'center', padding: '48px 20px', borderRadius: 20, background: '#f7f8f3' }}><div style={{ fontSize: 42 }}>🌼</div><h3>New discoveries are on the way</h3><p>There are no printables matching these filters yet. Try another age or section.</p></div>}
-  {buying && <PrintablePayModal resource={buying} onClose={() => setBuying(null)} onPaid={ids => { setOwned(o => [...new Set([...o, ...ids])]); }} />}
+  </div>}
+  {checkoutItems && <PrintablePayModal resources={checkoutItems} onClose={() => setCheckoutItems(null)} onPaid={ids => { setOwned(o => [...new Set([...o, ...ids])]); setBasketIds(b => b.filter(x => !ids.includes(x))); }} />}
   </main>;
 };
