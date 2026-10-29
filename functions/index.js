@@ -20,7 +20,7 @@ const ADMIN_EMAILS = defineString('ADMIN_EMAILS', { default: '' });
 // Keep these the same as js/payments.js. Confirm the percentages in your Razorpay dashboard.
 const CFG = { feeDomestic: 2, feeInternational: 3, gst: 18, passFee: true, freeFrom: 499, shipping: 49 };
 const CURRENCIES = ['INR', 'USD', 'EUR', 'GBP', 'AED', 'SGD', 'AUD', 'CAD'];
-const ALLOWED_ORIGINS = ['http://localhost:5173', 'http://127.0.0.1:5173', 'https://kiddiebloom.in', 'https://www.kiddiebloom.in', 'https://chandangara97-cmyk.github.io']; // Replace with your exact GitHub Pages/custom-domain origins
+const ALLOWED_ORIGINS = ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:5173', 'http://127.0.0.1:5173', 'https://kiddiebloom.in', 'https://www.kiddiebloom.in', 'https://chandangara97-cmyk.github.io']; // Replace with your exact GitHub Pages/custom-domain origins
 
 async function liveRate(cur) {
   if (cur === 'INR') return 1;
@@ -105,6 +105,12 @@ async function calculatePrintables(items, currency) {
   return { subtotal, totalINR: Math.round(totalINR * 100) / 100, rate, amount, currency };
 }
 async function driveFile(fileId) {
+  // Local test mode: file ID "local_<name>" reads private-pdfs/<name>.pdf from this machine (no Google Drive needed).
+  if (String(fileId).startsWith('local_')) {
+    const nm = String(fileId).slice(6).replace(/[^A-Za-z0-9_-]/g, '');
+    const p = require('path').join(process.env.PDF_DIR || require('path').join(__dirname, '..', 'private-pdfs'), nm + '.pdf');
+    try { return require('fs').readFileSync(p); } catch (e) { throw httpErr(404, 'Local PDF not found: private-pdfs/' + nm + '.pdf'); }
+  }
   const auth = new GoogleAuth({ credentials: JSON.parse(DRIVE_SA_KEY.value()), scopes: ['https://www.googleapis.com/auth/drive.readonly'] });
   const { token } = await (await auth.getClient()).getAccessToken();
   const r = await fetch('https://www.googleapis.com/drive/v3/files/' + encodeURIComponent(fileId) + '?alt=media&supportsAllDrives=true', { headers: { Authorization: 'Bearer ' + token } });
@@ -140,6 +146,7 @@ exports.api = onRequest({ secrets: [KEY_ID, KEY_SECRET, DRIVE_SA_KEY], cors: ALL
       });
       if (!tx.committed || !tx.snapshot || !tx.snapshot.val()) throw httpErr(410, 'This download link has expired or has already been used.');
       const grant = tx.snapshot.val();
+      try {
       const [item] = await loadPrintables([grant.resourceId]);
       const fileId = (await db('learningPrivate/' + item.id + '/driveFileId').once('value')).val();
       if (!fileId) throw httpErr(404, 'This printable has no file yet.');
@@ -147,6 +154,7 @@ exports.api = onRequest({ secrets: [KEY_ID, KEY_SECRET, DRIVE_SA_KEY], cors: ALL
       if (pdf.length > 30 * 1024 * 1024) throw httpErr(413, 'File is too large to deliver. Keep PDFs under 30 MB.');
       res.set({ 'Content-Type': 'application/pdf', 'Content-Disposition': 'attachment; filename="' + (item.title.replace(/[^a-zA-Z0-9 _-]/g, '').trim() || item.id) + '.pdf"', 'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff' });
       return res.send(pdf);
+      } catch (e) { await tokenRef.update({ used: false, usedAt: null }); throw e; }
     }
     if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
     if (req.path === '/createOrder') {

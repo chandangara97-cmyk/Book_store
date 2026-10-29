@@ -11,7 +11,7 @@ Cloud Functions need Blaze, so the same payment code runs on a normal Node serve
 ```bash
 ./run-all.sh          # or: (cd functions && npm install); npm install; npm run api   + in a 2nd terminal: npm run dev
 ```
-Open http://localhost:5173 and pay with card 4111 1111 1111 1111 or UPI success@razorpay.
+Open http://localhost:3000 and pay with card 4111 1111 1111 1111 or UPI success@razorpay.
 
 ## Going public (still free)
 Deploy the `server/` API to a free Node host (Render, Railway, Fly) with the same variables as `.env` (store the service-account JSON as a secret file), then set `VITE_API_URL` to `https://<your-host>/api` and add your site to `ALLOWED_ORIGINS` in `functions/index.js`.

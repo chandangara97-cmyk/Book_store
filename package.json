@@ -8,7 +8,7 @@
     "build": "tsc && vite build",
     "lint": "tsc --noEmit",
     "preview": "vite preview --port 3000",
-    "api": "node server/server.js"
+    "api": "node server/server.cjs"
   },
   "dependencies": {
     "lucide-react": "^1.16.0",
