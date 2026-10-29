@@ -1,6 +1,6 @@
 # Kiddie Bloom
 
-> **Digital-only store.** Customers browse five printable sections (worksheets, activities, puzzles, cut-and-paste, coloring) by age, pay with PayPal and download the PDF, which is delivered from a private Google Drive folder ("Kiddie Bloom PDFs"). See `PRINTABLES-SETUP.md`. The older book/toy/cart code is kept in the repo but is no longer reachable from the site.
+> **Digital-only store.** Customers browse five printable sections (worksheets, activities, puzzles, cut-and-paste, coloring) by age, pay with Razorpay and download the PDF, which is delivered from a private Google Drive folder ("Kiddie Bloom PDFs"). See `PRINTABLES-SETUP.md`. The older book/toy/cart code is kept in the repo but is no longer reachable from the site.
 
 A modern, responsive React + TypeScript e-commerce and learning studio application for children's tutorial books, fiction, learning titles, toys, and gift finder recommendations.
 
@@ -12,7 +12,7 @@ Kiddie Bloom is built with React 19, TypeScript, and Vite. It preserves all orig
 - **Toys & Learning Kits**: Creative craft kits, puzzles, plush toys, and pairing suggestions for reading corners.
 - **Cart & Threshold Rewards**: Real-time quantity adjustment, persistent storage, and automatic unlockable gift tiers (Spend ₹999 for a Free Colouring Kit; Spend ₹1,499 for a Free Mini Toy; Free shipping over ₹499).
 - **Gift Finder Wizard**: 3-step recommendation quiz guiding shoppers by recipient, reading interests, and age group.
-- **Multi-Currency Checkout**: Real-time exchange rate calculation from live currency feeds (`INR`, `USD`, `EUR`, `GBP`, `AED`, `SGD`, `AUD`, `CAD`), dynamic fee calculation, and payment method support (Cards, PayPal, UPI, Bank/Wise).
+- **Multi-Currency Checkout**: Real-time exchange rate calculation from live currency feeds (`INR`, `USD`, `EUR`, `GBP`, `AED`, `SGD`, `AUD`, `CAD`), dynamic fee calculation, and payment method support (Cards, UPI, Net Banking via Razorpay).
 - **Printable Order Summary / Invoice**: Detailed order confirmation with customer information, item breakdown, currency conversion, and print/PDF support.
 - **User Account & Wishlist**: Save items to wishlist, view past orders, and manage authentication state.
 - **Studio Admin Workspace**: Curate products, manage books and toys, inspect statistics, edit items, and seed/restore catalog defaults.

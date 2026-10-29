@@ -25,10 +25,9 @@ export async function loadOwnedPrintables(): Promise<string[]> {
 }
 
 export const createPrintableOrder = (resourceIds: string[], currency: string) =>
-  postJson<{ id: string; orderRef: string; currency: string; amount: string }>('/createPrintableOrder', { resourceIds, currency });
-export const capturePrintableOrder = (orderRef: string, paypalOrderId: string) =>
-  postJson<{ ok: boolean; resourceIds: string[]; downloadTokens: Record<string, string> }>('/capturePrintableOrder', { orderRef, paypalOrderId });
-export const getPayPalConfig = () => postJson<{ clientId: string; environment: string }>('/paypalConfig', {});
+  postJson<{ orderId: string; orderRef: string; amount: number; currency: string; keyId: string }>('/createPrintableOrder', { resourceIds, currency });
+export const verifyPrintablePayment = (body: { orderRef: string; razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) =>
+  postJson<{ ok: boolean; resourceIds: string[]; downloadTokens: Record<string, string> }>('/verifyPrintablePayment', body);
 
 /** Fetches the PDF through the server (which checks payment) and saves it on the device. */
 export async function downloadPrintable(resourceId: string, title: string) {
@@ -39,21 +38,4 @@ export async function downloadPrintable(resourceId: string, title: string) {
   a.href = url; a.download = `${title.replace(/[^a-zA-Z0-9 _-]/g, '').trim() || resourceId}.pdf`;
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 30000);
-}
-
-declare global { interface Window { paypal?: any } }
-let sdkKey = '';
-export function loadPayPalSdk(clientId: string, currency: string): Promise<any> {
-  const key = `${clientId}|${currency}`;
-  if (window.paypal && sdkKey === key) return Promise.resolve(window.paypal);
-  document.querySelectorAll('script[data-kb-paypal]').forEach(n => n.remove());
-  delete window.paypal;
-  return new Promise((resolve, reject) => {
-    const s = document.createElement('script');
-    s.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(clientId)}&currency=${encodeURIComponent(currency)}&intent=capture`;
-    s.setAttribute('data-kb-paypal', '1');
-    s.onload = () => { sdkKey = key; window.paypal ? resolve(window.paypal) : reject(new Error('PayPal failed to load.')); };
-    s.onerror = () => reject(new Error('Could not load PayPal. Check your connection.'));
-    document.head.appendChild(s);
-  });
 }

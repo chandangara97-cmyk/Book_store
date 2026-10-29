@@ -18,4 +18,4 @@ npm run dev
 The build could not be verified in the preparation environment because the bundled dependency directory was incomplete and package installation did not finish. The ZIP intentionally excludes `node_modules`; run `npm ci` after extraction to install a clean dependency tree.
 
 ## Important
-The home hero artwork was not replaced or edited. Payment processing and one-time PDF delivery still require the documented Firebase/PayPal secrets and deployment of the Cloud Function before they work on the live site.
+The home hero artwork was not replaced or edited. Payment processing and one-time PDF delivery still require the documented Firebase Razorpay secrets and deployment of the Cloud Function before they work on the live site.

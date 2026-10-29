@@ -11,9 +11,6 @@ admin.initializeApp();
 
 const KEY_ID = defineSecret('RAZORPAY_KEY_ID');
 const KEY_SECRET = defineSecret('RAZORPAY_KEY_SECRET');
-const PAYPAL_CLIENT_ID = defineSecret('PAYPAL_CLIENT_ID');
-const PAYPAL_CLIENT_SECRET = defineSecret('PAYPAL_CLIENT_SECRET');
-const PAYPAL_ENVIRONMENT = defineString('PAYPAL_ENVIRONMENT', { default: 'sandbox' });
 // Google service-account JSON key (as a secret). The Drive folder holding the PDFs must be shared with its client_email.
 const DRIVE_SA_KEY = defineSecret('DRIVE_SA_KEY');
 // Must match VITE_FIREBASE_DB_ROOT in the website (default 'bookstore').
@@ -34,18 +31,6 @@ async function liveRate(cur) {
   return rate;
 }
 
-function paypalBase() {
-  return PAYPAL_ENVIRONMENT.value() === 'live' ? 'https://api-m.paypal.com' : 'https://api-m.sandbox.paypal.com';
-}
-async function paypalToken() {
-  const credentials = Buffer.from(PAYPAL_CLIENT_ID.value() + ':' + PAYPAL_CLIENT_SECRET.value()).toString('base64');
-  const r = await fetch(paypalBase() + '/v1/oauth2/token', {
-    method: 'POST', headers: { Authorization: 'Basic ' + credentials, 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'grant_type=client_credentials'
-  });
-  const d = await r.json();
-  if (!r.ok || !d.access_token) throw new Error('PayPal authentication failed. Check PayPal API credentials and mode.');
-  return d.access_token;
-}
 async function calculateCheckout(items, currency, country) {
   if (!Array.isArray(items) || !items.length || items.length > 50) throw new Error('Your cart is empty.');
   if (!CURRENCIES.includes(currency)) throw new Error('Unsupported currency.');
@@ -101,10 +86,10 @@ async function loadPrintables(ids) {
   return out;
 }
 async function calculatePrintables(items, currency) {
-  if (!CURRENCIES.includes(currency) || currency === 'INR') throw httpErr(400, 'PayPal needs USD, EUR, GBP, AED, SGD, AUD or CAD.');
+  if (!CURRENCIES.includes(currency)) throw httpErr(400, 'Unsupported currency.');
   const subtotal = items.reduce((t, i) => t + i.price, 0);
   if (!(subtotal > 0)) throw httpErr(400, 'Free printables do not need payment.');
-  const eff = (CFG.feeInternational / 100) * (1 + CFG.gst / 100); // no shipping: digital goods
+  const eff = ((currency === 'INR' ? CFG.feeDomestic : CFG.feeInternational) / 100) * (1 + CFG.gst / 100); // no shipping: digital goods
   const totalINR = CFG.passFee ? subtotal / (1 - eff) : subtotal;
   const rate = await liveRate(currency);
   const amount = (Math.round(totalINR * rate * 100) / 100).toFixed(2);
@@ -131,7 +116,7 @@ async function makeDownloadTokens(orderRef, uid, items) {
   return tokens;
 }
 
-exports.api = onRequest({ secrets: [KEY_ID, KEY_SECRET, PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET, DRIVE_SA_KEY], cors: ALLOWED_ORIGINS, region: 'us-central1' }, async (req, res) => {
+exports.api = onRequest({ secrets: [KEY_ID, KEY_SECRET, DRIVE_SA_KEY], cors: ALLOWED_ORIGINS, region: 'us-central1' }, async (req, res) => {
   try {
     // One-time links are bearer links, so they deliberately do not require a signed-in session.
     // A database transaction makes each token single-use even for simultaneous requests.
@@ -155,40 +140,6 @@ exports.api = onRequest({ secrets: [KEY_ID, KEY_SECRET, PAYPAL_CLIENT_ID, PAYPAL
       return res.send(pdf);
     }
     if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
-    if (req.path === '/paypalConfig') {
-      return res.json({ clientId: PAYPAL_CLIENT_ID.value(), environment: PAYPAL_ENVIRONMENT.value() });
-    }
-    if (req.path === '/createPayPalOrder') {
-      const { items, currency, country, customer, orderRef } = req.body || {};
-      if (currency === 'INR') return res.status(400).json({ error: 'PayPal checkout requires a supported international currency. Please select USD, EUR, GBP, AED, SGD, AUD or CAD.' });
-      const calc = await calculateCheckout(items, currency, country);
-      const token = await paypalToken();
-      const safeRef = String(orderRef || ('RN-' + Date.now())).replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40);
-      const pr = await fetch(paypalBase() + '/v2/checkout/orders', {
-        method: 'POST', headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json', 'PayPal-Request-Id': safeRef },
-        body: JSON.stringify({ intent: 'CAPTURE', purchase_units: [{ reference_id: safeRef, custom_id: safeRef, description: 'Kiddie Bloom book order', amount: { currency_code: currency, value: calc.amount } }], application_context: { brand_name: 'Kiddie Bloom', user_action: 'PAY_NOW', shipping_preference: 'NO_SHIPPING' } })
-      });
-      const pd = await pr.json();
-      if (!pr.ok || !pd.id) throw new Error((pd && pd.message) || 'Could not create PayPal order.');
-      await admin.database().ref('orders/' + safeRef).update({ paypalOrderId: pd.id, status: 'created', paymentMethod: 'PayPal', currency, rate: calc.rate, baseINR: calc.base, totalINR: calc.totalINR, amount: calc.amount, items, country: country || '', customerEmail: String((customer && customer.email) || '').slice(0, 100), createdAt: admin.database.ServerValue.TIMESTAMP });
-      return res.json({ id: pd.id, clientId: PAYPAL_CLIENT_ID.value(), environment: PAYPAL_ENVIRONMENT.value(), currency, amount: calc.amount });
-    }
-    if (req.path === '/capturePayPalOrder') {
-      const paypalOrderId = String((req.body || {}).paypalOrderId || '');
-      if (!paypalOrderId) return res.status(400).json({ error: 'Missing PayPal order ID.' });
-      const snap = await admin.database().ref('orders').orderByChild('paypalOrderId').equalTo(paypalOrderId).once('value');
-      let orderRef = null, orderData = null;
-      snap.forEach(c => { orderRef = c.ref; orderData = c.val(); });
-      if (!orderRef || !orderData) return res.status(404).json({ error: 'Order not found.' });
-      if (orderData.status === 'paid') return res.json({ ok: true, orderId: orderRef.key, captureId: orderData.paymentId, amount: orderData.amount, currency: orderData.currency });
-      const token = await paypalToken();
-      const cr = await fetch(paypalBase() + '/v2/checkout/orders/' + encodeURIComponent(paypalOrderId) + '/capture', { method: 'POST', headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' } });
-      const cd = await cr.json();
-      const capture = cd && cd.purchase_units && cd.purchase_units[0] && cd.purchase_units[0].payments && cd.purchase_units[0].payments.captures && cd.purchase_units[0].payments.captures[0];
-      if (!cr.ok || cd.status !== 'COMPLETED' || !capture || capture.status !== 'COMPLETED' || capture.amount.currency_code !== orderData.currency || Number(capture.amount.value) !== Number(orderData.amount)) return res.status(400).json({ error: 'PayPal payment could not be confirmed.' });
-      await orderRef.update({ status: 'paid', paymentId: capture.id, paidAt: admin.database.ServerValue.TIMESTAMP });
-      return res.json({ ok: true, orderId: orderRef.key, captureId: capture.id, amount: orderData.amount, currency: orderData.currency });
-    }
     if (req.path === '/createOrder') {
       const rz = new Razorpay({ key_id: KEY_ID.value(), key_secret: KEY_SECRET.value() });
       const { items, currency, country, customer, orderRef } = req.body || {};
@@ -225,34 +176,28 @@ exports.api = onRequest({ secrets: [KEY_ID, KEY_SECRET, PAYPAL_CLIENT_ID, PAYPAL
       }
       const paid = items.filter(i => i.price > 0);
       const calc = await calculatePrintables(paid, currency);
-      const token = await paypalToken();
       const ref = 'PR-' + Date.now() + '-' + crypto.randomBytes(3).toString('hex');
-      const pr = await fetch(paypalBase() + '/v2/checkout/orders', {
-        method: 'POST', headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json', 'PayPal-Request-Id': ref },
-        body: JSON.stringify({ intent: 'CAPTURE', purchase_units: [{ reference_id: ref, custom_id: ref, description: 'Kiddie Bloom printable PDF', amount: { currency_code: currency, value: calc.amount } }], application_context: { brand_name: 'Kiddie Bloom', user_action: 'PAY_NOW', shipping_preference: 'NO_SHIPPING' } })
-      });
-      const pd = await pr.json();
-      if (!pr.ok || !pd.id) throw new Error((pd && pd.message) || 'Could not create PayPal order.');
-      await db('printableOrders/' + ref).set({ uid: user.uid, email: user.email || '', paypalOrderId: pd.id, status: 'created', currency, rate: calc.rate, totalINR: calc.totalINR, amount: calc.amount, items: paid.map(i => ({ id: i.id, title: i.title, priceINR: i.price })), createdAt: admin.database.ServerValue.TIMESTAMP });
-      return res.json({ id: pd.id, orderRef: ref, currency, amount: calc.amount });
+      const amountMinor = Math.round(Number(calc.amount) * 100);
+      const rz = new Razorpay({ key_id: KEY_ID.value(), key_secret: KEY_SECRET.value() });
+      const order = await rz.orders.create({ amount: amountMinor, currency, receipt: ref, notes: { uid: user.uid, type: 'printable' } });
+      await db('printableOrders/' + ref).set({ uid: user.uid, email: user.email || '', razorpayOrderId: order.id, status: 'created', currency, rate: calc.rate, totalINR: calc.totalINR, amount: calc.amount, amountMinor, items: paid.map(i => ({ id: i.id, title: i.title, priceINR: i.price })), createdAt: admin.database.ServerValue.TIMESTAMP });
+      return res.json({ orderId: order.id, orderRef: ref, amount: amountMinor, currency, keyId: KEY_ID.value() });
     }
-    if (req.path === '/capturePrintableOrder') {
+    if (req.path === '/verifyPrintablePayment') {
       const user = await authUser(req);
-      const { orderRef, paypalOrderId } = req.body || {};
+      const { orderRef, razorpay_order_id: o, razorpay_payment_id: p, razorpay_signature: s } = req.body || {};
       if (!/^PR-[a-zA-Z0-9-]{1,40}$/.test(String(orderRef || ''))) throw httpErr(400, 'Invalid order.');
+      if (!o || !p || !s || [o, p, s].some(v => typeof v !== 'string')) throw httpErr(400, 'Missing payment fields.');
       const oref = db('printableOrders/' + orderRef);
       const order = (await oref.once('value')).val();
-      if (!order || order.uid !== user.uid || order.paypalOrderId !== paypalOrderId) throw httpErr(404, 'Order not found.');
+      if (!order || order.uid !== user.uid || order.razorpayOrderId !== o) throw httpErr(404, 'Order not found.');
       const ids = order.items.map(i => i.id);
       if (order.status === 'paid') return res.json({ ok: true, resourceIds: ids, downloadTokens: order.downloadTokens || {} });
-      const token = await paypalToken();
-      let cr = await fetch(paypalBase() + '/v2/checkout/orders/' + encodeURIComponent(paypalOrderId) + '/capture', { method: 'POST', headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' } });
-      if (!cr.ok) cr = await fetch(paypalBase() + '/v2/checkout/orders/' + encodeURIComponent(paypalOrderId), { headers: { Authorization: 'Bearer ' + token } }); // already captured? re-check
-      const cd = await cr.json();
-      const cap = cd && cd.purchase_units && cd.purchase_units[0] && cd.purchase_units[0].payments && cd.purchase_units[0].payments.captures && cd.purchase_units[0].payments.captures[0];
-      if (cd.status !== 'COMPLETED' || !cap || cap.status !== 'COMPLETED' || cap.amount.currency_code !== order.currency || Number(cap.amount.value) !== Number(order.amount)) throw httpErr(400, 'PayPal payment could not be confirmed.');
+      const expected = crypto.createHmac('sha256', KEY_SECRET.value()).update(o + '|' + p).digest('hex');
+      const ok = expected.length === s.length && crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(s));
+      if (!ok) throw httpErr(400, 'Payment could not be verified.');
       const downloadTokens = await makeDownloadTokens(orderRef, user.uid, order.items);
-      const updates = { ['printableOrders/' + orderRef + '/status']: 'paid', ['printableOrders/' + orderRef + '/paymentId']: cap.id, ['printableOrders/' + orderRef + '/paidAt']: admin.database.ServerValue.TIMESTAMP, ['printableOrders/' + orderRef + '/downloadTokens']: downloadTokens };
+      const updates = { ['printableOrders/' + orderRef + '/status']: 'paid', ['printableOrders/' + orderRef + '/paymentId']: p, ['printableOrders/' + orderRef + '/paidAt']: admin.database.ServerValue.TIMESTAMP, ['printableOrders/' + orderRef + '/downloadTokens']: downloadTokens };
       ids.forEach(id => { updates['entitlements/' + user.uid + '/' + id] = { orderRef, paidAt: admin.database.ServerValue.TIMESTAMP, downloadLimit: 1 }; });
       await admin.database().ref(root()).update(updates);
       return res.json({ ok: true, resourceIds: ids, downloadTokens });

@@ -1,4 +1,4 @@
-import { API_URL } from './printablesApi';
+import { API_URL, createPrintableOrder, verifyPrintablePayment } from './printablesApi';
 
 declare global {
   interface Window { Razorpay?: any; }
@@ -64,6 +64,42 @@ export async function payWithRazorpay(opts: {
             razorpay_signature: resp.razorpay_signature
           });
           resolve({ paymentId: resp.razorpay_payment_id, orderId: resp.razorpay_order_id });
+        } catch (e) { reject(e); }
+      }
+    });
+    rzp.on('payment.failed', (resp: any) => reject(new Error((resp && resp.error && resp.error.description) || 'Payment failed. Please try again.')));
+    rzp.open();
+  });
+}
+
+/** Pays for printable PDFs (signed-in users). Resolves with one-time download tokens once the server verifies the payment. */
+export async function payPrintablesWithRazorpay(opts: {
+  resourceIds: string[];
+  currency: string;
+  prefill?: RazorpayPrefill;
+}): Promise<{ resourceIds: string[]; downloadTokens: Record<string, string> }> {
+  await loadCheckoutScript();
+  const order = await createPrintableOrder(opts.resourceIds, opts.currency);
+  return new Promise((resolve, reject) => {
+    const rzp = new window.Razorpay({
+      key: order.keyId,
+      order_id: order.orderId,
+      amount: order.amount,
+      currency: order.currency,
+      name: 'Kiddie Bloom',
+      description: 'Printable PDFs',
+      prefill: opts.prefill || {},
+      theme: { color: '#ff4f9a' },
+      modal: { ondismiss: () => reject(new Error('cancelled')) },
+      handler: async (resp: any) => {
+        try {
+          const done = await verifyPrintablePayment({
+            orderRef: order.orderRef,
+            razorpay_order_id: resp.razorpay_order_id,
+            razorpay_payment_id: resp.razorpay_payment_id,
+            razorpay_signature: resp.razorpay_signature
+          });
+          resolve({ resourceIds: done.resourceIds, downloadTokens: done.downloadTokens });
         } catch (e) { reject(e); }
       }
     });

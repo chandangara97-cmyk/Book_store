@@ -175,7 +175,7 @@ export const LearningView: React.FC = () => {
           </li>; })}
         </ul>
         <p style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: 18, margin: '16px 0 4px' }}><span>Total ({basket.length} item{basket.length === 1 ? '' : 's'})</span><span>₹{basketTotal.toFixed(0)}</span></p>
-        <p style={{ color: '#5c6472', fontSize: 12, margin: '0 0 14px' }}>Digital PDFs · no shipping · pay securely with PayPal in your choice of currency.</p>
+        <p style={{ color: '#5c6472', fontSize: 12, margin: '0 0 14px' }}>Digital PDFs · no shipping · pay securely with Razorpay in your choice of currency.</p>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
           <button type="button" className="btn gold" style={{ flex: 1, minWidth: 160 }} onClick={() => { if (!user) { setBasketOpen(false); needLogin(); return; } setBasketOpen(false); setCheckoutItems(basket); }}>Checkout · ₹{basketTotal.toFixed(0)}</button>
           <button type="button" className="btn alt" onClick={() => setBasketOpen(false)}>Keep browsing</button>

@@ -7,3 +7,6 @@ dist
 functions/.env.*
 !functions/.env.example
 functions/node_modules
+
+functions/.secret.local
+set-secrets.sh

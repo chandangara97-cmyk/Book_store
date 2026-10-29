@@ -257,7 +257,7 @@ export const HomeView: React.FC = () => {
           <h2 className="sec-title">Buying takes about a minute</h2>
           <p className="intro">
             Payments are handled by secure payment providers. Use Cards or UPI for domestic
-            checkout, and international payment options (PayPal, Wise, Bank Transfer) worldwide.
+            checkout, and international cards worldwide.
           </p>
           <div className="steps-grid">
             <div className="step-card">
@@ -302,7 +302,7 @@ export const HomeView: React.FC = () => {
             <summary>Which payment methods can I use?</summary>
             <p>
               We support Credit and Debit Cards (Visa, Mastercard, RuPay, Amex), UPI (Google Pay,
-              PhonePe, Paytm), PayPal for international checkout, and direct wire/transfer.
+              PhonePe, Paytm) and international cards through Razorpay.
             </p>
           </details>
 

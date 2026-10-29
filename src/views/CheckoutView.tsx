@@ -22,7 +22,7 @@ export const CheckoutView: React.FC = () => {
     country: 'IN'
   });
 
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'paypal' | 'upi' | 'bank'>('card');
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'upi' | 'bank'>('card');
   const [currency, setCurrency] = useState<string>('INR');
   const [fxRates, setFxRates] = useState<Record<string, number>>(DEFAULT_FX_RATES);
   const [rateStatus, setRateStatus] = useState<string>('Checking live exchange rates…');
@@ -30,7 +30,6 @@ export const CheckoutView: React.FC = () => {
   const [rateUpdatedAt, setRateUpdatedAt] = useState<string | null>(null);
   const [isLiveRates, setIsLiveRates] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
-  const [showPayPalModal, setShowPayPalModal] = useState<boolean>(false);
 
   // Fetch FX Rates
   useEffect(() => {
@@ -123,12 +122,8 @@ export const CheckoutView: React.FC = () => {
     }
   };
 
-  const handlePaymentMethodChange = (method: 'card' | 'paypal' | 'upi' | 'bank') => {
+  const handlePaymentMethodChange = (method: 'card' | 'upi' | 'bank') => {
     setPaymentMethod(method);
-    if (method === 'paypal' && currency === 'INR') {
-      setCurrency('USD');
-      showToast('PayPal uses an international currency (USD)');
-    }
   };
 
   const finalizeOrder = (isPaid: boolean = false, paymentId?: string) => {
@@ -165,8 +160,6 @@ export const CheckoutView: React.FC = () => {
       paymentMethod:
         paymentMethod === 'card'
           ? 'Credit / Debit Card'
-          : paymentMethod === 'paypal'
-          ? 'PayPal'
           : paymentMethod === 'upi'
           ? 'UPI (India)'
           : 'Bank Transfer / Wise',
@@ -190,12 +183,6 @@ export const CheckoutView: React.FC = () => {
     }
 
     setIsProcessing(true);
-
-    if (paymentMethod === 'paypal') {
-      setShowPayPalModal(true);
-      setIsProcessing(false);
-      return;
-    }
 
     // Razorpay Standard Checkout (card / UPI / bank)
     const orderRef = 'RN-' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2, 5).toUpperCase();
@@ -394,20 +381,6 @@ export const CheckoutView: React.FC = () => {
                     </div>
                   </label>
 
-                  <label className={`payment-method ${paymentMethod === 'paypal' ? 'selected' : ''}`}>
-                    <input
-                      type="radio"
-                      name="payment"
-                      checked={paymentMethod === 'paypal'}
-                      onChange={() => handlePaymentMethodChange('paypal')}
-                    />
-                    <span className="icon">🅿️</span>
-                    <div className="info">
-                      <strong>PayPal</strong>
-                      <span>Pay with your PayPal balance or linked international cards</span>
-                    </div>
-                  </label>
-
                   <label className={`payment-method ${paymentMethod === 'upi' ? 'selected' : ''}`}>
                     <input
                       type="radio"
@@ -571,69 +544,6 @@ export const CheckoutView: React.FC = () => {
             </div>
           </div>
         </form>
-
-        {/* PayPal Modal Simulator */}
-        {showPayPalModal && (
-          <div className="modal-overlay" onClick={() => setShowPayPalModal(false)}>
-            <div className="modal-content" style={{ maxWidth: '440px' }} onClick={(e) => e.stopPropagation()}>
-              <button className="close-modal-btn" onClick={() => setShowPayPalModal(false)}>
-                ✕
-              </button>
-              <h2 style={{ fontSize: '24px', marginBottom: '8px', color: 'var(--ink)' }}>
-                Pay securely with PayPal
-              </h2>
-              <p style={{ color: '#5c6472', fontSize: '14px', marginBottom: '20px' }}>
-                Your payment of <strong>{formatMoney(grandTotalINR, 'USD')}</strong> is processed
-                securely by PayPal.
-              </p>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <button
-                  type="button"
-                  style={{
-                    background: '#ffc439',
-                    border: '1px solid #e0aa2b',
-                    borderRadius: '8px',
-                    padding: '12px',
-                    fontWeight: 800,
-                    fontSize: '16px',
-                    cursor: 'pointer',
-                    color: '#003087'
-                  }}
-                  onClick={() => {
-                    setShowPayPalModal(false);
-                    finalizeOrder(true, 'PP-' + Math.random().toString(36).substring(2, 9).toUpperCase());
-                  }}
-                >
-                  Pay with PayPal
-                </button>
-                <button
-                  type="button"
-                  style={{
-                    background: '#2c2e2f',
-                    border: 0,
-                    borderRadius: '8px',
-                    padding: '12px',
-                    fontWeight: 700,
-                    fontSize: '15px',
-                    cursor: 'pointer',
-                    color: 'white'
-                  }}
-                  onClick={() => {
-                    setShowPayPalModal(false);
-                    finalizeOrder(true, 'PP-CARD-' + Math.random().toString(36).substring(2, 9).toUpperCase());
-                  }}
-                >
-                  Debit or Credit Card
-                </button>
-              </div>
-
-              <p style={{ fontSize: '12px', color: '#737987', marginTop: '16px', textAlign: 'center' }}>
-                Encrypted checkout powered by Kiddie Bloom
-              </p>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

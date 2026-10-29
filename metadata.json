@@ -1,6 +1,6 @@
 {
   "name": "Kiddie Bloom",
-  "description": "Digital printable PDFs (worksheets, activities, puzzles, cut-and-paste, coloring) for children, sold with PayPal and delivered instantly.",
+  "description": "Digital printable PDFs (worksheets, activities, puzzles, cut-and-paste, coloring) for children, sold with Razorpay and delivered instantly.",
   "prompt": "Kiddie Bloom bookstore and learning studio",
   "capabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
