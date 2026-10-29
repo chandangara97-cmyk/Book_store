@@ -20,7 +20,7 @@ const ADMIN_EMAILS = defineString('ADMIN_EMAILS', { default: '' });
 // Keep these the same as js/payments.js. Confirm the percentages in your Razorpay dashboard.
 const CFG = { feeDomestic: 2, feeInternational: 3, gst: 18, passFee: true, freeFrom: 499, shipping: 49 };
 const CURRENCIES = ['INR', 'USD', 'EUR', 'GBP', 'AED', 'SGD', 'AUD', 'CAD'];
-const ALLOWED_ORIGINS = ['https://kiddiebloom.in', 'https://www.kiddiebloom.in', 'https://chandangara97-cmyk.github.io']; // Replace with your exact GitHub Pages/custom-domain origins
+const ALLOWED_ORIGINS = ['http://localhost:5173', 'http://127.0.0.1:5173', 'https://kiddiebloom.in', 'https://www.kiddiebloom.in', 'https://chandangara97-cmyk.github.io']; // Replace with your exact GitHub Pages/custom-domain origins
 
 async function liveRate(cur) {
   if (cur === 'INR') return 1;
@@ -65,6 +65,15 @@ async function calculateCheckout(items, currency, country) {
 // ---------- Printable PDFs: paid downloads from Google Drive ----------
 const root = () => DB_ROOT.value().replace(/^\/|\/$/g, '');
 const db = (path) => admin.database().ref(root() + '/' + path);
+async function createRzOrder(rz, params) {
+  if (!Number.isFinite(params.amount) || params.amount < 100) throw httpErr(400, 'Amount is below the minimum (1 unit / 100 paise).');
+  try { return await rz.orders.create(params); }
+  catch (e) {
+    console.error('Razorpay order error', e && e.statusCode, e && e.error && e.error.description);
+    if (e && e.statusCode === 401) throw httpErr(401, 'Payment gateway authentication failed. Check Razorpay keys.');
+    throw httpErr(500, 'Could not create the payment order. Please try again.');
+  }
+}
 function httpErr(status, message) { const e = new Error(message); e.status = status; return e; }
 async function authUser(req) {
   const m = (req.get('Authorization') || '').match(/^Bearer (.+)$/);
@@ -147,7 +156,7 @@ exports.api = onRequest({ secrets: [KEY_ID, KEY_SECRET, DRIVE_SA_KEY], cors: ALL
       try { calc = await calculateCheckout(items, currency, country); } catch (e) { return res.status(400).json({ error: e.message }); }
       const amount = Math.round(Number(calc.amount) * 100);
       const safeRef = String(orderRef || ('RN-' + Date.now())).replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40);
-      const order = await rz.orders.create({ amount, currency, receipt: safeRef,
+      const order = await createRzOrder(rz, { amount, currency, receipt: safeRef,
         notes: { country: String(country || ''), email: String((customer && customer.email) || '').slice(0, 80) } });
       await admin.database().ref('orders/' + safeRef).update({
         razorpayOrderId: order.id, status: 'created', currency, rate: calc.rate, baseINR: calc.base, totalINR: calc.totalINR, amountMinor: amount,
@@ -179,7 +188,7 @@ exports.api = onRequest({ secrets: [KEY_ID, KEY_SECRET, DRIVE_SA_KEY], cors: ALL
       const ref = 'PR-' + Date.now() + '-' + crypto.randomBytes(3).toString('hex');
       const amountMinor = Math.round(Number(calc.amount) * 100);
       const rz = new Razorpay({ key_id: KEY_ID.value(), key_secret: KEY_SECRET.value() });
-      const order = await rz.orders.create({ amount: amountMinor, currency, receipt: ref, notes: { uid: user.uid, type: 'printable' } });
+      const order = await createRzOrder(rz, { amount: amountMinor, currency, receipt: ref, notes: { uid: user.uid, type: 'printable' } });
       await db('printableOrders/' + ref).set({ uid: user.uid, email: user.email || '', razorpayOrderId: order.id, status: 'created', currency, rate: calc.rate, totalINR: calc.totalINR, amount: calc.amount, amountMinor, items: paid.map(i => ({ id: i.id, title: i.title, priceINR: i.price })), createdAt: admin.database.ServerValue.TIMESTAMP });
       return res.json({ orderId: order.id, orderRef: ref, amount: amountMinor, currency, keyId: KEY_ID.value() });
     }

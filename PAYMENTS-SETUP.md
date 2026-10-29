@@ -1,3 +1,5 @@
+> No Blaze plan? Use FREE-PLAN-SETUP.md instead of the Firebase deploy steps below.
+
 # Online payments (Razorpay only)
 
 All payments (books/toys checkout and paid printable PDFs) go through **Razorpay** (cards, UPI, net banking, international cards if enabled on your account). PayPal has been removed.
@@ -34,3 +36,10 @@ Put the deployed `api` URL in `.env.local` as `VITE_API_URL=https://us-central1-
 - Prices are always computed server-side (`functions/catalog.js` and the database); browser prices are ignored.
 - Only the public Key ID is sent to the browser. The Key Secret stays in Firebase secrets.
 - Switch to Live keys only after Razorpay approves your account and end-to-end tests pass.
+
+## Going live
+1. Razorpay Dashboard: finish KYC/Activation, then switch to **Live Mode** → Account & Settings → API Keys → Generate Live Key.
+2. Run `./set-live-keys.sh` and paste the `rzp_live_...` ID and secret (it deploys for you).
+3. Use your real HTTPS domain in `ALLOWED_ORIGINS` (`functions/index.js`) and `VITE_API_URL`; remove localhost when you publish.
+4. Do one small real payment, check it shows as `paid`, then refund it.
+Do not keep live keys in any file or chat. `set-secrets.sh` / `.secret.local` hold TEST keys only.
