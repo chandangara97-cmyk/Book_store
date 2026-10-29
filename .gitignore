@@ -1,14 +1,10 @@
+# secrets
 .env
 .env.*
 !.env.example
-node_modules
-dist
-.env.local
-functions/.env.*
-!functions/.env.example
-functions/node_modules
-
-functions/.secret.local
-set-secrets.sh
 service-account.json
-private-pdfs/*.pdf
+functions/.secret.local
+# build / deps
+node_modules
+functions/node_modules
+dist

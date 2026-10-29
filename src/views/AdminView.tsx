@@ -4,7 +4,7 @@ import { Book, LearningResource, LearningSection } from '../types';
 import { pdfFirstPageCover } from '../utils/pdfCover';
 import { databaseRequest } from '../firebaseClient';
 
-const driveId = (v: string) => { const t = v.trim(); const m = t.match(/\/d\/([A-Za-z0-9_-]{10,})/) || t.match(/[?&]id=([A-Za-z0-9_-]{10,})/); return m ? m[1] : /^[A-Za-z0-9_-]{10,}$/.test(t) ? t : ''; };
+const driveId = (v: string) => { const t = v.trim(); if (/^local_[A-Za-z0-9_-]+$/.test(t)) return t; const m = t.match(/\/d\/([A-Za-z0-9_-]{10,})/) || t.match(/[?&]id=([A-Za-z0-9_-]{10,})/); return m ? m[1] : /^[A-Za-z0-9_-]{10,}$/.test(t) ? t : ''; };
 
 export const AdminView: React.FC = () => {
   const {

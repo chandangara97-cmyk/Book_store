@@ -1,45 +1,22 @@
 # Kiddie Bloom
 
-> **Digital-only store.** Customers browse five printable sections (worksheets, activities, puzzles, cut-and-paste, coloring) by age, pay with Razorpay and download the PDF, which is delivered from a private Google Drive folder ("Kiddie Bloom PDFs"). See `PRINTABLES-SETUP.md`. The older book/toy/cart code is kept in the repo but is no longer reachable from the site.
+React + TypeScript + Vite storefront for printable PDFs, paid via Razorpay.
+Payment API (`server/server.cjs`, wraps `functions/index.js`) uses Firebase Auth + Realtime Database.
+Paid PDFs are stored in `private-pdfs/` — **keep this repo private**.
 
-A modern, responsive React + TypeScript e-commerce and learning studio application for children's tutorial books, fiction, learning titles, toys, and gift finder recommendations.
+## Deploy (Render, both from this repo)
+**Web Service (API)** — Build: `cd functions && npm install` — Start: `node server/server.cjs`
+Env vars: see `.env.example` (API section). Secret File: `service-account.json`.
 
-## Overview
+**Static Site (storefront)** — Build: `npm install && npm run build` — Publish dir: `dist`
+Env vars: see `.env.example` (Storefront section). Add custom domain `kiddiebloom.in`.
 
-Kiddie Bloom is built with React 19, TypeScript, and Vite. It preserves all original features and business logic:
-- **Interactive Age Finder**: Slider from age 0 to 15 matching custom tutorial stages (Ages 0–3, 4–7, 8–12, 13–15) with dynamic preview images and instant Printed vs Digital edition format selection.
-- **Master Library & Search**: Complete catalog browsing with category filtering (Fiction & Stories, Learning & Growth, Children's Books, Gifts & Special Reads), search, and multiple sorting options.
-- **Toys & Learning Kits**: Creative craft kits, puzzles, plush toys, and pairing suggestions for reading corners.
-- **Cart & Threshold Rewards**: Real-time quantity adjustment, persistent storage, and automatic unlockable gift tiers (Spend ₹999 for a Free Colouring Kit; Spend ₹1,499 for a Free Mini Toy; Free shipping over ₹499).
-- **Gift Finder Wizard**: 3-step recommendation quiz guiding shoppers by recipient, reading interests, and age group.
-- **Multi-Currency Checkout**: Real-time exchange rate calculation from live currency feeds (`INR`, `USD`, `EUR`, `GBP`, `AED`, `SGD`, `AUD`, `CAD`), dynamic fee calculation, and payment method support (Cards, UPI, Net Banking via Razorpay).
-- **Printable Order Summary / Invoice**: Detailed order confirmation with customer information, item breakdown, currency conversion, and print/PDF support.
-- **User Account & Wishlist**: Save items to wishlist, view past orders, and manage authentication state.
-- **Studio Admin Workspace**: Curate products, manage books and toys, inspect statistics, edit items, and seed/restore catalog defaults.
+## Add a printable
+1. Put `name.pdf` in `private-pdfs/`, commit, push.
+2. Admin → PDF field: `local_name` → Publish printables to Firebase.
 
-## Tech Stack
-- **Framework**: React 19 + TypeScript
-- **Bundler & Dev Server**: Vite (listening on port 3000)
-- **State Management**: React Context (`StoreContext`) with persistent LocalStorage backup
-- **Icons**: Lucide icons & themed SVG graphics
+## Local dev
+Copy `.env.example` to `.env` (API) and `.env.local` (storefront), add `service-account.json`, then:
+`(cd functions && npm install) && npm install && npm run api` and in another terminal `npm run dev`.
 
-## Development
-
-```bash
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
-
-# Build for production
-npm run build
-```
-
-© 2026 Kiddie Bloom. All rights reserved.
-
-## Kiddie Bloom logo assets
-
-- Main logo: `public/img/kiddie-bloom-logo.png` (used on the homepage hero and social preview).
-- Compact logo: `public/img/kiddie-bloom-logo-sm.png` (used in the header, footer, favicon, and mobile-friendly brand areas).
-- The same source assets are retained in `img/` for repository compatibility. App references use root-relative `/img/...` paths so they are included in Vite production builds.
+Firebase DB rules: `firebase-rules.json`. Test: `cd functions && npm test`.

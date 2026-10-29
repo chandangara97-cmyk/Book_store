@@ -2,7 +2,7 @@
 // Start: npm run api   (from the project root)
 const path = require('path');
 const Module = require('module');
-require('fs').readFileSync(path.join(__dirname, '..', '.env'), 'utf8').split('\n').forEach(l => { const m = l.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*?)\s*$/); if (m && !(m[1] in process.env)) process.env[m[1]] = m[2].replace(/^['"]|['"]$/g, ''); });
+try { require('fs').readFileSync(path.join(__dirname, '..', '.env'), 'utf8').split('\n').forEach(l => { const m = l.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*?)\s*$/); if (m && !(m[1] in process.env)) process.env[m[1]] = m[2].replace(/^['"]|['"]$/g, ''); }); } catch (e) { /* no .env on the host: use real environment variables */ }
 
 const need = ['RAZORPAY_KEY_ID', 'RAZORPAY_KEY_SECRET', 'GOOGLE_APPLICATION_CREDENTIALS', 'FIREBASE_DATABASE_URL', 'FIREBASE_PROJECT_ID'];
 const missing = need.filter(k => !process.env[k]);
