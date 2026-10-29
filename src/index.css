@@ -2831,17 +2831,10 @@ header.header {
 .printables-toolbar input { flex: 1 1 250px; }
 .printables-toolbar input:focus, .printables-toolbar select:focus { border-color: #46a77b !important; box-shadow: 0 0 0 3px rgba(70,167,123,.14); }
 .printables-grid { align-items: stretch; }
-.printable-card { display: flex; flex-direction: column; min-width: 0; transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; box-shadow: 0 8px 24px rgba(38,75,55,.07) !important; }
+.printable-card { transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; box-shadow: 0 8px 24px rgba(38,75,55,.07); }
 .printable-card:hover { transform: translateY(-4px); box-shadow: 0 16px 34px rgba(38,75,55,.13) !important; border-color: #c9dfcf !important; }
-.printable-card-art { height: 175px !important; position: relative; overflow: hidden; }
-.printable-card-art:after { content: 'PDF • INSTANT ACCESS'; position: absolute; left: 12px; bottom: 12px; padding: 5px 9px; border-radius: 999px; background: rgba(255,255,255,.92); color: #285740; font-size: 9px; font-weight: 900; letter-spacing: .8px; box-shadow: 0 3px 10px rgba(0,0,0,.06); }
 .printable-card-art img { transition: transform .35s ease; }
 .printable-card:hover .printable-card-art img { transform: scale(1.035); }
-.printable-card > div:nth-child(2) { display: flex; flex: 1; flex-direction: column; }
-.printable-card h3 { font-size: 20px; line-height: 1.25; }
-.printable-card p { font-size: 14px; line-height: 1.55; }
-.printable-card .btn { min-height: 42px; border-radius: 12px; white-space: nowrap; }
-.printable-card strong { font-size: 18px; color: #214c3d; }
 [data-theme="dark"] .printables-hero { background: linear-gradient(120deg,#1c2a36,#1c302b 65%,#1b2b40) !important; border-color: var(--border); }
 [data-theme="dark"] .printables-hero p { color: #c0d0c5; }
 [data-theme="dark"] .printables-hero .pill { background: rgba(255,255,255,.08); color: var(--text); border-color: var(--border); }
@@ -2859,16 +2852,7 @@ header.header {
   .printables-toolbar > div { width: 100%; }
   .printables-toolbar input { width: 100%; min-width: 0 !important; }
   .printables-grid { grid-template-columns: repeat(2, minmax(0,1fr)) !important; gap: 12px !important; }
-  .printable-card { border-radius: 16px !important; }
-  .printable-card-art { height: 125px !important; font-size: 42px !important; }
-  .printable-card-art:after { left: 7px; bottom: 7px; font-size: 7px; padding: 4px 6px; }
-  .printable-card > div:nth-child(2) { padding: 12px !important; }
-  .printable-card h3 { font-size: 15px; }
-  .printable-card p { min-height: 0 !important; font-size: 12px; }
-  .printable-card .btn { font-size: 11px; padding: 9px 8px; white-space: normal; }
-  .printable-card strong { font-size: 15px; }
 }
-@media (max-width: 360px) { .printables-grid { grid-template-columns: 1fr !important; } .printable-card-art { height: 160px !important; } }
 @media (prefers-reduced-motion: reduce) { .printable-card, .printable-card-art img, .printables-categories .btn { transition: none !important; } }
 
 
@@ -2965,3 +2949,46 @@ img { max-width: 100%; }
 .admin-shell .btn:disabled { opacity: .5; cursor: not-allowed; }
 @media (max-width: 900px) { .admin-layout { grid-template-columns: minmax(0, 1fr); } .admin-product-list { max-height: 440px; } }
 @media (max-width: 600px) { .admin-shell { padding: 18px 14px 46px; } .admin-hero { border-radius: 20px; align-items: stretch; flex-direction: column; } .admin-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; } .admin-stat { padding: 13px 10px; border-radius: 15px; } .admin-stat small { font-size: 9px; letter-spacing: .04em; } .admin-stat strong { font-size: 1.65rem; } .admin-panel { padding: 17px; border-radius: 18px; } .admin-product-row { align-items: flex-start; flex-direction: column; } .admin-product-actions { width: 100%; } .admin-product-actions .btn { flex: 1; } }
+
+/* ---- Printables storefront: clean card layout, real first-page covers ---- */
+.pr-toolbar { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+.pr-chips { display: flex; gap: 8px; align-items: center; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.pr-chips::-webkit-scrollbar { display: none; }
+.pr-chips > * { flex: none; white-space: nowrap; }
+.pr-restart { border-radius: 999px !important; padding: 8px 14px !important; font-size: 13px !important; }
+.pr-search { width: 100%; min-height: 46px; padding: 10px 16px; border-radius: 14px; border: 1px solid #d7dfd5; background: #fff; font-size: 15px; box-sizing: border-box; }
+.pr-search:focus { outline: 3px solid rgba(70,167,123,.18); border-color: #46a77b; }
+@media (min-width: 721px) { .pr-toolbar { flex-direction: row; align-items: center; justify-content: space-between; } .pr-search { width: 320px; } }
+
+.printables-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; align-items: stretch; }
+.printable-card { display: flex; flex-direction: column; min-width: 0; overflow: hidden; background: #fff; border: 1px solid #e5e9e1; border-radius: 20px; }
+.printable-card.in-basket { border-color: #214c3d; box-shadow: 0 0 0 2px rgba(33,76,61,.14), 0 10px 26px rgba(38,75,55,.10) !important; }
+.printable-card-art { position: relative; aspect-ratio: 1 / 1.414; background: linear-gradient(135deg,#fff2dd,#edf7f0); display: grid; place-items: center; overflow: hidden; border-bottom: 1px solid #eef1ea; }
+.printable-card-art img { width: 100%; height: 100%; object-fit: cover; object-position: top center; display: block; background: #fff; }
+.pc-badge { position: absolute; top: 10px; left: 10px; padding: 4px 9px; border-radius: 999px; background: rgba(255,255,255,.94); color: #285740; font-size: 10px; font-weight: 900; letter-spacing: .6px; text-transform: uppercase; box-shadow: 0 2px 8px rgba(0,0,0,.10); }
+.pc-body { display: flex; flex: 1; flex-direction: column; padding: 14px 16px 16px; }
+.pc-meta { color: #a66a32; font-weight: 800; font-size: 11px; letter-spacing: .5px; text-transform: uppercase; }
+.pc-title { color: #214c3d; font-size: 17px; line-height: 1.28; margin: 6px 0 6px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.pc-desc { color: #68756c; font-size: 13.5px; line-height: 1.5; margin: 0 0 12px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.pc-foot { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.pc-price { font-size: 19px; color: #214c3d; }
+.pc-owned { color: #214c3d; font-weight: 700; font-size: 12px; }
+.pc-foot .btn { min-height: 42px; border-radius: 12px; white-space: nowrap; padding: 9px 14px; font-weight: 800; }
+.pc-remove { margin-top: 8px; background: none; border: 0; padding: 4px 0; color: #b3261e; font-weight: 700; font-size: 12px; cursor: pointer; text-align: left; }
+.pr-basket-bar { pointer-events: auto; border-radius: 999px !important; padding: 14px 20px !important; font-weight: 800; box-shadow: 0 10px 28px rgba(0,0,0,.22); max-width: calc(100vw - 28px); }
+[data-theme="dark"] .printable-card, [data-theme="dark"] .pr-search { background: var(--card-bg) !important; border-color: var(--border) !important; color: var(--text); }
+[data-theme="dark"] .pc-title, [data-theme="dark"] .pc-price { color: var(--text); }
+[data-theme="dark"] .pc-desc { color: var(--text-muted); }
+@media (max-width: 720px) {
+  .printables-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 12px !important; }
+  .printable-card { border-radius: 16px; }
+  .pc-body { padding: 10px 11px 12px; }
+  .pc-title { font-size: 14px; -webkit-line-clamp: 3; }
+  .pc-desc { font-size: 12px; -webkit-line-clamp: 2; margin-bottom: 10px; }
+  .pc-badge { top: 7px; left: 7px; font-size: 8px; padding: 3px 7px; }
+  .pc-price { font-size: 16px; }
+  .pc-foot { flex-direction: column; align-items: stretch; gap: 8px; }
+  .pc-foot .btn { width: 100%; font-size: 13px; }
+  .pc-owned { text-align: center; }
+}
+@media (max-width: 300px) { .printables-grid { grid-template-columns: 1fr !important; } }

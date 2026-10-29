@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../context/StoreContext';
 import { Book, LearningResource, LearningSection } from '../types';
+import { pdfFirstPageCover } from '../utils/pdfCover';
 import { databaseRequest } from '../firebaseClient';
 
 const driveId = (v: string) => { const t = v.trim(); const m = t.match(/\/d\/([A-Za-z0-9_-]{10,})/) || t.match(/[?&]id=([A-Za-z0-9_-]{10,})/); return m ? m[1] : /^[A-Za-z0-9_-]{10,}$/.test(t) ? t : ''; };
@@ -34,6 +35,14 @@ export const AdminView: React.FC = () => {
   const [resourcePdfUrl, setResourcePdfUrl] = useState('');
   const [resourceThumbnail, setResourceThumbnail] = useState('');
   const [resourcePrice, setResourcePrice] = useState<number>(0);
+  const [coverBusy, setCoverBusy] = useState(false);
+  const makeCover = async (file: File | undefined | null): Promise<string> => {
+    if (!file) return '';
+    setCoverBusy(true);
+    try { return await pdfFirstPageCover(file); }
+    catch (e) { showToast(e instanceof Error ? e.message : 'Could not read that PDF.'); return ''; }
+    finally { setCoverBusy(false); }
+  };
 
   // Form fields
   const [title, setTitle] = useState('');
@@ -208,10 +217,18 @@ export const AdminView: React.FC = () => {
           </div>
           <div className="form-group"><label>Description</label><textarea value={resourceDescription} onChange={e => setResourceDescription(e.target.value)} placeholder="What will children practise?" /></div>
           <div className="form-group"><label>Google Drive PDF link or file ID *</label><input required value={resourcePdfUrl} onChange={e => setResourcePdfUrl(e.target.value)} placeholder="https://drive.google.com/file/d/…/view" /></div>
-          <div className="form-group"><label>Optional thumbnail image URL</label><input type="url" value={resourceThumbnail} onChange={e => setResourceThumbnail(e.target.value)} placeholder="https://..." /></div>
+          <div className="form-group"><label>Cover = first page of the PDF</label>
+            <input type="file" accept="application/pdf" onChange={async e => { const f = e.target.files?.[0]; const url = await makeCover(f); if (url) { setResourceThumbnail(url); showToast('Cover created from page 1 of the PDF.'); } e.target.value = ''; }} />
+            <small style={{ color: 'var(--mut)' }}>{coverBusy ? 'Reading the PDF…' : 'Choose the same PDF from your device. Only a small cover image is stored; the PDF itself stays private in Drive.'}</small>
+            {resourceThumbnail && <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 8 }}><img src={resourceThumbnail} alt="Cover preview" style={{ width: 84, borderRadius: 8, border: '1px solid var(--border)' }} /><button type="button" className="btn alt" onClick={() => setResourceThumbnail('')}>Remove cover</button></div>}
+          </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 16 }}><button className="btn gold" type="submit">Save printable record</button><button className="btn alt" type="button" disabled={!firebaseConfigured} onClick={async () => { try { await pushLearningResources(); } catch (e) { showToast(e instanceof Error ? e.message : 'Could not publish resources'); } }}>Publish printables to Firebase</button><button className="btn alt" type="button" disabled={!firebaseConfigured} onClick={async () => { try { await fetchLearningResources(); } catch (e) { showToast(e instanceof Error ? e.message : 'Could not fetch resources'); } }}>Fetch live printables</button></div>
         </form>
-        <div style={{ marginTop: 22 }}><strong>{learningResources.length} printable records</strong>{learningResources.length > 0 && <ul>{learningResources.slice(0, 8).map(r => <li key={r.id}>{r.title} · {r.section} · ages {r.minAge}–{r.maxAge} · {r.active ? 'Published/active' : 'Hidden'}</li>)}</ul>}</div>
+        <div style={{ marginTop: 22 }}><strong>{learningResources.length} printable records</strong>{learningResources.length > 0 && <ul style={{ listStyle: 'none', padding: 0, display: 'grid', gap: 10 }}>{learningResources.map(r => <li key={r.id} style={{ display: 'flex', gap: 12, alignItems: 'center', padding: 10, border: '1px solid var(--border)', borderRadius: 14 }}>
+          <div style={{ width: 46, flex: 'none', aspectRatio: '1 / 1.414', borderRadius: 6, overflow: 'hidden', background: '#edf7f0', display: 'grid', placeItems: 'center' }}>{r.thumbnailUrl ? <img src={r.thumbnailUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span>📄</span>}</div>
+          <div style={{ flex: 1, minWidth: 0 }}><strong style={{ display: 'block' }}>{r.title}</strong><small>{r.section} · ages {r.minAge}–{r.maxAge} · {r.active ? 'Published/active' : 'Hidden'}{r.thumbnailUrl ? '' : ' · no cover yet'}</small></div>
+          <label className="btn alt" style={{ cursor: 'pointer', fontSize: 12, padding: '8px 10px', whiteSpace: 'nowrap' }}>{coverBusy ? '…' : r.thumbnailUrl ? 'New cover' : 'Add cover'}<input type="file" accept="application/pdf" hidden onChange={async e => { const f = e.target.files?.[0]; const url = await makeCover(f); e.target.value = ''; if (url) addOrUpdateLearningResource({ ...r, thumbnailUrl: url }); }} /></label>
+        </li>)}</ul>}{learningResources.length > 0 && <small style={{ color: 'var(--mut)' }}>After adding covers, press “Publish printables to Firebase” so customers see them.</small>}</div>
       </section>}
 
       {/* Stats */}
