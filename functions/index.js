@@ -23,7 +23,7 @@ const ADMIN_EMAILS = defineString('ADMIN_EMAILS', { default: '' });
 // Keep these the same as js/payments.js. Confirm the percentages in your Razorpay dashboard.
 const CFG = { feeDomestic: 2, feeInternational: 3, gst: 18, passFee: true, freeFrom: 499, shipping: 49 };
 const CURRENCIES = ['INR', 'USD', 'EUR', 'GBP', 'AED', 'SGD', 'AUD', 'CAD'];
-const ALLOWED_ORIGINS = ['https://YOUR-SITE.example']; // Replace with your exact GitHub Pages/custom-domain origins
+const ALLOWED_ORIGINS = ['https://chandangara97-cmyk.github.io']; // Replace with your exact GitHub Pages/custom-domain origins
 
 async function liveRate(cur) {
   if (cur === 'INR') return 1;
