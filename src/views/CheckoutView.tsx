@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useStore } from '../context/StoreContext';
 import { CURRENCY_SYMBOLS, DEFAULT_FX_RATES } from '../data/initialData';
 import { Order, CustomerDetails } from '../types';
+import { payWithRazorpay } from '../razorpayApi';
 
 const FX_ENDPOINT = 'https://open.er-api.com/v6/latest/INR';
 const FX_CACHE_KEY = 'readingNookFxRates';
@@ -196,11 +197,20 @@ export const CheckoutView: React.FC = () => {
       return;
     }
 
-    // Demo payment flow
-    setTimeout(() => {
-      setIsProcessing(false);
-      finalizeOrder(true);
-    }, 800);
+    // Razorpay Standard Checkout (card / UPI / bank)
+    const orderRef = 'RN-' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2, 5).toUpperCase();
+    payWithRazorpay({
+      items: cart.map((i) => ({ id: i.id, qty: Number(i.qty) || 1 })),
+      currency,
+      country: customer.country,
+      customer: { name: customer.name, email: customer.email, contact: customer.phone },
+      orderRef
+    })
+      .then(({ paymentId }) => finalizeOrder(true, paymentId))
+      .catch((err: Error) => {
+        showToast(err.message === 'cancelled' ? 'Payment cancelled.' : err.message || 'Payment failed.');
+      })
+      .finally(() => setIsProcessing(false));
   };
 
   if (cart.length === 0) {

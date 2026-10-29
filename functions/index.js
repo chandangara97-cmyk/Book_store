@@ -205,11 +205,13 @@ exports.api = onRequest({ secrets: [KEY_ID, KEY_SECRET, PAYPAL_CLIENT_ID, PAYPAL
     }
     if (req.path === '/verifyPayment') {
       const { razorpay_order_id: o, razorpay_payment_id: p, razorpay_signature: s } = req.body || {};
+      if (!o || !p || !s || [o, p, s].some(v => typeof v !== 'string')) return res.status(400).json({ error: 'Missing payment fields.' });
       const expected = crypto.createHmac('sha256', KEY_SECRET.value()).update(o + '|' + p).digest('hex');
-      const ok = s && expected.length === s.length && crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(s));
+      const ok = expected.length === s.length && crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(s));
       if (!ok) return res.status(400).json({ error: 'Payment could not be verified.' });
       const snap = await admin.database().ref('orders').orderByChild('razorpayOrderId').equalTo(o).once('value');
-      snap.forEach(c => c.ref.update({ status: 'paid', paymentId: p, paidAt: admin.database.ServerValue.TIMESTAMP }));
+      if (!snap.exists()) return res.status(404).json({ error: 'Order not found.' });
+      snap.forEach(c => { c.ref.update({ status: 'paid', paymentId: p, paidAt: admin.database.ServerValue.TIMESTAMP }); });
       return res.json({ ok: true });
     }
 
