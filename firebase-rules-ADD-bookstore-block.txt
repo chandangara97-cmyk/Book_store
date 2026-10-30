@@ -1,49 +1,53 @@
 PASTE THIS INSIDE your existing "rules": { ... } object, as one more entry next to your current ones
 (add a comma after your last existing entry first). Do NOT replace your existing rules.
-Replace REPLACE-WITH-ADMIN-EMAIL@example.com (every place it appears) with your admin email.
 
-  "bookstore": {
-    "books": {
-      ".read": true,
-      ".write": "auth != null && auth.token.email === 'REPLACE-WITH-ADMIN-EMAIL@example.com'"
-    },
-    "toys": {
-      ".read": true,
-      ".write": "auth != null && auth.token.email === 'REPLACE-WITH-ADMIN-EMAIL@example.com'"
-    },
-    "learningPrivate": {
-      ".read": "auth != null && auth.token.email === 'REPLACE-WITH-ADMIN-EMAIL@example.com'",
-      ".write": "auth != null && auth.token.email === 'REPLACE-WITH-ADMIN-EMAIL@example.com'"
-    },
-    "entitlements": {
-      "$uid": {
-        ".read": "auth != null && auth.uid === $uid",
+"bookstore": {
+      "books": {
+        ".read": true,
+        ".write": "auth != null && auth.token.email === 'chandanpanwar001@gmail.com'"
+      },
+      "toys": {
+        ".read": true,
+        ".write": "auth != null && auth.token.email === 'chandanpanwar001@gmail.com'"
+      },
+      "learningPrivate": {
+        ".read": "auth != null && auth.token.email === 'chandanpanwar001@gmail.com'",
+        ".write": "auth != null && auth.token.email === 'chandanpanwar001@gmail.com'"
+      },
+      "learningResources": {
+        ".read": true,
+        ".write": "auth != null && auth.token.email === 'chandanpanwar001@gmail.com'"
+      },
+      "entitlements": {
+        "$uid": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": false
+        }
+      },
+      "printableOrders": {
+        ".read": "auth != null && auth.token.email === 'chandanpanwar001@gmail.com'",
         ".write": false
-      }
-    },
-    "printableOrders": {
-      ".read": "auth != null && auth.token.email === 'REPLACE-WITH-ADMIN-EMAIL@example.com'",
-      ".write": false
-    },
-    "learningResources": {
-      ".read": true,
-      ".write": "auth != null && auth.token.email === 'REPLACE-WITH-ADMIN-EMAIL@example.com'"
-    },
-    "orders": {
-      ".read": "auth != null && auth.token.email === 'REPLACE-WITH-ADMIN-EMAIL@example.com'",
-      "$orderId": {
-        ".write": "auth != null && !data.exists() && newData.child('uid').val() === auth.uid",
-        ".validate": "newData.hasChildren(['orderId', 'uid', 'items', 'totalsINR', 'createdAt'])",
-        "status": {
-          ".write": "auth != null && auth.token.email === 'REPLACE-WITH-ADMIN-EMAIL@example.com'"
+      },
+      "downloadTokens": {
+        ".read": false,
+        ".write": false
+      },
+      "orders": {
+        ".read": "auth != null && auth.token.email === 'chandanpanwar001@gmail.com'",
+        ".indexOn": ["razorpayOrderId"],
+        "$orderId": {
+          ".write": "auth != null && !data.exists() && newData.child('uid').val() === auth.uid",
+          ".validate": "newData.hasChildren(['orderId', 'uid', 'items', 'totalsINR', 'createdAt'])",
+          "status": {
+            ".write": "auth != null && auth.token.email === 'chandanpanwar001@gmail.com'"
+          }
+        }
+      },
+      "users": {
+        ".read": "auth != null && auth.token.email === 'chandanpanwar001@gmail.com'",
+        "$uid": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": "auth != null && auth.uid === $uid"
         }
       }
-    },
-    "users": {
-      ".read": "auth != null && auth.token.email === 'REPLACE-WITH-ADMIN-EMAIL@example.com'",
-      "$uid": {
-        ".read": "auth != null && auth.uid === $uid",
-        ".write": "auth != null && auth.uid === $uid"
-      }
     }
-  }

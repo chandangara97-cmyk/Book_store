@@ -31,6 +31,24 @@ async function liveRate(cur) {
   return rate;
 }
 
+
+// Price lookup: static catalog first, then books/toys saved in Firebase by the Admin screen.
+async function priceFor(id) {
+  id = String(id);
+  if (PRICES[id] !== undefined) return PRICES[id];
+  if (!/^[a-z0-9-]{1,80}$/.test(id)) return undefined;
+  const digital = id.endsWith('-digital');
+  const base = digital ? id.slice(0, -8) : id;
+  for (const col of ['books', 'toys']) {
+    const r = (await db(col + '/' + base).once('value')).val();
+    if (r) {
+      const p = digital ? Number(r.digitalPrice) : Number(r.printedPrice || r.price);
+      if (p > 0) return p;
+    }
+  }
+  return undefined;
+}
+
 async function calculateCheckout(items, currency, country) {
   if (!Array.isArray(items) || !items.length || items.length > 50) throw new Error('Your cart is empty.');
   if (!CURRENCIES.includes(currency)) throw new Error('Unsupported currency.');
@@ -44,7 +62,7 @@ async function calculateCheckout(items, currency, country) {
       requestedGifts.push(it.id);
       continue;
     }
-    const price = PRICES[it.id];
+    const price = await priceFor(it.id);
     if (price === undefined) throw new Error('Unknown item: ' + String(it.id).slice(0, 40));
     subtotal += price * qty;
   }
@@ -166,7 +184,7 @@ exports.api = onRequest({ secrets: [KEY_ID, KEY_SECRET, DRIVE_SA_KEY], cors: ALL
       const safeRef = String(orderRef || ('RN-' + Date.now())).replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40);
       const order = await createRzOrder(rz, { amount, currency, receipt: safeRef,
         notes: { country: String(country || ''), email: String((customer && customer.email) || '').slice(0, 80) } });
-      await admin.database().ref('orders/' + safeRef).update({
+      await db('orders/' + safeRef).update({
         razorpayOrderId: order.id, status: 'created', currency, rate: calc.rate, baseINR: calc.base, totalINR: calc.totalINR, amountMinor: amount,
         items, country: country || '', createdAt: admin.database.ServerValue.TIMESTAMP });
       return res.json({ orderId: order.id, amount, currency, keyId: KEY_ID.value() });
@@ -177,7 +195,7 @@ exports.api = onRequest({ secrets: [KEY_ID, KEY_SECRET, DRIVE_SA_KEY], cors: ALL
       const expected = crypto.createHmac('sha256', KEY_SECRET.value()).update(o + '|' + p).digest('hex');
       const ok = expected.length === s.length && crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(s));
       if (!ok) return res.status(400).json({ error: 'Payment could not be verified.' });
-      const snap = await admin.database().ref('orders').orderByChild('razorpayOrderId').equalTo(o).once('value');
+      const snap = await db('orders').orderByChild('razorpayOrderId').equalTo(o).once('value');
       if (!snap.exists()) return res.status(404).json({ error: 'Order not found.' });
       snap.forEach(c => { c.ref.update({ status: 'paid', paymentId: p, paidAt: admin.database.ServerValue.TIMESTAMP }); });
       return res.json({ ok: true });

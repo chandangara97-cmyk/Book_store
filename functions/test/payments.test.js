@@ -109,9 +109,9 @@ async function t(name, fn) { seed(); try { await fn(); pass++; console.log('PASS
     const o = await call('/createOrder', { items: [{ id: Object.keys(require('../catalog')).find(k => k !== 'GIFTS'), qty: 1 }], currency: 'INR', country: 'IN', customer: { email: 'a@b.c' }, orderRef: 'RN-T1' });
     assert.equal(o.code, 200, JSON.stringify(o.body));
     const bad = await call('/verifyPayment', { razorpay_order_id: o.body.orderId, razorpay_payment_id: 'pay_9', razorpay_signature: 'x'.repeat(64) });
-    assert.equal(bad.code, 400); assert.equal(tree.orders['RN-T1'].status, 'created');
+    assert.equal(bad.code, 400); assert.equal(tree.bookstore.orders['RN-T1'].status, 'created');
     const good = await call('/verifyPayment', { razorpay_order_id: o.body.orderId, razorpay_payment_id: 'pay_9', razorpay_signature: sign(o.body.orderId, 'pay_9') });
-    assert.equal(good.code, 200); assert.equal(tree.orders['RN-T1'].status, 'paid');
+    assert.equal(good.code, 200); assert.equal(tree.bookstore.orders['RN-T1'].status, 'paid');
   });
   await t('free printable downloads for signed-in user', async () => { assert.equal((await call('/download', { resourceId: 'free-colors' }, 'tok-bob')).code, 200); });
   await t('admin can download paid file for checking', async () => { assert.equal((await call('/download', { resourceId: 'abc-tracing' }, 'tok-admin')).code, 200); });

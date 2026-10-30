@@ -22,7 +22,7 @@ export const CheckoutView: React.FC = () => {
     country: 'IN'
   });
 
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'upi' | 'bank'>('card');
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'upi'>('card');
   const [currency, setCurrency] = useState<string>('INR');
   const [fxRates, setFxRates] = useState<Record<string, number>>(DEFAULT_FX_RATES);
   const [rateStatus, setRateStatus] = useState<string>('Checking live exchange rates…');
@@ -122,7 +122,7 @@ export const CheckoutView: React.FC = () => {
     }
   };
 
-  const handlePaymentMethodChange = (method: 'card' | 'upi' | 'bank') => {
+  const handlePaymentMethodChange = (method: 'card' | 'upi') => {
     setPaymentMethod(method);
   };
 
@@ -160,9 +160,7 @@ export const CheckoutView: React.FC = () => {
       paymentMethod:
         paymentMethod === 'card'
           ? 'Credit / Debit Card'
-          : paymentMethod === 'upi'
-          ? 'UPI (India)'
-          : 'Bank Transfer / Wise',
+          : 'UPI (India)',
       paymentId: paymentId || (isPaid ? 'PAY-' + Math.random().toString(36).substring(2, 9).toUpperCase() : undefined)
     };
 
@@ -184,7 +182,7 @@ export const CheckoutView: React.FC = () => {
 
     setIsProcessing(true);
 
-    // Razorpay Standard Checkout (card / UPI / bank)
+    // Razorpay Standard Checkout (card / UPI / net banking)
     const orderRef = 'RN-' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2, 5).toUpperCase();
     payWithRazorpay({
       items: cart.map((i) => ({ id: i.id, qty: Number(i.qty) || 1 })),
@@ -394,28 +392,14 @@ export const CheckoutView: React.FC = () => {
                       <span>Google Pay, PhonePe, Paytm, BHIM QR</span>
                     </div>
                   </label>
-
-                  <label className={`payment-method ${paymentMethod === 'bank' ? 'selected' : ''}`}>
-                    <input
-                      type="radio"
-                      name="payment"
-                      checked={paymentMethod === 'bank'}
-                      onChange={() => handlePaymentMethodChange('bank')}
-                    />
-                    <span className="icon">🏦</span>
-                    <div className="info">
-                      <strong>Bank Transfer / Wise / Exchange</strong>
-                      <span>International wire, Wise, Western Union style transfers</span>
-                    </div>
-                  </label>
                 </div>
 
                 <div className="intl-note">
-                  <strong>International payments supported.</strong>
+                  <strong>Secure payment by Razorpay.</strong>
                   <br />
-                  You can pay in your local currency. We accept major international cards and transfers
-                  through money exchange services (Wise, Remitly, etc.). Currency conversion is
-                  handled automatically at competitive rates.
+                  Cards (Visa, Mastercard, RuPay, international cards), UPI, net banking and wallets are all
+                  shown in the secure Razorpay window. International cards work in your local currency; the
+                  exact methods shown depend on your Razorpay account settings.
                 </div>
               </div>
             </div>

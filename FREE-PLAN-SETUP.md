@@ -1,6 +1,6 @@
 # Run without the Firebase Blaze plan
 
-Cloud Functions need Blaze, so the same payment code runs on a normal Node server instead (`server/server.js`, which loads `functions/index.js` unchanged). Firebase Auth and Realtime Database work on the free Spark plan.
+Cloud Functions need Blaze, so the same payment code runs on a normal Node server instead (`server/server.cjs`, which loads `functions/index.js` unchanged). Firebase Auth and Realtime Database work on the free Spark plan.
 
 ## One-time
 1. Firebase Console > Project settings > Service accounts > **Generate new private key**. Save the file as `service-account.json` in the project root (it is git-ignored).
