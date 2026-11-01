@@ -197,7 +197,9 @@ exports.api = onRequest({ secrets: [KEY_ID, KEY_SECRET, DRIVE_SA_KEY], cors: ALL
       if (!ok) return res.status(400).json({ error: 'Payment could not be verified.' });
       const snap = await db('orders').orderByChild('razorpayOrderId').equalTo(o).once('value');
       if (!snap.exists()) return res.status(404).json({ error: 'Order not found.' });
-      snap.forEach(c => { c.ref.update({ status: 'paid', paymentId: p, paidAt: admin.database.ServerValue.TIMESTAMP }); });
+      const writes = [];
+      snap.forEach(c => { writes.push(c.ref.update({ status: 'paid', paymentId: p, paidAt: admin.database.ServerValue.TIMESTAMP })); });
+      await Promise.all(writes);
       return res.json({ ok: true });
     }
 
