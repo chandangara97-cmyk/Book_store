@@ -3,6 +3,12 @@
 // Routes: POST /createPrintableOrder, POST /verifyPrintablePayment, POST /download, GET /downloadOnce?token=...
 import http from "node:http";
 import { Readable } from "node:stream";
+import { createRequire } from "node:module";
+const require = createRequire(import.meta.url);
+// Reuse the trusted server-side catalogue maintained with the Firebase backend.
+const CATALOG = require("./functions/catalog.js");
+const GIFT_THRESHOLDS = CATALOG.GIFTS || {};
+delete CATALOG.GIFTS;
 import { SignJWT, importPKCS8, jwtVerify, createRemoteJWKSet } from "jose";
 const env = (k, d = "") => process.env[k] ?? d;
 const KEY_ID = () => env("RAZORPAY_KEY_ID");
@@ -13,7 +19,7 @@ const DB_ROOT = () => env("DB_ROOT", "bookstore").replace(/^\/|\/$/g, "");
 const ADMIN_EMAILS = () => env("ADMIN_EMAILS").split(",").map((v) => v.trim().toLowerCase()).filter(Boolean);
 const ALLOWED_ORIGINS = env("ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173,https://kiddiebloom.in,https://www.kiddiebloom.in,https://chandangara97-cmyk.github.io").split(",").map((v) => v.trim()).filter(Boolean);
 // Keep in sync with the Firebase version / website.
-const CFG = { feeDomestic: 2, feeInternational: 3, gst: 18, passFee: true };
+const CFG = { feeDomestic: 2, feeInternational: 3, gst: 18, passFee: true, freeFrom: 499, shipping: 49 };
 const CURRENCIES = ["INR", "USD", "EUR", "GBP", "AED", "SGD", "AUD", "CAD"];
 class HttpError extends Error {
     status;
@@ -134,6 +140,7 @@ async function authUser(req) {
 const isAdminEmail = (email) => !!email && ADMIN_EMAILS().includes(email.toLowerCase());
 // ---------- Razorpay (REST) ----------
 async function createRzOrder(params) {
+    if (!KEY_ID() || !KEY_SECRET()) throw new HttpError(503, "Razorpay is not configured on the Render service. Add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET.");
     if (!Number.isFinite(params.amount) || params.amount < 100)
         throw new HttpError(400, "Amount is below the minimum (1 unit / 100 paise).");
     const r = await fetch("https://api.razorpay.com/v1/orders", {
@@ -150,6 +157,52 @@ async function createRzOrder(params) {
     }
     return d;
 }
+// ---------- Books / toys checkout (same server-side pricing rules as functions/index.js) ----------
+async function priceFor(id) {
+    id = String(id);
+    if (Object.prototype.hasOwnProperty.call(CATALOG, id)) return Number(CATALOG[id]);
+    if (!/^[a-z0-9-]{1,80}$/.test(id)) return undefined;
+    const digital = id.endsWith("-digital");
+    const base = digital ? id.slice(0, -8) : id;
+    for (const collection of ["books", "toys"]) {
+        const record = await dbGet(collection + "/" + base);
+        if (record) {
+            const price = digital ? Number(record.digitalPrice) : Number(record.printedPrice || record.price);
+            if (price > 0) return price;
+        }
+    }
+    return undefined;
+}
+async function calculateCheckout(items, currency, country) {
+    if (!Array.isArray(items) || !items.length || items.length > 50) throw new HttpError(400, "Your cart is empty.");
+    if (!CURRENCIES.includes(currency)) throw new HttpError(400, "Unsupported currency.");
+    let subtotal = 0;
+    const requestedGifts = [];
+    for (const item of items) {
+        const qty = Math.floor(Number(item.qty));
+        if (!(qty >= 1 && qty <= 20)) throw new HttpError(400, "Invalid item quantity.");
+        if (Object.prototype.hasOwnProperty.call(GIFT_THRESHOLDS, item.id)) {
+            if (qty !== 1) throw new HttpError(400, "A complimentary gift can only be selected once.");
+            requestedGifts.push(item.id);
+            continue;
+        }
+        const price = await priceFor(item.id);
+        if (price === undefined) throw new HttpError(400, "Unknown item: " + String(item.id).slice(0, 40));
+        subtotal += price * qty;
+    }
+    for (const giftId of requestedGifts) {
+        if (subtotal < GIFT_THRESHOLDS[giftId]) throw new HttpError(400, "Your cart does not qualify for the selected complimentary gift.");
+    }
+    const shipping = subtotal >= CFG.freeFrom ? 0 : CFG.shipping;
+    const base = subtotal + shipping;
+    const pct = country && country !== "IN" ? CFG.feeInternational : CFG.feeDomestic;
+    const eff = (pct / 100) * (1 + CFG.gst / 100);
+    const totalINR = CFG.passFee ? base / (1 - eff) : base;
+    const rate = await liveRate(currency);
+    const amount = Math.round(totalINR * rate * 100) / 100;
+    return { subtotal, shipping, base, totalINR: Math.round(totalINR * 100) / 100, rate, amount: amount.toFixed(2), currency };
+}
+
 async function liveRate(cur) {
     if (cur === "INR")
         return 1;
@@ -250,10 +303,61 @@ async function handle(req) {
             }
         }
         if (req.method === "GET" && path === "/")
-            return json({ ok: true, service: "kiddie-bloom-api" }, 200, cors);
+            return json({ ok: true, service: "kiddie-bloom-api", configured: { razorpay: Boolean(KEY_ID() && KEY_SECRET()), firebase: Boolean(FIREBASE_PROJECT_ID() && FIREBASE_DB_URL() && env("FIREBASE_SA_KEY")), drive: Boolean(env("DRIVE_SA_KEY")) } }, 200, cors);
         if (req.method !== "POST")
             return json({ error: "POST only" }, 405, cors);
         const body = await req.json().catch(() => ({}));
+        // Create a Razorpay order for physical/digital books and toys.
+        // Prices are always read from the server catalogue / Firebase, never from browser totals.
+        if (path === "/createOrder") {
+            const { items, currency, country, customer, orderRef } = body;
+            const calc = await calculateCheckout(items, String(currency || ""), String(country || "IN"));
+            const amountMinor = Math.round(Number(calc.amount) * 100);
+            const safeRef = String(orderRef || ("RN-" + Date.now())).replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 40);
+            if (!safeRef) throw new HttpError(400, "Invalid order reference.");
+            const order = await createRzOrder({
+                amount: amountMinor,
+                currency: calc.currency,
+                receipt: safeRef,
+                notes: { country: String(country || "").slice(0, 40), email: String((customer && customer.email) || "").slice(0, 80), type: "bookstore" }
+            });
+            await dbSet("orders/" + safeRef, {
+                razorpayOrderId: order.id,
+                status: "created",
+                currency: calc.currency,
+                rate: calc.rate,
+                subtotalINR: calc.subtotal,
+                shippingINR: calc.shipping,
+                baseINR: calc.base,
+                totalINR: calc.totalINR,
+                amountMinor,
+                items: items.map((item) => ({ id: String(item.id), qty: Math.floor(Number(item.qty)) })),
+                country: String(country || ""),
+                customer: { name: String((customer && customer.name) || "").slice(0, 100), email: String((customer && customer.email) || "").slice(0, 150) },
+                createdAt: Date.now()
+            });
+            return json({ orderId: order.id, amount: amountMinor, currency: calc.currency, keyId: KEY_ID() }, 200, cors);
+        }
+        // Verify Razorpay's signature on the server before marking the order paid.
+        if (path === "/verifyPayment") {
+            const { razorpay_order_id: orderId, razorpay_payment_id: paymentId, razorpay_signature: signature } = body;
+            if (!orderId || !paymentId || !signature || [orderId, paymentId, signature].some((v) => typeof v !== "string"))
+                throw new HttpError(400, "Missing payment fields.");
+            if (!KEY_SECRET()) throw new HttpError(503, "Razorpay secret is not configured on the Render service.");
+            const expected = await hmacHex(KEY_SECRET(), orderId + "|" + paymentId);
+            if (!safeEqual(expected, signature)) throw new HttpError(400, "Payment could not be verified.");
+            const orders = await dbGet("orders") || {};
+            const match = Object.entries(orders).find(([, value]) => value && value.razorpayOrderId === orderId);
+            if (!match) throw new HttpError(404, "Order not found. Please contact support with your Razorpay payment ID.");
+            const [ref, saved] = match;
+            if (saved.status === "paid") return json({ ok: true, alreadyPaid: true }, 200, cors);
+            await dbPatchRoot({
+                ["orders/" + ref + "/status"]: "paid",
+                ["orders/" + ref + "/paymentId"]: paymentId,
+                ["orders/" + ref + "/paidAt"]: Date.now()
+            });
+            return json({ ok: true }, 200, cors);
+        }
         if (path === "/createPrintableOrder") {
             const user = await authUser(req);
             const { resourceIds, currency } = body;
