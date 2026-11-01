@@ -1,14 +1,3 @@
-.env
-.env.*
-!.env.example
 node_modules
-dist
-.env.local
-functions/.env.*
-!functions/.env.example
-functions/node_modules
-
-functions/.secret.local
-set-secrets.sh
-service-account.json
-private-pdfs/*.pdf
+.env
+*service-account*.json
