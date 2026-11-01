@@ -22,7 +22,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - run: npm install
+      - run: npm ci
       - name: Build
         env:
           VITE_FIREBASE_API_KEY: ${{ vars.VITE_FIREBASE_API_KEY }}
@@ -31,7 +31,7 @@ jobs:
           VITE_FIREBASE_PROJECT_ID: ${{ vars.VITE_FIREBASE_PROJECT_ID }}
           VITE_FIREBASE_ADMIN_EMAILS: ${{ vars.VITE_FIREBASE_ADMIN_EMAILS }}
           VITE_API_URL: ${{ vars.VITE_API_URL }}
-        run: npx tsc && npx vite build --base=/
+        run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
