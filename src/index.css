@@ -2992,3 +2992,188 @@ img { max-width: 100%; }
   .pc-owned { text-align: center; }
 }
 @media (max-width: 300px) { .printables-grid { grid-template-columns: 1fr !important; } }
+
+
+/* =========================================================
+   KIDDIE BLOOM — COMPLETE DAY / NIGHT THEME SYNCHRONIZATION
+   Keep semantic colours in one place so every view follows
+   the active theme, including forms, cards and admin screens.
+   ========================================================= */
+:root {
+  color-scheme: light;
+  --surface: #ffffff;
+  --surface-soft: #fffaf0;
+  --surface-raised: #ffffff;
+  --field-bg: #ffffff;
+  --field-text: #17224f;
+  --heading: #17224f;
+  --body-copy: #303b58;
+  --muted-copy: #5b6285;
+  --control-border: #e5dce3;
+  --hover-surface: #fff0f6;
+}
+[data-theme="dark"] {
+  color-scheme: dark;
+  --surface: #1b2554;
+  --surface-soft: #151e45;
+  --surface-raised: #222e62;
+  --field-bg: #151e45;
+  --field-text: #fff3fa;
+  --heading: #fff3fa;
+  --body-copy: #e4e9ff;
+  --muted-copy: #b5bde0;
+  --control-border: #46548f;
+  --hover-surface: #303b70;
+  --primary: #ffb3d1;
+  --primary-light: #ffd0e3;
+  --bg: #121a3d;
+  --card-bg: var(--surface);
+  --text: #fff3fa;
+  --text-muted: #b5bde0;
+  --border: #46548f;
+  --ink: #fff3fa;
+  --w: var(--surface);
+  --mut: #b5bde0;
+  --line: #46548f;
+}
+body, .app-shell {
+  background: var(--bg);
+  color: var(--text);
+}
+h1, h2, h3, h4, h5, h6 { color: var(--heading); }
+p, li, label, small { color: inherit; }
+input, select, textarea {
+  background-color: var(--field-bg);
+  color: var(--field-text);
+  border-color: var(--control-border);
+}
+input::placeholder, textarea::placeholder { color: var(--muted-copy); opacity: 1; }
+:where(button, a, input, select, textarea):focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--sun) 72%, transparent);
+  outline-offset: 3px;
+}
+header.header {
+  background: color-mix(in srgb, var(--surface-soft) 94%, transparent);
+  border-color: var(--control-border);
+}
+.nav-links button:hover, .nav-links a:hover,
+.nav-links button.active, .footer-links button:hover,
+.footer-links a:hover { color: var(--heading); }
+.icon-btn { color: var(--heading); }
+.icon-btn:hover { background: var(--hover-surface); border-color: var(--control-border); }
+.admin-tag-btn {
+  background: var(--surface-raised);
+  border-color: var(--control-border);
+  color: var(--heading);
+}
+.btn.alt, .btn.btn-outline {
+  color: var(--heading);
+  border-color: var(--control-border);
+}
+.btn.alt:hover, .btn.btn-outline:hover,
+.btn.btn-secondary:hover { background: var(--hover-surface); }
+.btn.btn-secondary {
+  background: var(--surface-raised);
+  border-color: var(--control-border);
+  color: var(--heading);
+}
+footer.footer, .page-header {
+  background: var(--surface);
+  color: var(--muted-copy);
+  border-color: var(--control-border);
+}
+.page-header h1, .page-header p { color: var(--heading); }
+.faq-item, .finder, .fmt-card, .book-card, .modal-content,
+.cart-item, .cart-summary, .checkout-card, .order-card,
+.wishlist-card, .learning-card, .toy-card, .admin-panel,
+.admin-stat, .admin-product-row, .mobile-drawer {
+  background-color: var(--surface);
+  color: var(--text);
+  border-color: var(--control-border);
+}
+.book-info h3, .book-info .price, .fmt-card h3,
+.faq-item summary, .admin-panel h2 { color: var(--heading); }
+.book-info .author, .book-info .desc, .fmt-card ul,
+.faq-item p, .intro, .tip, .ticks,
+.footer-inner, .footer-links a { color: var(--muted-copy); }
+.book-info .desc { color: var(--body-copy); }
+.book-cover { background: var(--surface-soft); }
+.wish-icon-btn {
+  background: var(--surface-raised);
+  border-color: var(--control-border);
+  color: var(--heading);
+}
+.filter-btn {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--control-border);
+}
+.filter-btn:hover, .filter-btn.active {
+  background: var(--hover-surface);
+  color: var(--heading);
+}
+.controls-bar label, .filter-group label, .sort-group label {
+  color: var(--muted-copy);
+}
+.mobile-drawer { border-color: var(--control-border); }
+.mobile-drawer-link, .mobile-drawer-theme {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--control-border);
+}
+.rn-toast { color: #ffffff; }
+[data-theme="dark"] .pr-search,
+[data-theme="dark"] .admin-shell .form-group input,
+[data-theme="dark"] .admin-shell .form-group select,
+[data-theme="dark"] .admin-shell .form-group textarea,
+[data-theme="dark"] .admin-catalog-search {
+  background: var(--field-bg) !important;
+  color: var(--field-text) !important;
+  border-color: var(--control-border) !important;
+}
+[data-theme="dark"] .pr-search::placeholder,
+[data-theme="dark"] .admin-shell input::placeholder,
+[data-theme="dark"] .admin-shell textarea::placeholder {
+  color: var(--muted-copy);
+}
+[data-theme="dark"] .printable-card {
+  background: var(--surface) !important;
+  border-color: var(--control-border) !important;
+}
+[data-theme="dark"] .pc-title, [data-theme="dark"] .pc-price,
+[data-theme="dark"] .pc-owned { color: var(--heading) !important; }
+[data-theme="dark"] .pc-desc { color: var(--muted-copy) !important; }
+[data-theme="dark"] .pc-foot .btn {
+  background: #ffd21f;
+  color: #17224f;
+  border-color: #ffd21f;
+}
+[data-theme="dark"] .toy-promo,
+[data-theme="dark"] .visual-story {
+  background: var(--surface-soft);
+  color: var(--text);
+}
+[data-theme="dark"] .reward-strip {
+  background: var(--surface-raised);
+  border-color: var(--control-border);
+}
+[data-theme="dark"] .reward-strip strong,
+[data-theme="dark"] .reward-strip span { color: var(--text); }
+[data-theme="dark"] .help-banner {
+  background: linear-gradient(135deg, #594a26, #76551c);
+  color: #fff8e8;
+}
+[data-theme="dark"] .help-banner h2,
+[data-theme="dark"] .help-banner p { color: #fff8e8; }
+[data-theme="dark"] .admin-empty-state {
+  background: var(--surface-soft);
+  color: var(--muted-copy);
+}
+@media (prefers-contrast: more) {
+  [data-theme="dark"] {
+    --text-muted: #d4dcff;
+    --mut: #d4dcff;
+    --muted-copy: #d4dcff;
+    --control-border: #8290ca;
+  }
+}

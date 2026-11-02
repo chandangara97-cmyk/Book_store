@@ -84,7 +84,8 @@ export const Header: React.FC = () => {
             type="button"
             className="icon-btn theme-toggle-btn mobile-hide"
             title={theme === 'dark' ? 'Switch to light day mode' : 'Switch to cozy night mode'}
-            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            aria-label={theme === 'dark' ? 'Switch to day mode' : 'Switch to night mode'}
+            aria-pressed={theme === 'dark'}
             onClick={toggleTheme}
             style={{ fontSize: '18px' }}
           >
