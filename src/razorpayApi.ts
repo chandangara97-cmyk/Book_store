@@ -13,6 +13,9 @@ export interface RazorpayPrefill {
 }
 
 let scriptPromise: Promise<void> | null = null;
+/** Call early (e.g. when the basket opens) so checkout.js is already loaded when the customer taps Pay. */
+export function preloadRazorpay(): void { loadCheckoutScript().catch(() => {}); }
+
 function loadCheckoutScript(): Promise<void> {
   if (typeof window === 'undefined') return Promise.resolve();
   if (window.Razorpay) return Promise.resolve();
@@ -370,6 +373,21 @@ export async function payWithRazorpay(opts: {
   return { paymentId: simResult.paymentId, orderId: order.orderId };
 }
 
+type PrintableOrder = Awaited<ReturnType<typeof createPrintableOrder>>;
+const orderCache = new Map<string, { at: number; p: Promise<PrintableOrder> }>();
+const orderKey = (ids: string[], cur: string) => [...ids].sort().join(',') + '|' + cur;
+
+/** Creates the Razorpay order in the background while the customer reviews the basket, so Pay opens instantly. */
+export function prefetchPrintableOrder(resourceIds: string[], currency: string): void {
+  if (!resourceIds.length) return;
+  const key = orderKey(resourceIds, currency);
+  const hit = orderCache.get(key);
+  if (hit && Date.now() - hit.at < 8 * 60 * 1000) return;
+  const p = createPrintableOrder(resourceIds, currency);
+  p.catch(() => orderCache.delete(key));
+  orderCache.set(key, { at: Date.now(), p });
+}
+
 /** Pays for printable PDFs (signed-in users). Resolves with one-time download tokens once the server verifies the payment. */
 export async function payPrintablesWithRazorpay(opts: {
   resourceIds: string[];
@@ -377,7 +395,15 @@ export async function payPrintablesWithRazorpay(opts: {
   prefill?: RazorpayPrefill;
 }): Promise<{ resourceIds: string[]; downloadTokens: Record<string, string> }> {
   // 1. Create printable order on server
-  const order = await createPrintableOrder(opts.resourceIds, opts.currency);
+  const key = orderKey(opts.resourceIds, opts.currency);
+  const cached = orderCache.get(key);
+  orderCache.delete(key); // use each prefetched order once
+  let order: PrintableOrder;
+  if (cached && Date.now() - cached.at < 8 * 60 * 1000) {
+    try { order = await cached.p; } catch { order = await createPrintableOrder(opts.resourceIds, opts.currency); }
+  } else {
+    order = await createPrintableOrder(opts.resourceIds, opts.currency);
+  }
 
   const isRealRazorpayKey = Boolean(
     order.keyId &&

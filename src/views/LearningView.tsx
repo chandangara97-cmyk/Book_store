@@ -89,7 +89,7 @@ export const LearningView: React.FC = () => {
 
   return <main className="wrap printables-page" style={{ paddingTop: 20, paddingBottom: basket.length > 0 ? 150 : 64 }}>
     <section className="printables-hero" style={{ borderRadius: 28, padding: 0, background: '#fff', marginBottom: 30 }}>
-      <img src={asset('/img/kiddie-bloom-hero.jpg')} alt="Kiddie Bloom – a giraffe, bunny, panda, bear and squirrel with books, crayons and an open storybook" width={1600} height={593} style={{ display: 'block', width: '100%', height: 'auto' }} />
+      <img fetchPriority="high" decoding="async" src={asset('/img/kiddie-bloom-hero.jpg')} alt="Kiddie Bloom – a giraffe, bunny, panda, bear and squirrel with books, crayons and an open storybook" width={1600} height={593} style={{ display: 'block', width: '100%', height: 'auto' }} />
       <div style={{ padding: 'clamp(18px,3.5vw,34px)', textAlign: 'center', background: 'linear-gradient(120deg,#fff4e6,#f2f8ee 65%,#e8f4ff)' }}>
         <h1 style={{ fontFamily: 'var(--serif)', color: '#214c3d', fontSize: 'clamp(26px,4vw,40px)', margin: '0 auto 8px' }}>Little hands. Big discoveries.</h1>
         <p style={{ maxWidth: 620, margin: '0 auto', lineHeight: 1.6 }}>Answer a few quick questions and we’ll show the printable worksheets, activities, puzzles and colouring pages that fit your child.</p>

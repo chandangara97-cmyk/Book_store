@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStore } from '../context/StoreContext';
 import { LearningResource } from '../types';
 import { API_URL } from '../printablesApi';
-import { payPrintablesWithRazorpay } from '../razorpayApi';
+import { payPrintablesWithRazorpay, preloadRazorpay, prefetchPrintableOrder } from '../razorpayApi';
 
 const CURRENCIES = ['INR', 'USD', 'EUR', 'GBP', 'AED', 'SGD', 'AUD', 'CAD'];
 
@@ -25,6 +25,14 @@ export const PrintablePayModal: React.FC<Props> = ({ resources, onClose, onPaid,
   const [error, setError] = useState('');
   const [links, setLinks] = useState<{ id: string; title: string; url: string }[]>([]);
   const ids = resources.map(r => r.id);
+  const idsKey = ids.join(',');
+  useEffect(() => { preloadRazorpay(); }, []);
+  // Create the order in the background (after a short pause so quick Remove taps don't spam the server)
+  useEffect(() => {
+    if (!isLoggedIn || links.length || !ids.length) return;
+    const t = setTimeout(() => prefetchPrintableOrder(ids, currency), 400);
+    return () => clearTimeout(t);
+  }, [idsKey, currency, isLoggedIn, links.length]);
   const total = resources.reduce((n, r) => n + r.price, 0);
 
   const pay = async () => {
