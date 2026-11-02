@@ -1,18 +1,39 @@
 import React from 'react';
 import { useStore } from '../context/StoreContext';
+
 const TABS = [
-  { view: 'home', icon: '⌂', label: 'Home' },
-  { view: 'learning', icon: '📚', label: 'Learn' },
-  { view: 'toys', icon: '🧸', label: 'Toys' },
-  { view: 'wishlist', icon: '♡', label: 'Saved' },
-  { view: 'cart', icon: '🛒', label: 'Cart' },
+  { view: 'printables', icon: '🖍️', label: 'Printables' },
+  { view: 'auth', icon: '👤', label: 'Account' },
 ];
+
 export const BottomNav: React.FC = () => {
-  const { view, setView, cartCount } = useStore();
-  if (['checkout', 'order-summary', 'auth', 'admin'].includes(view)) return null;
-  return <nav className="bottom-nav no-print" aria-label="Quick navigation">
-    {TABS.map(t => <button key={t.view} type="button" className={`bn-tab ${view === t.view || (t.view === 'learning' && view === 'library') ? 'active' : ''}`} onClick={() => { setView(t.view); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
-      <span className="bn-icon">{t.icon}{t.view === 'cart' && cartCount > 0 ? <i className="bn-count">{cartCount}</i> : null}</span><span className="bn-label">{t.label}</span>
-    </button>)}
-  </nav>;
+  const { view, setView, setSelectedCategory } = useStore();
+
+  if (view === 'checkout' || view === 'order-summary') return null;
+
+  const go = (v: string) => {
+    setSelectedCategory('all');
+    setView(v);
+    window.scrollTo({ top: 0 });
+  };
+
+  return (
+    <nav className="bottom-nav no-print" aria-label="App navigation">
+      {TABS.map((t) => (
+        <button
+          key={t.view}
+          type="button"
+          className={`bn-tab ${(view === t.view || (t.view === 'printables' && view === 'home')) ? 'active' : ''}`}
+          onClick={() => go(t.view)}
+          aria-current={(view === t.view || (t.view === 'printables' && view === 'home')) ? 'page' : undefined}
+        >
+          <span className="bn-icon">
+            {t.icon}
+            
+          </span>
+          <span className="bn-label">{t.label}</span>
+        </button>
+      ))}
+    </nav>
+  );
 };

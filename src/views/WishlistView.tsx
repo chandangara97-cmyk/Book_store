@@ -1,17 +1,109 @@
+import { CoverImage } from '../components/CoverImage';
 import React from 'react';
 import { useStore } from '../context/StoreContext';
 
 export const WishlistView: React.FC = () => {
-  const { wishlist, removeFromWishlist, addToCart, setView } = useStore();
-  return <main className="wrap collection-page">
-    <div className="collection-heading"><span className="eyebrow">YOUR LITTLE COLLECTION</span><h1>My Wishlist <span>♡</span></h1><p>Save the books and playthings you love, then add them to your basket whenever you're ready.</p></div>
-    {wishlist.length === 0 ? <section className="empty-state"><div className="empty-emoji">💗</div><h2>Your wishlist is waiting to bloom</h2><p>Tap the heart on any book or toy to keep it here.</p><button className="btn" onClick={() => setView('learning')}>Explore learning books</button></section> : <div className="wishlist-grid">
-      {wishlist.map(item => <article className="wishlist-card" key={item.id}>
-        <div className="wishlist-art">{item.cover ? <img src={item.cover} alt={item.title} /> : <span>📚</span>}</div>
-        <div className="wishlist-copy"><small>{item.category || 'Kiddie Bloom'}</small><h3>{item.title}</h3><p>₹{Number(item.price).toLocaleString('en-IN')}</p>
-          <div className="wishlist-actions"><button className="btn" onClick={() => { addToCart({ id: item.id, title: item.title, author: item.author || 'Kiddie Bloom', price: item.price, cover: item.cover || '', category: item.category || 'children', type: item.type || 'book' }); }}>Add to cart</button><button className="btn btn-light" onClick={() => removeFromWishlist(item.id)}>Remove</button></div>
+  const { wishlist, removeFromWishlist, addToCart, setView, setSelectedCategory } = useStore();
+
+  const handleAddToCart = (item: typeof wishlist[0]) => {
+    addToCart({
+      id: item.id,
+      title: item.title,
+      author: item.author,
+      price: item.price,
+      cover: item.cover,
+      category: item.category,
+      type: item.type || 'book',
+      qty: 1
+    });
+  };
+
+  return (
+    <div>
+      <div className="page-header">
+        <div className="container">
+          <button
+            type="button"
+            onClick={() => setView('home')}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--mut)',
+              fontSize: '14px',
+              cursor: 'pointer',
+              marginBottom: '12px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              fontWeight: 600
+            }}
+          >
+            ← Continue Browsing
+          </button>
+          <h1>Your Wishlist</h1>
+          <p>Books and gifts you’re saving for later.</p>
         </div>
-      </article>)}
-    </div>}
-  </main>;
+      </div>
+
+      <div className="container" style={{ paddingBottom: '70px' }}>
+        {wishlist.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-muted)' }}>
+            <div style={{ fontSize: '48px', marginBottom: '14px' }}>♡</div>
+            <h3 style={{ fontSize: '24px', color: 'var(--ink)', marginBottom: '8px' }}>
+              Your wishlist is empty
+            </h3>
+            <p style={{ margin: '8px 0 24px', fontSize: '16px' }}>
+              Tap the save button on any book or toy to keep it here.
+            </p>
+            <button
+              type="button"
+              className="btn"
+              onClick={() => {
+                setSelectedCategory('all');
+                setView('library');
+              }}
+            >
+              Browse Books
+            </button>
+          </div>
+        ) : (
+          <div className="book-grid">
+            {wishlist.map((item) => {
+
+              return (
+                <article key={item.id} className="book-card">
+                  <div className="book-cover">
+                    <CoverImage cover={item.cover} alt={item.title} emojiClassName="emoji-cover" />
+                  </div>
+
+                  <div className="book-info">
+                    <h3>{item.title}</h3>
+                    <div className="author">by {item.author}</div>
+                    <div className="price">₹{item.price.toLocaleString('en-IN')}</div>
+
+                    <div style={{ display: 'flex', gap: '8px', marginTop: 'auto' }}>
+                      <button
+                        type="button"
+                        className="btn btn-sm"
+                        onClick={() => handleAddToCart(item)}
+                      >
+                        Add to Cart
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-outline"
+                        onClick={() => removeFromWishlist(item.id)}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };

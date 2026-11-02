@@ -1,43 +1,127 @@
-import React, { useState } from 'react';
 import { asset } from '../utils/images';
+import React, { useState } from 'react';
 import { useStore } from '../context/StoreContext';
 
-const LINKS = [
-  { view: 'home', label: 'Home' },
-  { view: 'learning', label: 'Learning' },
-  { view: 'toys', label: 'Toys' },
-  { view: 'gift-finder', label: 'Gift Finder' },
-  { view: 'printables', label: 'Printables' },
-];
-
 export const Header: React.FC = () => {
-  const { view, setView, cartCount, wishlist, user, theme, toggleTheme } = useStore();
+  const { view, setView, cartCount, user, setSelectedCategory, theme, toggleTheme } = useStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const go = (v: string) => { setView(v); setMobileMenuOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); };
-  return <header className="header">
-    <div className="header-inner">
-      <button className="brand brand-button" onClick={() => go('home')} aria-label="Kiddie Bloom home">
-        <img className="brand-logo" src={asset('/img/kiddie-bloom-logo-sm.png')} alt="" width="48" height="48" />
-        <span className="brand-text"><strong><span className="brand-kiddie">Kiddie</span> <span className="brand-bloom">Bloom</span></strong><small>Learn · Play · Grow</small></span>
-      </button>
-      <nav className="main-nav" aria-label="Main navigation">
-        {LINKS.map(link => <button key={link.view} className={view === link.view || (link.view === 'learning' && view === 'library') ? 'active' : ''} onClick={() => go(link.view)}>{link.label}</button>)}
-      </nav>
-      <div className="header-actions">
-        <button className="icon-btn header-action" onClick={() => go('wishlist')} aria-label={`Wishlist, ${wishlist.length} saved`} title="Wishlist">♡{wishlist.length > 0 && <i className="action-count">{wishlist.length}</i>}</button>
-        <button className="icon-btn header-action" onClick={() => go('cart')} aria-label={`Cart, ${cartCount} items`} title="Shopping cart">🛒{cartCount > 0 && <i className="action-count">{cartCount}</i>}</button>
-        <button className="icon-btn header-action" onClick={() => go('auth')} aria-label="Account" title="Account">♙</button>
-        <button className="theme-switch" onClick={toggleTheme} aria-label={theme === 'dark' ? 'Switch to day mode' : 'Switch to night mode'} title={theme === 'dark' ? 'Day mode' : 'Night mode'}><span>{theme === 'dark' ? '☀️' : '🌙'}</span><small>{theme === 'dark' ? 'Day' : 'Night'}</small></button>
-        <button className="icon-btn mobile-menu-btn" onClick={() => setMobileMenuOpen(v => !v)} aria-label="Toggle menu">☰</button>
+
+  const navigateTo = (newView: string, category: string = 'all') => {
+    setSelectedCategory(category);
+    setView(newView);
+    setMobileMenuOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const scrollToSection = (id: string) => {
+    if (view !== 'home') {
+      setView('home');
+      setTimeout(() => {
+        const el = document.getElementById(id);
+        el?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    } else {
+      const el = document.getElementById(id);
+      el?.scrollIntoView({ behavior: 'smooth' });
+    }
+    setMobileMenuOpen(false);
+  };
+
+  return (
+    <header className="header">
+      <div className="header-inner">
+        <a
+          href="#top"
+          className="brand"
+          onClick={(e) => {
+            e.preventDefault();
+            navigateTo('home');
+          }}
+        >
+          <img className="brand-logo" src={asset('/img/kiddie-bloom-logo-sm.png')} alt="Kiddie Bloom logo" width="56" height="56" />
+          <div className="brand-text">
+            <h1 aria-label="Kiddie Bloom">
+              {['K','i','d','d','i','e'].map((c, i) => (
+                <span key={i} className={`wm wm${i}`}>{c}</span>
+              ))}{' '}
+              <span className="wm-bloom">Bloom</span>
+            </h1>
+            <span>Digital Printables</span>
+          </div>
+        </a>
+
+        <nav aria-label="Main Navigation">
+          <ul className="nav-links">
+            <li>
+              <button type="button" className={view === 'printables' || view === 'home' ? 'active' : ''} onClick={() => navigateTo('printables')}>
+                All printables
+              </button>
+            </li>
+          </ul>
+        </nav>
+
+        <div className="header-actions">
+          <button
+            type="button"
+            className="admin-tag-btn mobile-hide"
+            title="Studio Admin"
+            onClick={() => navigateTo('admin')}
+          >
+            {user?.isAdmin ? 'Studio Admin' : 'Admin'}
+          </button>
+
+          <button
+            type="button"
+            className="icon-btn"
+            title="Account"
+            aria-label="Account"
+            onClick={() => navigateTo('auth')}
+          >
+            👤
+          </button>
+
+          <button
+            type="button"
+            className="icon-btn theme-toggle-btn mobile-hide"
+            title={theme === 'dark' ? 'Switch to light day mode' : 'Switch to cozy night mode'}
+            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            onClick={toggleTheme}
+            style={{ fontSize: '18px' }}
+          >
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
+
+          <button
+            type="button"
+            className="icon-btn mobile-menu-btn"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle navigation menu"
+          >
+            ☰
+          </button>
+        </div>
       </div>
-    </div>
-    {mobileMenuOpen && <div className="mobile-drawer">
-      {LINKS.map(link => <button key={link.view} className="mobile-drawer-link" onClick={() => go(link.view)}>{link.label}</button>)}
-      <button className="mobile-drawer-link" onClick={() => go('wishlist')}>♡ Wishlist</button>
-      <button className="mobile-drawer-link" onClick={() => go('cart')}>🛒 Cart ({cartCount})</button>
-      <button className="mobile-drawer-link" onClick={() => go('auth')}>Account</button>
-      {user?.isAdmin && <button className="mobile-drawer-link" onClick={() => go('admin')}>Studio Admin</button>}
-      <button className="mobile-drawer-theme" onClick={toggleTheme}>{theme === 'dark' ? '☀️ Switch to Day Mode' : '🌙 Switch to Night Mode'}</button>
-    </div>}
-  </header>;
+
+      {/* Mobile Drawer */}
+      {mobileMenuOpen && (
+        <div className="mobile-drawer" role="navigation" aria-label="Mobile menu">
+          <button type="button" className="mobile-drawer-link" onClick={() => navigateTo('printables')}>🖍️ Printables: Worksheets & Activities</button>
+          <button type="button" className="mobile-drawer-link" onClick={() => navigateTo('admin')}>
+            ⚙️ Studio Admin
+          </button>
+          <button
+            type="button"
+            className="mobile-drawer-theme"
+            onClick={() => {
+              toggleTheme();
+              setMobileMenuOpen(false);
+            }}
+          >
+            <span>{theme === 'dark' ? '☀️' : '🌙'}</span>
+            <span>{theme === 'dark' ? 'Switch to Day Mode' : 'Switch to Cozy Night Mode'}</span>
+          </button>
+        </div>
+      )}
+    </header>
+  );
 };
