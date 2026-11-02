@@ -170,6 +170,7 @@ export const CheckoutView: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isProcessing) return;
     if (!customer.name.trim() || !customer.email.trim() || !customer.address1.trim()) {
       showToast('Please fill in your name, email, and shipping address.');
       return;

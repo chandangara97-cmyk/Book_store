@@ -314,9 +314,9 @@ export async function payWithRazorpay(opts: {
   );
 
   if (isRealRazorpayKey) {
-    try {
-      await loadCheckoutScript();
-      if (window.Razorpay) {
+    await loadCheckoutScript();
+    if (window.Razorpay) {
+      // NOTE: no try/catch here - cancel/failure must NOT fall through to the simulator (caused a 2nd payment popup)
         return await new Promise<{ paymentId: string; orderId: string }>((resolve, reject) => {
           const rzp = new window.Razorpay({
             key: order.keyId,
@@ -346,10 +346,8 @@ export async function payWithRazorpay(opts: {
           );
           rzp.open();
         });
-      }
-    } catch (e) {
-      console.warn('Real Razorpay initialization failed, opening interactive payment modal instead:', e);
     }
+    throw new Error('Payment gateway could not be loaded. Please check your connection and try again.');
   }
 
   // 3. Open Interactive Payment Simulator (works seamlessly without third-party popups)
@@ -390,9 +388,8 @@ export async function payPrintablesWithRazorpay(opts: {
   );
 
   if (isRealRazorpayKey) {
-    try {
-      await loadCheckoutScript();
-      if (window.Razorpay) {
+    await loadCheckoutScript();
+    if (window.Razorpay) {
         return await new Promise((resolve, reject) => {
           const rzp = new window.Razorpay({
             key: order.keyId,
@@ -423,10 +420,8 @@ export async function payPrintablesWithRazorpay(opts: {
           );
           rzp.open();
         });
-      }
-    } catch (e) {
-      console.warn('Real Razorpay initialization failed, using interactive modal instead:', e);
     }
+    throw new Error('Payment gateway could not be loaded. Please check your connection and try again.');
   }
 
   // Fallback simulator for printables

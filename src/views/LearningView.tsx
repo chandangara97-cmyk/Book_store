@@ -33,7 +33,6 @@ const CoverArt: React.FC<{ r: LearningResource; emoji: string }> = ({ r, emoji }
 export const LearningView: React.FC = () => {
   const { learningResources, user, setView, showToast } = useStore();
   const [owned, setOwned] = useState<string[]>([]);
-  const [checkoutItems, setCheckoutItems] = useState<LearningResource[] | null>(null);
   const [basketOpen, setBasketOpen] = useState(false);
   const [basketIds, setBasketIds] = useState<string[]>(() => { try { return JSON.parse(localStorage.getItem('kbPrintableBasket') || '[]'); } catch { return []; } });
   useEffect(() => { try { localStorage.setItem('kbPrintableBasket', JSON.stringify(basketIds)); } catch { /* ignore */ } }, [basketIds]);
@@ -158,32 +157,18 @@ export const LearningView: React.FC = () => {
         </article>;
       })}</div> : <div style={{ textAlign: 'center', padding: '48px 20px', borderRadius: 20, background: '#f7f8f3' }}><div style={{ fontSize: 42 }}>🌼</div><h3>Nothing matches just yet</h3><p>Try a different age or activity — new printables are added regularly.</p><button type="button" className="btn gold" onClick={restart}>↺ Answer the questions again</button></div>}
     </div>}
-  {basket.length > 0 && !basketOpen && !checkoutItems && <div style={{ position: 'fixed', left: 0, right: 0, bottom: 'calc(env(safe-area-inset-bottom, 0px) + 74px)', display: 'flex', justifyContent: 'center', zIndex: 40, pointerEvents: 'none' }}>
+  {basket.length > 0 && !basketOpen && <div style={{ position: 'fixed', left: 0, right: 0, bottom: 'calc(env(safe-area-inset-bottom, 0px) + 74px)', display: 'flex', justifyContent: 'center', zIndex: 40, pointerEvents: 'none' }}>
     <button type="button" className="btn gold pr-basket-bar" onClick={() => setBasketOpen(true)}>🧺 Basket ({basket.length}) · ₹{basketTotal.toFixed(0)} — Review & checkout</button>
   </div>}
-  {basketOpen && <div className="modal-overlay" onClick={() => setBasketOpen(false)}>
-    <div className="modal-content" role="dialog" aria-label="Your basket" style={{ maxWidth: 520, maxHeight: '90vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
-      <button className="close-modal-btn" onClick={() => setBasketOpen(false)}>✕</button>
-      <h2 style={{ fontSize: 24, marginBottom: 4, color: 'var(--ink)' }}>🧺 Your basket</h2>
-      <p style={{ color: '#5c6472', fontSize: 14, margin: '0 0 14px' }}>Check everything you’ve selected before you pay.</p>
-      {basket.length ? <>
-        <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'grid', gap: 10 }}>
-          {basket.map(r => { const meta = sections.find(x => x.id === r.section); return <li key={r.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 10, border: '1px solid #e5e9e1', borderRadius: 14 }}>
-            <div style={{ width: 52, flex: 'none', aspectRatio: '1 / 1.414', borderRadius: 8, overflow: 'hidden', background: '#edf7f0', display: 'grid', placeItems: 'center', fontSize: 26 }}>{r.thumbnailUrl ? <img src={asset(r.thumbnailUrl)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : meta?.emoji}</div>
-            <div style={{ flex: 1, minWidth: 0 }}><strong style={{ display: 'block', color: '#214c3d', lineHeight: 1.3 }}>{r.title}</strong><small style={{ color: '#68756c' }}>{meta?.label} · Ages {r.minAge}–{r.maxAge}</small></div>
-            <div style={{ textAlign: 'right' }}><strong>₹{r.price.toFixed(0)}</strong><button type="button" onClick={() => setBasketIds(b => b.filter(x => x !== r.id))} style={{ display: 'block', background: 'none', border: 0, color: '#b3261e', fontWeight: 700, fontSize: 12, cursor: 'pointer', padding: '4px 0 0', marginLeft: 'auto' }}>Remove</button></div>
-          </li>; })}
-        </ul>
-        <p style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: 18, margin: '16px 0 4px' }}><span>Total ({basket.length} item{basket.length === 1 ? '' : 's'})</span><span>₹{basketTotal.toFixed(0)}</span></p>
-        <p style={{ color: '#5c6472', fontSize: 12, margin: '0 0 14px' }}>Digital PDFs · no shipping · pay securely with Razorpay in your choice of currency.</p>
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <button type="button" className="btn gold" style={{ flex: 1, minWidth: 160 }} onClick={() => { if (!user) { setBasketOpen(false); needLogin(); return; } setBasketOpen(false); setCheckoutItems(basket); }}>Checkout · ₹{basketTotal.toFixed(0)}</button>
-          <button type="button" className="btn alt" onClick={() => setBasketOpen(false)}>Keep browsing</button>
-        </div>
-        {!user && <p style={{ fontSize: 12, color: '#5c6472', marginTop: 10 }}>You’ll be asked to sign in first. Your basket is saved.</p>}
-      </> : <p style={{ textAlign: 'center', padding: '24px 0' }}>Your basket is empty. Tap “Add to basket” on any printable.</p>}
-    </div>
-  </div>}
-  {checkoutItems && <PrintablePayModal resources={checkoutItems} onClose={() => setCheckoutItems(null)} onPaid={ids => { setOwned(o => [...new Set([...o, ...ids])]); setBasketIds(b => b.filter(x => !ids.includes(x))); }} />}
+  {basketOpen && <PrintablePayModal
+    resources={basket}
+    isLoggedIn={!!user}
+    onNeedLogin={() => { setBasketOpen(false); needLogin(); }}
+    onClose={() => setBasketOpen(false)}
+    onRemove={id => setBasketIds(b => b.filter(x => x !== id))}
+    renderThumb={r => r.thumbnailUrl ? <img src={asset(r.thumbnailUrl)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <>{sections.find(x => x.id === r.section)?.emoji}</>}
+    getSubtitle={r => `${sections.find(x => x.id === r.section)?.label ?? ''} · Ages ${r.minAge}–${r.maxAge}`}
+    onPaid={ids => { setOwned(o => [...new Set([...o, ...ids])]); setBasketIds(b => b.filter(x => !ids.includes(x))); }}
+  />}
   </main>;
 };
