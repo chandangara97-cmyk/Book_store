@@ -43,7 +43,7 @@ Signing out clears the cart, favourites and orders from that device (they stay i
 The site is built by GitHub Actions, so it needs the values too. In the repo go to **Settings → Secrets and variables → Actions → Variables** and add `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_DATABASE_URL`, `VITE_FIREBASE_PROJECT_ID` and `VITE_FIREBASE_ADMIN_EMAILS`. Then re-run the deploy workflow. (These web config values are not secrets.) Also add your GitHub Pages domain (`YOUR-USERNAME.github.io`) under **Authentication → Settings → Authorized domains**.
 
 ## 6. Important limitations
-- Orders and checkout payment flows are not moved by the catalog sync buttons. Payment endpoints/secrets still require the Render API described in the `kiddie-bloom-api` repo's `RENDER-SETUP.md`.
+- Orders and checkout payment flows are not moved by the catalog sync buttons. Payment endpoints/secrets still require the existing secure Cloud Functions setup described in `PAYMENTS-SETUP.md`.
 - Do not put Firebase service-account JSON or payment secrets in the frontend or GitHub.
 - The database URL and project ID are project-specific; they cannot be safely guessed. This package intentionally uses placeholders until you provide your Firebase web config.
 
@@ -76,4 +76,4 @@ Paid printable PDFs are delivered through a server-generated bearer link after R
 
 The paid PDF direct-download endpoint is intentionally blocked for customers; they must use the one-time link shown in the payment-success modal. Admins may still test downloads. Free printable behavior is unchanged.
 
-Before launch, deploy the Render API, configure `ALLOWED_ORIGINS`, set the Razorpay live keys only after testing, and confirm that `VITE_API_URL` points at the Render URL. do not deploy if TypeScript/build checks fail.
+Before launch, deploy the Cloud Function, configure `ALLOWED_ORIGINS`, set the Razorpay live keys only after testing, and confirm that `VITE_API_URL` points at the deployed `api` function. The website build requires a clean `npm ci`; do not deploy if TypeScript/build checks fail.

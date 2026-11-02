@@ -22,7 +22,7 @@
 
 ## Paid PDF printables
 
-Use the **Printable learning library** section for paid printable PDF products. Save each PDF in the API repo's `private-pdfs/` folder as `<id>.pdf` (the form shows the name); only metadata is published to Firebase.
+Use the **Printable learning library** section for paid printable PDF products. Keep the Google Drive PDF private and save its file ID only in the admin-only `learningPrivate` branch. Do not put private PDF file IDs or unrestricted download links in public book metadata. Publish the printable metadata after saving its private file reference.
 
 ## Security notes
 

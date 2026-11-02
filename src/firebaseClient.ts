@@ -11,7 +11,7 @@ const REFRESH_KEY = 'kb_firebase_refresh_token';
 const USER_KEY = 'kb_firebase_user';
 export const firebaseConfigured = Boolean(cfg.apiKey && cfg.databaseURL);
 // Everything the store saves lives under this folder, so it can share a Firebase project with other apps (e.g. PLFS) without touching their data.
-const DB_ROOT = ((import.meta.env.VITE_FIREBASE_DB_ROOT as string | undefined) || 'bookstore').replace(/^\/|\/$/g, '');
+const DB_ROOT = ((import.meta.env.VITE_FIREBASE_DB_ROOT as string | undefined) ?? 'bookstore').replace(/^\/|\/$/g, '');
 export const firebaseAdminEmails = cfg.adminEmails;
 export const getFirebaseUser = (): { email: string; localId: string; displayName?: string } | null => {
   try { return JSON.parse(localStorage.getItem(USER_KEY) || 'null'); } catch { return null; }
