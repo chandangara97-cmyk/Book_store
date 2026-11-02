@@ -1,6 +1,0 @@
-# Minimal config. The key line is verify_jwt = false: the website sends Firebase login tokens,
-# not Supabase tokens, so Supabase's own JWT check must be off. The function verifies Firebase tokens itself.
-project_id = "kiddie-bloom"
-
-[functions.api]
-verify_jwt = false

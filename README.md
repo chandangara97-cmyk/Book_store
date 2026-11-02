@@ -1,6 +1,6 @@
 # Kiddie Bloom
 
-> **Digital-only store.** Customers browse five printable sections (worksheets, activities, puzzles, cut-and-paste, coloring) by age, pay with Razorpay and download the PDF, which is delivered from a private Google Drive folder ("Kiddie Bloom PDFs"). See `PRINTABLES-SETUP.md`. The older book/toy/cart code is kept in the repo but is no longer reachable from the site.
+> **Digital-only store.** Customers browse five printable sections (worksheets, activities, puzzles, cut-and-paste, coloring) by age, pay with Razorpay and download the PDF, which is delivered by a separate private API repo (`kiddie-bloom-api`). See `PRINTABLES-SETUP.md`. The older book/toy/cart code is kept in the repo but is no longer reachable from the site.
 
 A modern, responsive React + TypeScript e-commerce and learning studio application for children's tutorial books, fiction, learning titles, toys, and gift finder recommendations.
 
@@ -19,6 +19,7 @@ Kiddie Bloom is built with React 19, TypeScript, and Vite. It preserves all orig
 
 ## Tech Stack
 - **Framework**: React 19 + TypeScript
+- **Backend**: separate private repo `kiddie-bloom-api` (Node API on Render). This repo is the public website only.
 - **Bundler & Dev Server**: Vite (listening on port 3000)
 - **State Management**: React Context (`StoreContext`) with persistent LocalStorage backup
 - **Icons**: Lucide icons & themed SVG graphics
