@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Kiddie Bloom · Admin</title>
+<link rel="icon" href="favicon.png">
+<style>
+  :root{--ink:#17224f;--pink:#ff4f9a;--sky:#34a0ff;--sun:#ffd21f;--mint:#46c256;--bg:#fffaf0;--card:#fff;--mut:#5b6285;--line:#f6d3e1;--pink-soft:#ffe3ef;--err:#c62828}
+  @media (prefers-color-scheme:dark){:root{--ink:#fff3fa;--bg:#121a3d;--card:#1b2554;--mut:#b5bde0;--line:#36438a;--pink-soft:#3a2254}}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Nunito','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;padding-bottom:60px}
+  header{background:var(--card);border-bottom:2px solid var(--line);padding:14px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  header h1{font-size:20px;flex:1}
+  header small{color:var(--mut)}
+  main{max-width:1000px;margin:24px auto;padding:0 16px;display:grid;gap:20px}
+  .card{background:var(--card);border:2px solid var(--ink);border-radius:20px;padding:22px;box-shadow:0 10px 24px rgba(23,34,79,.07)}
+  h2{font-size:19px;margin-bottom:4px}
+  .hint{color:var(--mut);font-size:14px;margin-bottom:14px}
+  label{display:block;font-weight:800;font-size:14px;margin:12px 0 4px}
+  input[type=text],input[type=email],input[type=password],input[type=url],textarea{width:100%;padding:11px 13px;border:2px solid var(--line);border-radius:12px;font:inherit;color:var(--ink);background:var(--card)}
+  input:focus,textarea:focus{outline:none;border-color:var(--sky)}
+  textarea{min-height:170px;resize:vertical}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .check{display:flex;align-items:center;gap:10px;font-weight:800;margin-top:14px}
+  .check input{width:20px;height:20px}
+  button{font:inherit;font-weight:800;border:2px solid var(--ink);background:var(--sun);color:#17224f;padding:10px 20px;border-radius:999px;cursor:pointer}
+  button.alt{background:var(--card);color:var(--ink)}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+  .status{margin-top:12px;font-weight:700;font-size:14px;min-height:20px}
+  .status.ok{color:var(--mint)}.status.err{color:var(--err)}
+  .hidden{display:none!important}
+  details summary{cursor:pointer;font-weight:800;color:var(--mut)}
+  /* preview — mirrors the live welcome card */
+  .pv{max-width:760px;margin:0 auto;background:var(--card);border:2px solid var(--ink);border-top:10px solid var(--sun);border-radius:24px;padding:28px 30px;text-align:center}
+  .pv .k{display:inline-block;background:var(--pink-soft);font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:5px 14px;border-radius:999px;margin-bottom:10px}
+  .pv h3{font-size:30px;margin-bottom:12px}
+  .pv p{color:var(--mut);font-size:17px;line-height:1.6;margin-bottom:12px}
+  .pv .sign{display:inline-flex;align-items:center;gap:12px;margin-top:8px;padding-top:16px;border-top:2px dashed var(--line);text-align:left}
+  .pv .sign b{display:block;font-size:21px}.pv .sign small{color:var(--mut)}
+  .off{opacity:.45}
+  @media(max-width:640px){.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1>🌸 Kiddie Bloom · Admin</h1>
+  <small id="who"></small>
+  <button class="alt hidden" id="signOut" type="button">Sign out</button>
+</header>
+
+<main>
+  <!-- Firebase connection -->
+  <section class="card" id="cfgCard">
+    <h2>1 · Firebase connection</h2>
+    <p class="hint">Use the same values as your <code>.env.local</code>. They are saved only in this browser.</p>
+    <div class="row">
+      <div><label for="apiKey">API key (VITE_FIREBASE_API_KEY)</label><input type="text" id="apiKey" autocomplete="off"></div>
+      <div><label for="dbUrl">Database URL (VITE_FIREBASE_DATABASE_URL)</label><input type="url" id="dbUrl" placeholder="https://your-project-default-rtdb.firebaseio.com" autocomplete="off"></div>
+    </div>
+    <label for="dbRoot">Database folder</label>
+    <input type="text" id="dbRoot" value="bookstore">
+    <div class="actions"><button type="button" id="saveCfg">Save connection</button></div>
+  </section>
+
+  <!-- Sign in -->
+  <section class="card hidden" id="loginCard">
+    <h2>2 · Admin sign in</h2>
+    <p class="hint">Use the admin email account (the one allowed in your Firebase rules).</p>
+    <form id="loginForm">
+      <div class="row">
+        <div><label for="email">Email</label><input type="email" id="email" required autocomplete="username"></div>
+        <div><label for="password">Password</label><input type="password" id="password" required autocomplete="current-password"></div>
+      </div>
+      <div class="actions"><button type="submit">Sign in</button></div>
+    </form>
+    <div class="status" id="loginStatus"></div>
+  </section>
+
+  <!-- Editor -->
+  <section class="card hidden" id="editCard">
+    <h2>Welcome message</h2>
+    <p class="hint">Shown at the top of the home page, just under the banner.</p>
+    <label class="check"><input type="checkbox" id="enabled" checked> Show the welcome message on the home page</label>
+    <div class="row">
+      <div><label for="kicker">Small label</label><input type="text" id="kicker" maxlength="40"></div>
+      <div><label for="title">Heading</label><input type="text" id="title" maxlength="80"></div>
+    </div>
+    <label for="body">Message <span style="font-weight:600;color:var(--mut)">(leave a blank line between paragraphs)</span></label>
+    <textarea id="body"></textarea>
+    <div class="row">
+      <div><label for="names">Signed by</label><input type="text" id="names" maxlength="80"></div>
+      <div><label for="tagline">Line under the names</label><input type="text" id="tagline" maxlength="80"></div>
+    </div>
+    <div class="actions">
+      <button type="button" id="save">Save &amp; publish</button>
+      <button type="button" class="alt" id="reload">Reload live version</button>
+      <button type="button" class="alt" id="reset">Reset to default text</button>
+    </div>
+    <div class="status" id="status"></div>
+  </section>
+
+  <section class="card hidden" id="previewCard">
+    <h2>Preview</h2>
+    <p class="hint">This is how it will look to visitors.</p>
+    <div class="pv" id="pv"></div>
+  </section>
+
+  <details class="card">
+    <summary>One-time setup: Firebase rules</summary>
+    <p class="hint" style="margin-top:10px">Add this inside <code>"bookstore"</code> in your Realtime Database rules (already included in the updated <code>firebase-rules.json</code>), then Publish. Without it, saving will be refused.</p>
+    <pre style="overflow:auto;font-size:13px;background:var(--pink-soft);padding:12px;border-radius:12px">"siteContent": {
+  ".read": true,
+  ".write": "auth != null &amp;&amp; auth.token.email === 'your-admin@email.com'"
+},</pre>
+  </details>
+</main>
+
+<script>
+(function(){
+  var DEFAULTS={enabled:true,kicker:'A warm welcome',title:'Welcome to Kiddie Bloom!',
+    body:'We are so happy you are here. Every book, worksheet and little activity in our shop is chosen with care, to make learning feel like play and reading feel like a treat for your child.\n\nTake your time, explore by age, and tell us if you cannot find what you are looking for. We would love to help your little learner bloom.',
+    names:'Pulkit Sharma & Tanuja Sharma',tagline:'With love, from our family to yours'};
+  var K={cfg:'kb_admin_cfg',tok:'kb_admin_tok',ref:'kb_admin_ref',usr:'kb_admin_usr'};
+  var $=function(id){return document.getElementById(id)};
+  var FIELDS=['kicker','title','body','names','tagline'];
+
+  function load(k){try{return JSON.parse(localStorage.getItem(k)||'null')}catch(e){return null}}
+  function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+  function show(el,on){$(el).classList.toggle('hidden',!on)}
+  function say(el,msg,type){var s=$(el);s.textContent=msg||'';s.className='status '+(type||'')}
+
+  var cfg=load(K.cfg)||{};
+  cfg={apiKey:cfg.apiKey||'',dbUrl:cfg.dbUrl||'',dbRoot:cfg.dbRoot||'bookstore'};
+  var ADMIN_EMAIL='chandanpanwar001@gmail.com',GUESS_DB='https://data-for-development-11b00-default-rtdb.firebaseio.com';
+  $('apiKey').value=cfg.apiKey;$('dbUrl').value=cfg.dbUrl;$('dbRoot').value=cfg.dbRoot||'bookstore';
+
+  function configured(){return !!(cfg.apiKey&&cfg.dbUrl)}
+  function user(){return load(K.usr)}
+  function refreshUI(){
+    var ok=configured(),u=user()&&load(K.tok);
+    show('loginCard',ok&&!u);
+    show('editCard',ok&&!!u);
+    show('previewCard',ok&&!!u);
+    show('signOut',!!u);
+    $('who').textContent=u?user().email:'';
+    if(ok&&u)fetchLive();
+  }
+
+  $('saveCfg').onclick=function(){
+    cfg={apiKey:$('apiKey').value.trim(),dbUrl:$('dbUrl').value.trim().replace(/\/$/,''),dbRoot:$('dbRoot').value.trim().replace(/^\/|\/$/g,'')||'bookstore'};
+    save(K.cfg,cfg);
+    say('loginStatus','');
+    refreshUI();
+  };
+
+  $('loginForm').onsubmit=function(e){
+    e.preventDefault();say('loginStatus','Signing in…');
+    fetch('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key='+encodeURIComponent(cfg.apiKey),{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email:$('email').value.trim(),password:$('password').value,returnSecureToken:true})
+    }).then(function(r){return r.json().then(function(d){return {ok:r.ok,d:d}})}).then(function(x){
+      if(!x.ok)throw new Error(String((x.d.error&&x.d.error.message)||'Sign in failed').replace(/_/g,' '));
+      save(K.tok,x.d.idToken);save(K.ref,x.d.refreshToken);save(K.usr,{email:x.d.email});
+      $('password').value='';say('loginStatus','');refreshUI();
+    }).catch(function(err){say('loginStatus',err.message,'err')});
+  };
+
+  $('signOut').onclick=function(){[K.tok,K.ref,K.usr].forEach(function(k){localStorage.removeItem(k)});refreshUI()};
+
+  function refreshToken(){
+    var rt=load(K.ref);if(!rt)return Promise.resolve(false);
+    return fetch('https://securetoken.googleapis.com/v1/token?key='+encodeURIComponent(cfg.apiKey),{
+      method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body:new URLSearchParams({grant_type:'refresh_token',refresh_token:rt})
+    }).then(function(r){return r.json().then(function(d){
+      if(!r.ok)return false;save(K.tok,d.id_token);save(K.ref,d.refresh_token);return true})});
+  }
+
+  function db(method,body,retry){
+    var url=cfg.dbUrl+'/'+cfg.dbRoot+'/siteContent/welcome.json?auth='+encodeURIComponent(load(K.tok)||'');
+    return fetch(url,{method:method,headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined})
+      .then(function(r){return r.json().catch(function(){return null}).then(function(d){
+        if(r.status===401&&!retry){return refreshToken().then(function(ok){if(ok)return db(method,body,true);throw new Error('Session expired. Please sign in again.')})}
+        if(r.status===401)throw new Error('Session expired. Please sign in again.');
+        if(!r.ok)throw new Error((d&&d.error)||('Request failed ('+r.status+')'));
+        return d})});
+  }
+
+  function read(){
+    return {enabled:$('enabled').checked,kicker:$('kicker').value.trim(),title:$('title').value.trim(),
+      body:$('body').value.trim(),names:$('names').value.trim(),tagline:$('tagline').value.trim()};
+  }
+  function fill(v){
+    v=Object.assign({},DEFAULTS,v||{});
+    $('enabled').checked=v.enabled!==false;
+    FIELDS.forEach(function(f){$(f).value=v[f]||''});
+    preview();
+  }
+  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  function preview(){
+    var v=read();
+    var paras=v.body.split(/\n\s*\n/).map(function(p){return p.trim()}).filter(Boolean)
+      .map(function(p){return '<p>'+esc(p).replace(/\n/g,'<br>')+'</p>'}).join('');
+    $('pv').className='pv'+(v.enabled?'':' off');
+    $('pv').innerHTML=(v.kicker?'<span class="k">'+esc(v.kicker)+'</span>':'')+'<h3>'+esc(v.title||'(no heading)')+'</h3>'+paras+
+      '<div class="sign"><span style="font-size:28px">💛</span><div><b>'+esc(v.names||'')+'</b>'+(v.tagline?'<small>'+esc(v.tagline)+'</small>':'')+'</div></div>'+
+      (v.enabled?'':'<p style="margin-top:12px;font-weight:800">Hidden on the site</p>');
+  }
+  ['enabled'].concat(FIELDS).forEach(function(id){$(id).addEventListener('input',preview);$(id).addEventListener('change',preview)});
+
+  function fetchLive(){
+    say('status','Loading live version…');
+    db('GET').then(function(d){fill(d);say('status',d?'Loaded the live version.':'Nothing saved yet — showing the default text.','ok')})
+      .catch(function(err){fill(null);say('status',err.message,'err')});
+  }
+
+  $('save').onclick=function(){
+    var v=read();
+    if(!v.title||!v.body||!v.names){say('status','Heading, message and signed-by name are required.','err');return}
+    $('save').disabled=true;say('status','Publishing…');
+    db('PUT',v).then(function(){say('status','Published ✓ Visitors will see it on their next page load.','ok')})
+      .catch(function(err){say('status',err.message+(/permission/i.test(err.message)?' — check the Firebase rules and that you are signed in with the admin email.':''),'err')})
+      .then(function(){$('save').disabled=false});
+  };
+  $('reload').onclick=fetchLive;
+  $('reset').onclick=function(){if(confirm('Replace the form with the default text? (Nothing is published until you press Save.)')){fill(DEFAULTS);say('status','Default text loaded. Press Save & publish to apply.')}};
+
+  $('email').value=ADMIN_EMAIL;
+  function detect(){
+    var base=location.href.replace(/[#?].*$/,'').replace(/[^/]*$/,'');
+    return fetch(base+'index.html',{cache:'no-store'}).then(function(r){return r.text()}).then(function(page){
+      var srcs=[],re=/(?:src|href)="([^"]+\.js)"/g,m;while((m=re.exec(page))&&srcs.length<8)srcs.push(new URL(m[1],base).href);
+      return srcs.reduce(function(p,u){return p.then(function(found){if(found)return found;
+        return fetch(u).then(function(r){return r.text()}).then(function(t){
+          var k=t.match(/AIza[0-9A-Za-z_-]{35}/),d=t.match(/https:\/\/[a-z0-9-]+\.(?:[a-z0-9-]+\.)?(?:firebaseio\.com|firebasedatabase\.app)/);
+          return (k||d)?{apiKey:k?k[0]:'',dbUrl:d?d[0]:''}:null})})},Promise.resolve(null));
+    }).catch(function(){return null});
+  }
+  if(!configured()){
+    detect().then(function(f){
+      if(f&&f.apiKey)cfg.apiKey=f.apiKey; if(f&&f.dbUrl)cfg.dbUrl=f.dbUrl;
+      if(!cfg.dbUrl)cfg.dbUrl=GUESS_DB;
+      save(K.cfg,cfg);$('apiKey').value=cfg.apiKey;$('dbUrl').value=cfg.dbUrl;refreshUI();
+    });
+  }
+  refreshUI();
+})();
+</script>
+</body>
+</html>

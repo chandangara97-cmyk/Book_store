@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Kiddie Bloom · PDF Library Admin</title>
+<link rel="icon" href="favicon.png">
+<style>
+  :root{--ink:#17224f;--pink:#ff4f9a;--sky:#34a0ff;--sun:#ffd21f;--mint:#2e9e41;--bg:#fffaf0;--card:#fff;--mut:#5b6285;--line:#f6d3e1;--pink-soft:#ffe3ef;--sky-soft:#e3f3ff;--err:#c62828;--warn:#b26a00}
+  @media (prefers-color-scheme:dark){:root{--ink:#fff3fa;--bg:#121a3d;--card:#1b2554;--mut:#b5bde0;--line:#36438a;--pink-soft:#3a2254;--sky-soft:#1d2f66;--mint:#6fdc82;--warn:#ffb74d}}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Nunito','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.45;padding-bottom:70px}
+  header{background:var(--card);border-bottom:2px solid var(--line);padding:12px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:5}
+  header h1{font-size:19px;flex:1;min-width:200px}
+  header small{color:var(--mut)}
+  nav{display:flex;gap:6px;max-width:1100px;margin:16px auto 0;padding:0 16px;flex-wrap:wrap}
+  nav button{background:var(--card);color:var(--ink)}
+  nav button.on{background:var(--ink);color:var(--card)}
+  main{max-width:1100px;margin:16px auto;padding:0 16px;display:grid;gap:18px}
+  .card{background:var(--card);border:2px solid var(--ink);border-radius:20px;padding:20px;box-shadow:0 10px 24px rgba(23,34,79,.07)}
+  h2{font-size:19px;margin-bottom:4px}
+  h3{font-size:16px}
+  .hint{color:var(--mut);font-size:14px;margin-bottom:12px}
+  label{display:block;font-weight:800;font-size:13px;margin:10px 0 4px}
+  input[type=text],input[type=email],input[type=password],input[type=url],input[type=number],input[type=search],select,textarea{width:100%;padding:10px 12px;border:2px solid var(--line);border-radius:12px;font:inherit;color:var(--ink);background:var(--card)}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--sky)}
+  textarea{min-height:80px;resize:vertical}
+  .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+  .check{display:flex;align-items:center;gap:10px;font-weight:800;margin-top:12px}
+  .check input{width:19px;height:19px;flex:none}
+  button{font:inherit;font-weight:800;border:2px solid var(--ink);background:var(--sun);color:#17224f;padding:9px 18px;border-radius:999px;cursor:pointer}
+  button.alt{background:var(--card);color:var(--ink)}
+  button.danger{background:var(--card);color:var(--err);border-color:var(--err)}
+  button.sm{padding:5px 12px;font-size:13px}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;align-items:center}
+  .hidden{display:none!important}
+  .status{margin-top:10px;font-weight:700;font-size:14px;min-height:20px}
+  .ok{color:var(--mint)}.err{color:var(--err)}.warn{color:var(--warn)}
+  .log{font-size:13px;max-height:220px;overflow:auto;margin-top:12px;display:grid;gap:3px}
+  .log div{padding:3px 0;border-bottom:1px dashed var(--line)}
+  /* library */
+  .filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:end}
+  .filters label{margin-top:0}
+  .grp{margin-top:18px}
+  .grp>h3{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:12px;background:var(--sky-soft);margin-bottom:8px}
+  .grp>h3 span{font-weight:600;color:var(--mut);font-size:13px}
+  .item{display:grid;grid-template-columns:auto 46px 1fr auto;gap:12px;align-items:center;padding:10px;border:2px solid var(--line);border-radius:14px;margin-bottom:8px}
+  .thumb{width:46px;height:58px;border-radius:8px;background:var(--pink-soft);object-fit:cover;display:flex;align-items:center;justify-content:center;font-size:20px;overflow:hidden}
+  .thumb img{width:100%;height:100%;object-fit:cover}
+  .item b{display:block;word-break:break-word}
+  .item code{font-size:12px;color:var(--mut)}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+  .chip{font-size:12px;font-weight:800;padding:2px 9px;border-radius:999px;background:var(--pink-soft)}
+  .chip.good{background:#dff5e3;color:#1b6b2b}.chip.bad{background:#ffe1e1;color:#a11}.chip.amber{background:#fff0cf;color:#7a4a00}
+  .btns{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+  .drop{border:3px dashed var(--line);border-radius:18px;padding:26px;text-align:center;color:var(--mut);cursor:pointer}
+  .drop.over{border-color:var(--sky);background:var(--sky-soft)}
+  .q{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line)}
+  .q small{color:var(--mut)}
+  .modal{position:fixed;inset:0;background:rgba(10,15,40,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:20}
+  .modal .card{max-width:560px;width:100%;max-height:92vh;overflow:auto}
+  @media(max-width:700px){.item{grid-template-columns:auto 1fr}.item .thumb{display:none}.item .btns{grid-column:1/-1;justify-content:flex-start}.q{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1>📚 Kiddie Bloom · PDF Library</h1>
+  <small id="who"></small>
+  <button class="alt sm hidden" id="signOut" type="button">Sign out</button>
+</header>
+<nav id="tabs">
+  <button type="button" data-tab="library">Library</button>
+  <button type="button" data-tab="upload">Push files</button>
+  <button type="button" data-tab="settings">Settings</button>
+</nav>
+
+<main>
+  <!-- LOGIN -->
+  <section class="card hidden" id="loginCard">
+    <h2>Admin sign in</h2>
+    <p class="hint">Use the Firebase admin email. (Signing in here also signs you in on <code>admin.html</code>.)</p>
+    <form id="loginForm">
+      <div class="row">
+        <div><label for="email">Email</label><input type="email" id="email" required autocomplete="username"></div>
+        <div><label for="password">Password</label><input type="password" id="password" required autocomplete="current-password"></div>
+      </div>
+      <div class="actions"><button type="submit">Sign in</button></div>
+    </form>
+    <div class="status" id="loginStatus"></div>
+  </section>
+
+  <!-- LIBRARY -->
+  <section class="hidden" id="tab-library">
+    <div class="card">
+      <h2>PDF library</h2>
+      <p class="hint">Pulled live from your private GitHub folder (the PDFs) and Firebase (the listing: category, ages, price).</p>
+      <div class="filters">
+        <div><label for="fSearch">Search</label><input type="search" id="fSearch" placeholder="Title or file name"></div>
+        <div><label for="fCat">Category</label><select id="fCat"></select></div>
+        <div><label for="fAge">Child's age</label><select id="fAge"></select></div>
+        <div><label for="fGroup">Group by</label><select id="fGroup"><option value="cat">Category</option><option value="age">Age band (starting age)</option></select></div>
+        <div><label for="fStatus">Show</label><select id="fStatus">
+          <option value="">Everything</option><option value="ok">PDF + listing OK</option>
+          <option value="missing">Listed, PDF missing</option><option value="orphan">PDF with no listing</option></select></div>
+      </div>
+      <div class="actions">
+        <button type="button" id="reload" class="alt">↻ Pull latest</button>
+        <button type="button" id="selAll" class="alt">Select shown</button>
+        <button type="button" id="dlSel">⬇ Download selected</button>
+        <button type="button" id="expJson" class="alt">Export listing (JSON)</button>
+        <span id="count" class="hint" style="margin:0"></span>
+      </div>
+      <div class="status" id="libStatus"></div>
+    </div>
+    <div id="groups"></div>
+  </section>
+
+  <!-- UPLOAD -->
+  <section class="hidden" id="tab-upload">
+    <div class="card">
+      <h2>Push files</h2>
+      <p class="hint">Files are committed straight to the folder you choose in your private GitHub repo. Choose the shop folder (<code id="folderName">private-pdfs</code>) to also publish a listing; any other folder is plain storage. Your Render server may redeploy after each commit.</p>
+
+      <label for="uDest">Destination folder</label>
+      <div class="row">
+        <select id="uDest"></select>
+        <input type="text" id="uDestCustom" class="hidden" placeholder="e.g. private-pdfs/archive-2026" autocomplete="off">
+        <div><button type="button" class="alt" id="uRefreshDirs">↻ Refresh folders</button></div>
+      </div>
+      <div class="hint" id="destInfo" style="margin:6px 0 0"></div>
+
+      <label class="check"><input type="checkbox" id="uListing" checked> Also publish a shop listing (category + ages) for each PDF</label>
+      <label class="check"><input type="checkbox" id="uKeep"> Keep original file names (no renaming)</label>
+
+      <div class="drop" id="drop" style="margin-top:14px"><span id="dropText">Drop PDFs here or tap to choose</span><input type="file" id="pdfIn" accept="application/pdf,.pdf" multiple class="hidden"></div>
+      <div id="queue"></div>
+
+      <div id="listingFields">
+        <div class="row" style="margin-top:6px">
+          <div><label for="uSec">Category *</label><select id="uSec"></select></div>
+          <div><label for="uMin">Min age *</label><input type="number" id="uMin" min="0" max="15" value="4"></div>
+          <div><label for="uMax">Max age *</label><input type="number" id="uMax" min="0" max="15" value="7"></div>
+          <div><label for="uPrice">Price (₹, 0 = free)</label><input type="number" id="uPrice" min="0" value="0"></div>
+        </div>
+        <label for="uDesc">Description <span style="font-weight:600;color:var(--mut)">(optional, applied to all)</span></label>
+        <textarea id="uDesc"></textarea>
+        <label class="check"><input type="checkbox" id="uCover" checked> Make the cover image from page 1 of each PDF</label>
+      </div>
+      <div class="actions"><button type="button" id="push">⬆ Push to folder</button><button type="button" class="alt" id="clearQ">Clear list</button></div>
+      <div class="log" id="log"></div>
+    </div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section class="hidden" id="tab-settings">
+    <div class="card">
+      <h2>Firebase</h2>
+      <div class="actions" style="margin:0 0 8px"><button type="button" class="alt sm" id="autoFill">✨ Auto-fill from this site</button></div>
+      <p class="hint">Same values as <code>.env.local</code>. Saved only in this browser (shared with <code>admin.html</code>).</p>
+      <div class="row">
+        <div><label for="apiKey">API key</label><input type="text" id="apiKey" autocomplete="off"></div>
+        <div><label for="dbUrl">Database URL</label><input type="url" id="dbUrl" placeholder="https://your-project-default-rtdb.firebaseio.com" autocomplete="off"></div>
+        <div><label for="dbRoot">Database folder</label><input type="text" id="dbRoot" value="bookstore"></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:18px">
+      <h2>GitHub (where the PDFs live)</h2>
+      <p class="hint">Create a <b>fine-grained personal access token</b> (GitHub → Settings → Developer settings), limited to <b>only</b> the <code>kiddie-bloom-api</code> repo, with <b>Contents: Read and write</b>. It is kept in this browser only — use this page on your own device and press “Forget token” when finished.</p>
+      <div class="row">
+        <div><label for="ghOwner">Repo owner (GitHub username)</label><input type="text" id="ghOwner" autocomplete="off"></div>
+        <div><label for="ghRepo">Repo name</label><input type="text" id="ghRepo" value="kiddie-bloom-api"></div>
+        <div><label for="ghBranch">Branch</label><input type="text" id="ghBranch" value="main"></div>
+        <div><label for="ghFolder">Folder</label><input type="text" id="ghFolder" value="private-pdfs"></div>
+      </div>
+      <label for="ghToken">Access token</label>
+      <input type="password" id="ghToken" autocomplete="off" placeholder="github_pat_…">
+      <div class="actions">
+        <button type="button" id="saveCfg">Save settings &amp; test</button>
+        <button type="button" class="danger" id="forgetTok">Forget token</button>
+      </div>
+      <div class="status" id="cfgStatus"></div>
+    </div>
+  </section>
+</main>
+
+<!-- Edit dialog -->
+<div class="modal hidden" id="modal">
+  <div class="card">
+    <h2 id="mTitle">Edit listing</h2>
+    <p class="hint" id="mId"></p>
+    <label for="mName">Title *</label><input type="text" id="mName">
+    <div class="row">
+      <div><label for="mSec">Category *</label><select id="mSec"></select></div>
+      <div><label for="mPrice">Price (₹)</label><input type="number" id="mPrice" min="0"></div>
+      <div><label for="mMin">Min age</label><input type="number" id="mMin" min="0" max="15"></div>
+      <div><label for="mMax">Max age</label><input type="number" id="mMax" min="0" max="15"></div>
+    </div>
+    <label for="mDesc">Description</label><textarea id="mDesc"></textarea>
+    <label class="check"><input type="checkbox" id="mActive"> Visible in the shop</label>
+    <div class="actions"><button type="button" id="mSave">Save listing</button><button type="button" class="alt" id="mCancel">Cancel</button></div>
+    <div class="status" id="mStatus"></div>
+  </div>
+</div>
+<input type="file" id="replaceIn" accept="application/pdf,.pdf" class="hidden">
+
+<script>
+(() => {
+const $ = id => document.getElementById(id);
+const SECTIONS = [['worksheet','Worksheets'],['activity','Activities'],['puzzle','Puzzles & matching'],['cut-and-paste','Cut & paste'],['coloring','Colouring']];
+const SEC = Object.fromEntries(SECTIONS);
+const BANDS = [[0,3,'Ages 0–3'],[4,7,'Ages 4–7'],[8,12,'Ages 8–12'],[13,15,'Ages 13–15']];
+const K = {cfg:'kb_admin_cfg', gh:'kb_admin_gh', tok:'kb_admin_tok', ref:'kb_admin_ref', usr:'kb_admin_usr'};
+const MAX_MB = 40;
+
+const load = k => { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } };
+const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const slug = s => String(s).toLowerCase().replace(/\.pdf$/i, '').trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const show = (id, on) => $(id).classList.toggle('hidden', !on);
+const say = (id, msg, cls) => { const e = $(id); e.textContent = msg || ''; e.className = 'status ' + (cls || ''); };
+const fmtSize = n => n > 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB';
+const titleFromName = n => n.replace(/\.[A-Za-z0-9]{1,8}$/, '').replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim().replace(/\b\w/g, c => c.toUpperCase());
+
+/* ---- Preloaded details (edit here if anything changes). No secrets live in this file. ---- */
+const PRESET = {
+  adminEmail: 'chandanpanwar001@gmail.com',
+  dbRoot: 'bookstore',
+  guessDbUrl: 'https://data-for-development-11b00-default-rtdb.firebaseio.com',   // fallback guess from the Firebase project id
+  gh: {owner: 'chandangara97-cmyk', repo: 'kiddie-bloom-api', branch: 'main', folder: 'private-pdfs'}
+};
+const nonEmpty = o => Object.fromEntries(Object.entries(o || {}).filter(([, v]) => v !== '' && v != null));
+let cfg = Object.assign({apiKey: '', dbUrl: '', dbRoot: PRESET.dbRoot}, nonEmpty(load(K.cfg)));
+let gh = Object.assign({token: ''}, PRESET.gh, nonEmpty(load(K.gh)));
+let items = [];          // {id, meta|null, file|null}
+let queue = [];          // File[] with .kbTitle
+let tab = 'library', selected = new Set(), pendingReplace = null, editing = null;
+
+const fbReady = () => !!(cfg.apiKey && cfg.dbUrl);
+const ghReady = () => !!(gh.owner && gh.repo && gh.token);
+const signedIn = () => !!(load(K.tok) && load(K.usr));
+
+/* ---------- Firebase ---------- */
+async function refreshToken() {
+  const rt = load(K.ref); if (!rt) return false;
+  const r = await fetch('https://securetoken.googleapis.com/v1/token?key=' + encodeURIComponent(cfg.apiKey), {
+    method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+    body: new URLSearchParams({grant_type: 'refresh_token', refresh_token: rt})
+  });
+  const d = await r.json(); if (!r.ok) return false;
+  save(K.tok, d.id_token); save(K.ref, d.refresh_token); return true;
+}
+async function fb(path, method = 'GET', body, retried) {
+  const url = cfg.dbUrl.replace(/\/$/, '') + '/' + cfg.dbRoot + '/' + path + '.json?auth=' + encodeURIComponent(load(K.tok) || '');
+  const r = await fetch(url, {method, headers: {'Content-Type': 'application/json'}, body: body === undefined ? undefined : JSON.stringify(body)});
+  const d = await r.json().catch(() => null);
+  if (r.status === 401 && !retried && await refreshToken()) return fb(path, method, body, true);
+  if (r.status === 401) throw new Error('Session expired. Please sign in again.');
+  if (!r.ok) throw new Error((d && d.error) || 'Firebase request failed (' + r.status + ')');
+  return d;
+}
+
+/* ---------- GitHub ---------- */
+const ghBase = () => 'https://api.github.com/repos/' + encodeURIComponent(gh.owner) + '/' + encodeURIComponent(gh.repo) + '/';
+const encPath = p => p.split('/').filter(Boolean).map(encodeURIComponent).join('/');
+const ghPath = (name, folder) => encPath((folder === undefined ? gh.folder : folder).replace(/^\/|\/$/g, '') + (name ? '/' + name : ''));
+async function ghFetch(url, opts = {}, raw) {
+  const r = await fetch(url, Object.assign({}, opts, {headers: Object.assign({
+    Authorization: 'Bearer ' + gh.token,
+    Accept: raw ? 'application/vnd.github.raw+json' : 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28'}, opts.headers || {})}));
+  if (!r.ok) {
+    const d = await r.json().catch(() => ({}));
+    const hint = r.status === 401 ? 'GitHub rejected the token.' :
+      r.status === 403 ? 'Token lacks permission (needs Contents: Read and write).' :
+      r.status === 404 ? 'Not found — check owner, repo name, and that the token can access this repo.' : '';
+    const e = new Error((hint ? hint + ' ' : '') + (d.message || ('GitHub error ' + r.status))); e.status = r.status; throw e;
+  }
+  return r;
+}
+/** Files in a folder (default: the shop folder). pdfOnly=false returns every file type. */
+async function ghList(folder, pdfOnly = true) {
+  try {
+    const r = await ghFetch(ghBase() + 'contents/' + ghPath('', folder) + '?ref=' + encodeURIComponent(gh.branch));
+    const d = await r.json();
+    return Array.isArray(d) ? d.filter(f => f.type === 'file' && (!pdfOnly || /\.pdf$/i.test(f.name))) : [];
+  } catch (e) { if (e.status === 404 && /Not Found/i.test(e.message) && ghReady()) { return []; } throw e; }
+}
+/** Every folder in the repo (one API call). */
+async function ghFolders() {
+  const r = await ghFetch(ghBase() + 'git/trees/' + encodeURIComponent(gh.branch) + '?recursive=1');
+  const d = await r.json();
+  return (d.tree || []).filter(x => x.type === 'tree' && !/(^|\/)(node_modules|\.git)(\/|$)/.test(x.path)).map(x => x.path).sort();
+}
+const ghGetPdf = async name => (await ghFetch(ghBase() + 'contents/' + ghPath(name) + '?ref=' + encodeURIComponent(gh.branch), {}, true)).blob();
+async function ghPut(name, b64, sha, msg, folder) {
+  const body = {message: msg, content: b64, branch: gh.branch}; if (sha) body.sha = sha;
+  return (await ghFetch(ghBase() + 'contents/' + ghPath(name, folder), {method: 'PUT', body: JSON.stringify(body), headers: {'Content-Type': 'application/json'}})).json();
+}
+const ghDelete = (name, sha, msg) => ghFetch(ghBase() + 'contents/' + ghPath(name), {method: 'DELETE', body: JSON.stringify({message: msg, sha, branch: gh.branch}), headers: {'Content-Type': 'application/json'}});
+const fileToB64 = f => new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(',')[1]); fr.onerror = () => rej(new Error('Could not read ' + f.name)); fr.readAsDataURL(f); });
+
+/* ---------- Cover from PDF page 1 ---------- */
+let pdfjs = null;
+function loadPdfJs() {
+  if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+  if (pdfjs) return pdfjs;
+  const base = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174';
+  pdfjs = new Promise((res, rej) => {
+    const s = document.createElement('script'); s.src = base + '/pdf.min.js';
+    s.onload = () => { window.pdfjsLib.GlobalWorkerOptions.workerSrc = base + '/pdf.worker.min.js'; res(window.pdfjsLib); };
+    s.onerror = () => rej(new Error('PDF reader failed to load')); document.head.appendChild(s);
+  }).catch(e => { pdfjs = null; throw e; });
+  return pdfjs;
+}
+async function coverFrom(file) {
+  const lib = await loadPdfJs();
+  const doc = await lib.getDocument({data: await file.arrayBuffer()}).promise;
+  const page = await doc.getPage(1);
+  const v0 = page.getViewport({scale: 1}), scale = 420 / v0.width, vp = page.getViewport({scale});
+  const c = document.createElement('canvas'); c.width = Math.round(vp.width); c.height = Math.round(vp.height);
+  await page.render({canvasContext: c.getContext('2d'), viewport: vp}).promise;
+  return c.toDataURL('image/jpeg', 0.72);
+}
+
+/* ---------- Data ---------- */
+async function loadAll() {
+  say('libStatus', 'Pulling from GitHub and Firebase…');
+  const [m, f] = await Promise.allSettled([fb('learningResources'), ghList()]);
+  const errs = [];
+  let list = [];
+  if (m.status === 'fulfilled') { const d = m.value; list = Array.isArray(d) ? d.filter(Boolean) : Object.values(d || {}); } else errs.push('Firebase: ' + m.reason.message);
+  const files = f.status === 'fulfilled' ? f.value : (errs.push('GitHub: ' + f.reason.message), []);
+  const map = new Map();
+  list.forEach(x => map.set(x.id, {id: x.id, meta: x, file: null}));
+  files.forEach(x => { const id = x.name.replace(/\.pdf$/i, ''); if (!map.has(id)) map.set(id, {id, meta: null, file: null}); map.get(id).file = x; });
+  items = [...map.values()];
+  selected = new Set([...selected].filter(id => map.has(id)));
+  say('libStatus', errs.length ? errs.join(' · ') : 'Up to date ✓', errs.length ? 'err' : 'ok');
+  renderLibrary();
+}
+
+/* ---------- Library ---------- */
+function fillSelects() {
+  const catOpts = '<option value="">All categories</option>' + SECTIONS.map(s => `<option value="${s[0]}">${s[1]}</option>`).join('');
+  $('fCat').innerHTML = catOpts;
+  const plain = SECTIONS.map(s => `<option value="${s[0]}">${s[1]}</option>`).join('');
+  $('uSec').innerHTML = plain; $('mSec').innerHTML = plain;
+  let ages = '<option value="">Any age</option>'; for (let i = 0; i <= 15; i++) ages += `<option value="${i}">${i} ${i === 1 ? 'year' : 'years'}</option>`;
+  $('fAge').innerHTML = ages;
+}
+function visibleItems() {
+  const q = $('fSearch').value.trim().toLowerCase(), cat = $('fCat').value, age = $('fAge').value, st = $('fStatus').value;
+  return items.filter(it => {
+    const m = it.meta;
+    if (q && !((m && m.title || '').toLowerCase().includes(q) || it.id.toLowerCase().includes(q))) return false;
+    if (cat && !(m && m.section === cat)) return false;
+    if (age !== '' && !(m && m.minAge <= +age && m.maxAge >= +age)) return false;
+    if (st === 'ok' && !(m && it.file)) return false;
+    if (st === 'missing' && !(m && !it.file)) return false;
+    if (st === 'orphan' && !(!m && it.file)) return false;
+    return true;
+  }).sort((a, b) => ((a.meta ? a.meta.minAge : 99) - (b.meta ? b.meta.minAge : 99)) || ((a.meta && a.meta.title || a.id).localeCompare(b.meta && b.meta.title || b.id)));
+}
+function rowHtml(it) {
+  const m = it.meta;
+  const thumb = m && m.thumbnailUrl ? `<img src="${esc(m.thumbnailUrl)}" alt="">` : '📄';
+  const chips = [];
+  if (m) {
+    chips.push(`<span class="chip">${esc(SEC[m.section] || m.section)}</span>`, `<span class="chip">Ages ${m.minAge}–${m.maxAge}</span>`, `<span class="chip">${m.price > 0 ? '₹' + m.price : 'Free'}</span>`);
+    if (m.active === false) chips.push('<span class="chip amber">Hidden</span>');
+  } else chips.push('<span class="chip amber">No listing yet</span>');
+  chips.push(it.file ? `<span class="chip good">PDF ✓ ${fmtSize(it.file.size)}</span>` : '<span class="chip bad">PDF missing</span>');
+  return `<div class="item" data-id="${esc(it.id)}">
+    <input type="checkbox" data-act="sel" ${selected.has(it.id) ? 'checked' : ''} ${it.file ? '' : 'disabled'} aria-label="Select">
+    <div class="thumb">${thumb}</div>
+    <div><b>${esc(m ? m.title : titleFromName(it.id))}</b><code>${esc(it.id)}.pdf</code><div class="chips">${chips.join('')}</div></div>
+    <div class="btns">
+      ${it.file ? '<button class="sm" data-act="dl">⬇ Pull</button>' : ''}
+      <button class="sm alt" data-act="replace">${it.file ? 'Replace PDF' : 'Upload PDF'}</button>
+      <button class="sm alt" data-act="edit">${m ? 'Edit' : 'Add listing'}</button>
+      <button class="sm danger" data-act="del">Delete</button>
+    </div></div>`;
+}
+function renderLibrary() {
+  const vis = visibleItems(), by = $('fGroup').value;
+  $('count').textContent = vis.length + ' of ' + items.length + ' shown · ' + selected.size + ' selected';
+  const groups = [];
+  if (by === 'cat') {
+    SECTIONS.forEach(s => groups.push([s[1], vis.filter(i => i.meta && i.meta.section === s[0])]));
+  } else {
+    BANDS.forEach(b => groups.push([b[2], vis.filter(i => i.meta && i.meta.minAge >= b[0] && i.meta.minAge <= b[1])]));
+  }
+  groups.push(['Not listed yet (PDF only)', vis.filter(i => !i.meta)]);
+  const other = vis.filter(i => i.meta && !groups.slice(0, -1).some(g => g[1].includes(i)));
+  if (other.length) groups.splice(groups.length - 1, 0, ['Other', other]);
+  const html = groups.filter(g => g[1].length).map(g => `<div class="grp"><h3>${esc(g[0])} <span>${g[1].length} PDF${g[1].length === 1 ? '' : 's'}</span></h3>${g[1].map(rowHtml).join('')}</div>`).join('');
+  $('groups').innerHTML = html || '<div class="card" style="margin-top:18px">Nothing to show. Use “Push PDFs” to add the first one, or change the filters.</div>';
+}
+
+async function downloadIds(ids) {
+  let n = 0;
+  for (const id of ids) {
+    const it = items.find(x => x.id === id); if (!it || !it.file) continue;
+    say('libStatus', `Pulling ${++n} of ${ids.length}: ${id}.pdf …`);
+    try {
+      const url = URL.createObjectURL(await ghGetPdf(id + '.pdf'));
+      const a = document.createElement('a'); a.href = url;
+      a.download = (it.meta && it.meta.title ? it.meta.title.replace(/[^a-zA-Z0-9 _-]/g, '').trim() : id) + '.pdf';
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 30000);
+      await new Promise(r => setTimeout(r, 500));
+    } catch (e) { say('libStatus', id + ': ' + e.message, 'err'); return; }
+  }
+  say('libStatus', 'Pulled ' + n + ' PDF' + (n === 1 ? '' : 's') + ' ✓', 'ok');
+}
+
+async function replacePdf(id, file) {
+  if (!file) return;
+  if (file.size > MAX_MB * 1048576) { say('libStatus', 'File is over ' + MAX_MB + ' MB.', 'err'); return; }
+  const it = items.find(x => x.id === id);
+  say('libStatus', 'Pushing ' + id + '.pdf …');
+  try {
+    await ghPut(id + '.pdf', await fileToB64(file), it && it.file ? it.file.sha : undefined, (it && it.file ? 'Replace ' : 'Add ') + id + '.pdf');
+    say('libStatus', id + '.pdf pushed ✓', 'ok'); await loadAll();
+  } catch (e) { say('libStatus', e.message, 'err'); }
+}
+
+async function deleteItem(id) {
+  const it = items.find(x => x.id === id); if (!it) return;
+  const what = it.meta && it.file ? 'the PDF and its listing' : it.file ? 'the PDF' : 'the listing';
+  if (!confirm('Delete ' + what + ' for “' + (it.meta ? it.meta.title : id) + '”? This cannot be undone from here.')) return;
+  try {
+    if (it.meta) await fb('learningResources/' + id, 'DELETE');
+    if (it.file) await ghDelete(id + '.pdf', it.file.sha, 'Remove ' + id + '.pdf');
+    selected.delete(id); say('libStatus', 'Deleted ✓', 'ok'); await loadAll();
+  } catch (e) { say('libStatus', e.message, 'err'); }
+}
+
+/* ---------- Edit dialog ---------- */
+function openEdit(id) {
+  const it = items.find(x => x.id === id); if (!it) return;
+  const m = it.meta || {title: titleFromName(id), section: 'worksheet', minAge: 4, maxAge: 7, price: 0, description: '', active: true};
+  editing = {id, existing: it.meta};
+  $('mTitle').textContent = it.meta ? 'Edit listing' : 'Add listing';
+  $('mId').textContent = 'File: ' + id + '.pdf' + (it.file ? '' : ' (PDF not uploaded yet)');
+  $('mName').value = m.title; $('mSec').value = m.section; $('mMin').value = m.minAge; $('mMax').value = m.maxAge;
+  $('mPrice').value = m.price || 0; $('mDesc').value = m.description || ''; $('mActive').checked = m.active !== false;
+  say('mStatus', ''); show('modal', true);
+}
+async function saveEdit() {
+  const min = +$('mMin').value, max = +$('mMax').value, title = $('mName').value.trim();
+  if (!title) return say('mStatus', 'Title is required.', 'err');
+  if (!(min >= 0 && max <= 15 && min <= max)) return say('mStatus', 'Ages must be between 0 and 15, min not above max.', 'err');
+  const rec = Object.assign({createdAt: new Date().toISOString()}, editing.existing || {}, {
+    id: editing.id, title, section: $('mSec').value, minAge: min, maxAge: max,
+    price: Math.max(0, +$('mPrice').value || 0), description: $('mDesc').value.trim(), active: $('mActive').checked});
+  try { await fb('learningResources/' + editing.id, 'PUT', rec); show('modal', false); say('libStatus', 'Listing saved ✓', 'ok'); await loadAll(); }
+  catch (e) { say('mStatus', e.message, 'err'); }
+}
+
+/* ---------- Push ---------- */
+let repoFolders = [];
+const ext = n => ((n.match(/\.[A-Za-z0-9]{1,8}$/) || [''])[0]).toLowerCase();
+const safeName = n => n.replace(/[\\/:*?"<>|#%]+/g, '-').trim();
+function destFolder() {
+  const v = $('uDest').value;
+  const raw = v === '__custom' ? $('uDestCustom').value : v === '' ? gh.folder : v;
+  return raw.trim().replace(/\\/g, '/').replace(/^\/+|\/+$/g, '').replace(/\/{2,}/g, '/');
+}
+const destOk = d => d && !/(^|\/)\.\.?(\/|$)/.test(d) && /^[A-Za-z0-9._\/ -]+$/.test(d) && !/(^|\/)\.git(\/|$)/.test(d);
+const modes = () => {
+  const dest = destFolder(), isShop = dest === gh.folder;
+  const listing = isShop && $('uListing').checked;
+  return {dest, isShop, listing, keep: !listing && $('uKeep').checked};
+};
+function fillDestSelect(keepValue) {
+  const shop = gh.folder, seen = new Set([shop]);
+  let h = `<option value="">★ Shop folder — ${esc(shop)}</option>`;
+  repoFolders.forEach(f => { if (!seen.has(f)) { seen.add(f); h += `<option value="${esc(f)}">${esc(f)}</option>`; } });
+  h += '<option value="__custom">＋ Other / new folder…</option>';
+  $('uDest').innerHTML = h;
+  if (keepValue !== undefined && [...$('uDest').options].some(o => o.value === keepValue)) $('uDest').value = keepValue;
+}
+async function refreshDirs() {
+  if (!ghReady()) return;
+  const keep = $('uDest').value;
+  try { repoFolders = await ghFolders(); } catch (e) { $('destInfo').textContent = 'Could not list folders: ' + e.message; }
+  fillDestSelect(keep); syncPushUI();
+}
+function syncPushUI() {
+  $('uDestCustom').classList.toggle('hidden', $('uDest').value !== '__custom');
+  const m = modes();
+  $('uListing').disabled = !m.isShop;
+  $('uKeep').disabled = m.listing;
+  if (m.listing) $('uKeep').checked = false;
+  show('listingFields', m.listing);
+  $('destInfo').textContent = !destOk(m.dest) ? 'Enter a folder path such as private-pdfs/archive (letters, numbers, - _ . / only).'
+    : m.listing ? `PDFs go to ${m.dest}/ and appear in the shop under the category and ages below. Only PDFs are accepted.`
+    : m.isShop ? `Files go to ${m.dest}/ with no shop listing.`
+    : `Files go to ${m.dest}/ as plain storage. The payment server only sends PDFs from ${gh.folder}/, so files here are not sold.`;
+  $('pdfIn').accept = m.listing ? 'application/pdf,.pdf' : '';
+  $('dropText').textContent = m.listing ? 'Drop PDFs here or tap to choose' : 'Drop files here or tap to choose (any type)';
+  renderQueue();
+}
+function targetName(f) {
+  const m = modes();
+  if (m.keep) return safeName(f.name);
+  return (slug(f.kbTitle) || '?') + (m.listing ? '.pdf' : (ext(f.name) || '.pdf'));
+}
+function renderQueue() {
+  const m = modes();
+  $('queue').innerHTML = queue.map((f, i) => `<div class="q"><div><b>${esc(f.name)}</b><br><small>${fmtSize(f.size)} → ${esc(m.dest || '?')}/${esc(targetName(f))}</small></div>
+    ${m.keep ? '<span></span>' : `<input type="text" data-i="${i}" value="${esc(f.kbTitle)}" aria-label="Title">`}<button class="sm alt" data-rm="${i}">✕</button></div>`).join('');
+}
+function addFiles(list) {
+  const pdfOnly = modes().listing;
+  [...list].forEach(f => {
+    if (pdfOnly && !/\.pdf$/i.test(f.name) && f.type !== 'application/pdf') return;
+    f.kbTitle = titleFromName(f.name); queue.push(f);
+  });
+  renderQueue();
+}
+const logLine = (msg, cls) => { const d = document.createElement('div'); d.className = cls || ''; d.textContent = msg; $('log').appendChild(d); $('log').scrollTop = 1e9; };
+
+async function push() {
+  if (!queue.length) return logLine('Choose at least one file first.', 'err');
+  const m = modes();
+  if (!destOk(m.dest)) return logLine('Choose or type a valid destination folder.', 'err');
+  const section = $('uSec').value, min = +$('uMin').value, max = +$('uMax').value, price = Math.max(0, +$('uPrice').value || 0);
+  if (m.listing && !(min >= 0 && max <= 15 && min <= max)) return logLine('Ages must be between 0 and 15, min not above max.', 'err');
+  if (m.listing && queue.some(f => !/\.pdf$/i.test(f.name) && f.type !== 'application/pdf')) return logLine('Shop listings need PDF files. Remove the others or untick “publish a shop listing”.', 'err');
+  if (!m.keep && queue.some(f => !slug(f.kbTitle))) return logLine('Every file needs a title.', 'err');
+  const names = queue.map(targetName);
+  if (new Set(names.map(n => n.toLowerCase())).size !== names.length) return logLine('Two files would end up with the same name — change a title.', 'err');
+  $('push').disabled = true; $('log').innerHTML = '';
+  try {
+    const existing = new Map((await ghList(m.dest, false)).map(x => [x.name, x]));
+    const clashes = names.filter(n => existing.has(n));
+    if (clashes.length && !confirm('These already exist in ' + m.dest + '/ and will be replaced:\n\n' + clashes.join('\n') + '\n\nContinue?')) { $('push').disabled = false; return; }
+    let okN = 0, metaById = new Map();
+    if (m.listing) { try { const d = await fb('learningResources'); (Array.isArray(d) ? d.filter(Boolean) : Object.values(d || {})).forEach(x => metaById.set(x.id, x)); } catch (e) { logLine('Could not read current listings: ' + e.message, 'warn'); } }
+    for (let i = 0; i < queue.length; i++) {
+      const f = queue[i], name = names[i], id = name.replace(/\.pdf$/i, ''), ex = existing.get(name);
+      try {
+        if (f.size > MAX_MB * 1048576) throw new Error('over ' + MAX_MB + ' MB');
+        logLine('⬆ ' + m.dest + '/' + name + ' …');
+        await ghPut(name, await fileToB64(f), ex ? ex.sha : undefined, (ex ? 'Replace ' : 'Add ') + m.dest + '/' + name, m.dest);
+        if (m.listing) {
+          let cover = '';
+          if ($('uCover').checked) { try { cover = await coverFrom(f); } catch (e) { logLine('  (cover skipped: ' + e.message + ')', 'warn'); } }
+          const old = metaById.get(id) || {};
+          const rec = Object.assign({createdAt: new Date().toISOString()}, old, {
+            id, title: f.kbTitle.trim(), section, minAge: min, maxAge: max, price,
+            description: $('uDesc').value.trim() || old.description || `Printable ${SEC[section].toLowerCase()} for ages ${min}–${max}.`, active: old.active !== false});
+          if (cover) rec.thumbnailUrl = cover;
+          await fb('learningResources/' + id, 'PUT', rec);
+          logLine('✓ ' + name + ' — ' + SEC[section] + ', ages ' + min + '–' + max, 'ok');
+        } else logLine('✓ ' + m.dest + '/' + name, 'ok');
+        okN++;
+      } catch (e) { logLine('✗ ' + name + ': ' + e.message, 'err'); }
+    }
+    logLine('Done: ' + okN + ' of ' + queue.length + ' pushed.', okN === queue.length ? 'ok' : 'warn');
+    if (okN === queue.length) { queue = []; renderQueue(); }
+    if (m.isShop) await loadAll();
+    refreshDirs();
+  } catch (e) { logLine(e.message, 'err'); }
+  $('push').disabled = false;
+}
+
+/* ---------- Auto-fill Firebase details from this site's own build ---------- */
+async function detectFromSite() {
+  try {
+    const base = location.href.replace(/[#?].*$/, '').replace(/[^/]*$/, '');
+    const page = await (await fetch(base + 'index.html', {cache: 'no-store'})).text();
+    const srcs = [...page.matchAll(/(?:src|href)="([^"]+\.js)"/g)].map(m => new URL(m[1], base).href).slice(0, 8);
+    for (const u of srcs) {
+      const t = await (await fetch(u)).text();
+      const k = t.match(/AIza[0-9A-Za-z_-]{35}/);
+      const d = t.match(/https:\/\/[a-z0-9-]+\.(?:[a-z0-9-]+\.)?(?:firebaseio\.com|firebasedatabase\.app)/);
+      if (k || d) return {apiKey: k ? k[0] : '', dbUrl: d ? d[0] : ''};
+    }
+  } catch (e) {}
+  return null;
+}
+async function autoFill(manual) {
+  const found = await detectFromSite();
+  if (found && (found.apiKey || found.dbUrl)) {
+    if (found.apiKey) cfg.apiKey = found.apiKey;
+    if (found.dbUrl) cfg.dbUrl = found.dbUrl;
+    say('cfgStatus', 'Firebase details filled in from this site ✓' + (ghReady() ? '' : ' — only your GitHub token is left.'), 'ok');
+  } else {
+    if (!cfg.dbUrl) cfg.dbUrl = PRESET.guessDbUrl;
+    say('cfgStatus', (manual ? 'Could not read them from this site. ' : '') + 'Database URL is a guess from the project id; paste your Firebase API key and check the URL.', 'warn');
+  }
+  save(K.cfg, cfg); fillSettings(); route();
+}
+
+/* ---------- Settings / auth / tabs ---------- */
+function fillSettings() {
+  $('apiKey').value = cfg.apiKey; $('dbUrl').value = cfg.dbUrl; $('dbRoot').value = cfg.dbRoot;
+  $('ghOwner').value = gh.owner; $('ghRepo').value = gh.repo; $('ghBranch').value = gh.branch; $('ghFolder').value = gh.folder; $('ghToken').value = gh.token;
+  $('folderName').textContent = gh.folder;
+}
+async function saveSettings() {
+  cfg = {apiKey: $('apiKey').value.trim(), dbUrl: $('dbUrl').value.trim().replace(/\/$/, ''), dbRoot: $('dbRoot').value.trim().replace(/^\/|\/$/g, '') || 'bookstore'};
+  gh = {owner: $('ghOwner').value.trim(), repo: $('ghRepo').value.trim(), branch: $('ghBranch').value.trim() || 'main', folder: $('ghFolder').value.trim().replace(/^\/|\/$/g, '') || 'private-pdfs', token: $('ghToken').value.trim()};
+  save(K.cfg, cfg); save(K.gh, gh); $('folderName').textContent = gh.folder; fillDestSelect(); syncPushUI(); refreshDirs();
+  if (!fbReady() || !ghReady()) return say('cfgStatus', 'Saved. Fill in the Firebase API key + URL and the GitHub owner + token to connect.', 'warn');
+  say('cfgStatus', 'Saved. Testing GitHub…');
+  try { const n = (await ghList()).length; say('cfgStatus', 'Connected ✓ — found ' + n + ' PDF' + (n === 1 ? '' : 's') + ' in ' + gh.folder + '/.', 'ok'); }
+  catch (e) { say('cfgStatus', 'GitHub: ' + e.message, 'err'); }
+  route();
+}
+function route() {
+  const ready = fbReady() && ghReady();
+  const needLogin = ready && !signedIn();
+  if (!ready) tab = 'settings';
+  ['library', 'upload', 'settings'].forEach(t => show('tab-' + t, t === tab && (t === 'settings' || (ready && !needLogin))));
+  show('loginCard', needLogin && tab !== 'settings');
+  [...$('tabs').children].forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+  show('signOut', signedIn()); $('who').textContent = signedIn() ? load(K.usr).email : '';
+  if (ready && signedIn() && tab === 'library' && !items.length && !route.loading) { route.loading = true; loadAll().finally(() => route.loading = false); }
+}
+
+$('tabs').onclick = e => { const t = e.target.dataset && e.target.dataset.tab; if (t) { tab = t; route(); } };
+$('saveCfg').onclick = saveSettings;
+$('autoFill').onclick = () => autoFill(true);
+$('forgetTok').onclick = () => { gh.token = ''; save(K.gh, gh); $('ghToken').value = ''; say('cfgStatus', 'GitHub token removed from this browser.', 'ok'); };
+$('signOut').onclick = () => { [K.tok, K.ref, K.usr].forEach(k => localStorage.removeItem(k)); items = []; route(); };
+$('loginForm').onsubmit = async e => {
+  e.preventDefault(); say('loginStatus', 'Signing in…');
+  try {
+    const r = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=' + encodeURIComponent(cfg.apiKey), {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({email: $('email').value.trim(), password: $('password').value, returnSecureToken: true})});
+    const d = await r.json(); if (!r.ok) throw new Error(String((d.error && d.error.message) || 'Sign in failed').replace(/_/g, ' '));
+    save(K.tok, d.idToken); save(K.ref, d.refreshToken); save(K.usr, {email: d.email}); $('password').value = ''; say('loginStatus', ''); route();
+  } catch (err) { say('loginStatus', err.message, 'err'); }
+};
+
+['fSearch', 'fCat', 'fAge', 'fGroup', 'fStatus'].forEach(id => $(id).addEventListener('input', renderLibrary));
+$('reload').onclick = loadAll;
+$('selAll').onclick = () => { visibleItems().forEach(i => i.file && selected.add(i.id)); renderLibrary(); };
+$('dlSel').onclick = () => selected.size ? downloadIds([...selected]) : say('libStatus', 'Tick the PDFs you want to pull first.', 'warn');
+$('expJson').onclick = () => {
+  const data = items.filter(i => i.meta).map(i => i.meta);
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'}));
+  a.download = 'learningResources.json'; a.click();
+};
+$('groups').onclick = e => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const id = b.closest('.item').dataset.id, act = b.dataset.act;
+  if (act === 'sel') { b.checked ? selected.add(id) : selected.delete(id); $('count').textContent = $('count').textContent.replace(/\d+ selected/, selected.size + ' selected'); }
+  else if (act === 'dl') downloadIds([id]);
+  else if (act === 'replace') { pendingReplace = id; $('replaceIn').value = ''; $('replaceIn').click(); }
+  else if (act === 'edit') openEdit(id);
+  else if (act === 'del') deleteItem(id);
+};
+$('replaceIn').onchange = e => { const f = e.target.files[0]; if (f && pendingReplace) replacePdf(pendingReplace, f); };
+$('mCancel').onclick = () => show('modal', false);
+$('mSave').onclick = saveEdit;
+
+const drop = $('drop');
+drop.onclick = () => $('pdfIn').click();
+$('pdfIn').onchange = e => { addFiles(e.target.files); e.target.value = ''; };
+['dragover', 'dragenter'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', e => addFiles(e.dataTransfer.files));
+$('queue').addEventListener('input', e => { const i = e.target.dataset.i; if (i !== undefined) { queue[i].kbTitle = e.target.value; e.target.closest('.q').querySelector('small').textContent = fmtSize(queue[i].size) + ' → ' + modes().dest + '/' + targetName(queue[i]); } });
+['uDest', 'uListing', 'uKeep'].forEach(id => $(id).addEventListener('change', syncPushUI));
+$('uDestCustom').addEventListener('input', syncPushUI);
+$('uRefreshDirs').onclick = refreshDirs;
+$('queue').addEventListener('click', e => { const i = e.target.dataset.rm; if (i !== undefined) { queue.splice(+i, 1); renderQueue(); } });
+$('clearQ').onclick = () => { queue = []; renderQueue(); $('log').innerHTML = ''; };
+$('push').onclick = push;
+
+fillSelects(); fillSettings(); fillDestSelect(); syncPushUI();
+$('email').value = PRESET.adminEmail;
+if (!cfg.apiKey || !cfg.dbUrl) autoFill(false).then(refreshDirs); else { route(); refreshDirs(); if (!gh.token) say('cfgStatus', 'Only your GitHub token is left — paste it below and press Save.', 'warn'); }
+})();
+</script>
+</body>
+</html>
