@@ -1,7 +1,7 @@
 import { getIdToken, refreshFirebaseToken, getFirebaseUser, databaseRequest } from './firebaseClient';
 
-export const API_URL = ((import.meta.env.VITE_API_URL as string | undefined) || '/api').replace(/\/$/, '');
-export const apiConfigured = true;
+export const API_URL = ((import.meta.env.VITE_API_URL as string | undefined) || '').replace(/\/$/, '');
+export const apiConfigured = /^https?:\/\//i.test(API_URL);
 
 function buildUrl(path: string): string {
   const normalizedPath = path.startsWith('/') ? path : '/' + path;
@@ -12,6 +12,9 @@ function buildUrl(path: string): string {
 }
 
 async function post(path: string, body: unknown): Promise<Response> {
+  if (!apiConfigured) {
+    throw new Error('Payment API is not configured. Add VITE_API_URL in GitHub Actions Variables (your Render API URL ending in /api).');
+  }
   const url = buildUrl(path);
   const call = () =>
     fetch(url, {
