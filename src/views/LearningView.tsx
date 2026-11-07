@@ -20,7 +20,6 @@ const ageBands = [
   { label: 'Ages 13–15', emoji: '🚀', min: 13, max: 15 },
 ];
 type PriceChoice = 'any' | 'free' | 'paid';
-const chipStyle: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 13px', borderRadius: 999, border: '1px solid #cfe0d3', background: 'white', color: '#214c3d', fontWeight: 800, fontSize: 13, cursor: 'pointer' };
 
 /** Cover = saved thumbnail, else /img/printables/covers/<id>.jpg (page 1 of the PDF committed to the repo), else the emoji. */
 const CoverArt: React.FC<{ r: LearningResource; emoji: string }> = ({ r, emoji }) => {
@@ -44,7 +43,7 @@ export const LearningView: React.FC = () => {
 
   // Guided questions: nothing is listed until the questions are answered.
   const [step, setStep] = useState(0);
-  const [done, setDone] = useState(false);
+  const [done, setDone] = useState(true); // show printables straight away; the quiz is optional
   const [ageIdx, setAgeIdx] = useState<number | null>(null); // null = any age
   const [section, setSection] = useState<LearningSection | 'all'>('all');
   const [priceChoice, setPriceChoice] = useState<PriceChoice>('any');
@@ -66,10 +65,12 @@ export const LearningView: React.FC = () => {
     (!mineOnly || owned.includes(r.id)) && fitsAge(r, ageIdx) && (section === 'all' || r.section === section) && fitsPrice(r, priceChoice) &&
     `${r.title} ${r.description}`.toLowerCase().includes(query.toLowerCase())), [active, mineOnly, owned, ageIdx, section, priceChoice, query]);
 
-  useEffect(() => { if (done) resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, [done, mineOnly]);
+  const firstRun = useRef(true);
+  useEffect(() => { if (firstRun.current) { firstRun.current = false; return; } if (done) resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, [done, mineOnly]);
   const finish = () => { setQuery(''); setDone(true); };
   const next = () => { if (step + 1 >= totalSteps) finish(); else setStep(step + 1); };
-  const restart = () => { setDone(false); setMineOnly(false); setStep(0); setAgeIdx(null); setSection('all'); setPriceChoice('any'); setQuery(''); };
+  const restart = () => { setDone(true); setMineOnly(false); setStep(0); setAgeIdx(null); setSection('all'); setPriceChoice('any'); setQuery(''); };
+  const startQuiz = () => { setMineOnly(false); setStep(0); setAgeIdx(null); setSection('all'); setPriceChoice('any'); setQuery(''); setDone(false); };
   const editStep = (n: number) => { setMineOnly(false); setDone(false); setStep(n); };
   const showMine = () => { setMineOnly(true); setAgeIdx(null); setSection('all'); setPriceChoice('any'); setQuery(''); setDone(true); };
 
@@ -78,14 +79,30 @@ export const LearningView: React.FC = () => {
       <span>{label}</span>{sub && <small style={{ fontWeight: 600, opacity: .8 }}>{sub}</small>}
     </button>;
 
-  const answerChips = <div className="pr-chips">
-    {mineOnly ? <span style={{ ...chipStyle, cursor: 'default' }}>📥 My purchases</span> : <>
-      <button type="button" style={chipStyle} onClick={() => editStep(0)}>{ageIdx === null ? '🌈 Any age' : `${ageBands[ageIdx].emoji} ${ageBands[ageIdx].label}`} ✎</button>
-      <button type="button" style={chipStyle} onClick={() => editStep(1)}>{section === 'all' ? '✨ Anything fun' : `${sections.find(s => s.id === section)!.emoji} ${sections.find(s => s.id === section)!.label}`} ✎</button>
-      {askPrice && <button type="button" style={chipStyle} onClick={() => editStep(2)}>{priceChoice === 'any' ? '💛 Free & paid' : priceChoice === 'free' ? '🎁 Free only' : '⭐ Paid only'} ✎</button>}
-    </>}
-    <button type="button" className="btn alt pr-restart" onClick={restart}>↺ Start over</button>
-  </div>;
+  const filterChip = (key: string, label: string, on: boolean, onClick: () => void) =>
+    <button key={key} type="button" aria-pressed={on} className={`pr-filter${on ? ' on' : ''}`} onClick={onClick}>{label}</button>;
+  const hasFilters = ageIdx !== null || section !== 'all' || priceChoice !== 'any' || query !== '';
+  const answerChips = mineOnly
+    ? <div className="pr-chips"><span className="pr-filter on">📥 My purchases</span><button type="button" className="btn alt pr-restart" onClick={restart}>← All printables</button></div>
+    : <div className="pr-filters">
+        <div className="pr-chips" role="group" aria-label="Filter by age">
+          {filterChip('age-any', '🌈 All ages', ageIdx === null, () => setAgeIdx(null))}
+          {ageBands.map((a, i) => filterChip(a.label, `${a.emoji} ${a.label}`, ageIdx === i, () => setAgeIdx(ageIdx === i ? null : i)))}
+        </div>
+        <div className="pr-chips" role="group" aria-label="Filter by type">
+          {filterChip('sec-all', '✨ Everything', section === 'all', () => setSection('all'))}
+          {sections.map(sc => filterChip(sc.id, `${sc.emoji} ${sc.label}`, section === sc.id, () => setSection(section === sc.id ? 'all' : sc.id)))}
+        </div>
+        {askPrice && <div className="pr-chips" role="group" aria-label="Filter by price">
+          {filterChip('p-any', '💛 Free & paid', priceChoice === 'any', () => setPriceChoice('any'))}
+          {filterChip('p-free', '🎁 Free', priceChoice === 'free', () => setPriceChoice('free'))}
+          {filterChip('p-paid', '⭐ Premium', priceChoice === 'paid', () => setPriceChoice('paid'))}
+        </div>}
+        <div className="pr-actions">
+          <button type="button" className="btn gold pr-restart" onClick={startQuiz}>🎯 Help me choose</button>
+          {hasFilters && <button type="button" className="btn alt pr-restart" onClick={restart}>↺ Clear filters</button>}
+        </div>
+      </div>;
 
   return <main className="wrap printables-page" style={{ paddingTop: 20, paddingBottom: basket.length > 0 ? 150 : 64 }}>
     <section className="printables-hero" style={{ borderRadius: 28, padding: 0, background: '#fff', marginBottom: 30 }}>
@@ -94,6 +111,22 @@ export const LearningView: React.FC = () => {
         <h1 style={{ fontFamily: 'var(--serif)', color: '#214c3d', fontSize: 'clamp(26px,4vw,40px)', margin: '0 auto 8px' }}>Little hands. Big discoveries.</h1>
         <p style={{ maxWidth: 620, margin: '0 auto', lineHeight: 1.6 }}>Answer a few quick questions and we’ll show the printable worksheets, activities, puzzles and colouring pages that fit your child.</p>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center', marginTop: 14 }}><span className="pill">📄 Instant printable PDFs</span><span className="pill">🌱 Age-friendly learning</span><span className="pill">💛 Learn through play</span></div>
+      </div>
+    </section>
+
+    <section className="welcome-note" id="welcome" aria-labelledby="welcome-title">
+      <div className="welcome-card">
+        <span className="welcome-kicker">A warm welcome</span>
+        <h2 id="welcome-title" className="sec-title">Welcome to Kiddie Bloom!</h2>
+        <p>We are so happy you are here. Every worksheet and little activity in our shop is chosen with care, to make learning feel like play for your child.</p>
+        <p>Take your time, explore by age, and tell us if you cannot find what you are looking for. We would love to help your little learner bloom.</p>
+        <div className="welcome-sign">
+          <span aria-hidden="true">💛</span>
+          <div>
+            <b>Pulkit Sharma &amp; Tanuja Sharma</b>
+            <small>With love, from our family to yours</small>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -126,7 +159,7 @@ export const LearningView: React.FC = () => {
       </div>
     </section> :
     <div ref={resultsRef} style={{ scrollMarginTop: 80 }}>
-      <div className="printables-section-heading" style={{ marginBottom: 12 }}><span className="eyebrow">{mineOnly ? 'YOUR LIBRARY' : 'PICKED FOR YOU'}</span><h2 className="sec-title">{visible.length} printable{visible.length === 1 ? '' : 's'} {mineOnly ? 'purchased' : 'ready for you'}</h2></div>
+      <div className="printables-section-heading" style={{ marginBottom: 12 }}><span className="eyebrow">{mineOnly ? 'YOUR LIBRARY' : hasFilters ? 'PICKED FOR YOU' : 'ALL PRINTABLES'}</span><h2 className="sec-title">{visible.length} printable{visible.length === 1 ? '' : 's'} {mineOnly ? 'purchased' : hasFilters ? 'ready for you' : 'to explore'}</h2></div>
       <div className="pr-toolbar">
         {answerChips}
         <input className="pr-search" type="search" aria-label="Search these printables" placeholder="Search within results…" value={query} onChange={e => setQuery(e.target.value)} />
@@ -155,7 +188,7 @@ export const LearningView: React.FC = () => {
             {inBasket && r.price > 0 && !isOwned && <button type="button" className="pc-remove" onClick={() => toggleBasket(r)}>Remove from basket</button>}
           </div>
         </article>;
-      })}</div> : <div style={{ textAlign: 'center', padding: '48px 20px', borderRadius: 20, background: '#f7f8f3' }}><div style={{ fontSize: 42 }}>🌼</div><h3>Nothing matches just yet</h3><p>Try a different age or activity — new printables are added regularly.</p><button type="button" className="btn gold" onClick={restart}>↺ Answer the questions again</button></div>}
+      })}</div> : <div style={{ textAlign: 'center', padding: '48px 20px', borderRadius: 20, background: '#f7f8f3' }}><div style={{ fontSize: 42 }}>🌼</div><h3>Nothing matches just yet</h3><p>Try a different age or activity — new printables are added regularly.</p><button type="button" className="btn gold" onClick={restart}>↺ Clear filters</button></div>}
     </div>}
   {basket.length > 0 && !basketOpen && <div style={{ position: 'fixed', left: 0, right: 0, bottom: 'calc(env(safe-area-inset-bottom, 0px) + 74px)', display: 'flex', justifyContent: 'center', zIndex: 40, pointerEvents: 'none' }}>
     <button type="button" className="btn gold pr-basket-bar" onClick={() => setBasketOpen(true)}>🧺 Basket ({basket.length}) · ₹{basketTotal.toFixed(0)} — Review & checkout</button>

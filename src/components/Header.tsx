@@ -61,14 +61,16 @@ export const Header: React.FC = () => {
         </nav>
 
         <div className="header-actions">
-          <button
-            type="button"
-            className="admin-tag-btn mobile-hide"
-            title="Studio Admin"
-            onClick={() => navigateTo('admin')}
-          >
-            {user?.isAdmin ? 'Studio Admin' : 'Admin'}
-          </button>
+          {user?.isAdmin && (
+            <button
+              type="button"
+              className="admin-tag-btn mobile-hide"
+              title="Studio Admin"
+              onClick={() => navigateTo('admin')}
+            >
+              Studio Admin
+            </button>
+          )}
 
           <button
             type="button"
@@ -106,9 +108,11 @@ export const Header: React.FC = () => {
       {mobileMenuOpen && (
         <div className="mobile-drawer" role="navigation" aria-label="Mobile menu">
           <button type="button" className="mobile-drawer-link" onClick={() => navigateTo('printables')}>🖍️ Printables: Worksheets & Activities</button>
-          <button type="button" className="mobile-drawer-link" onClick={() => navigateTo('admin')}>
-            ⚙️ Studio Admin
-          </button>
+          {user?.isAdmin && (
+            <button type="button" className="mobile-drawer-link" onClick={() => navigateTo('admin')}>
+              ⚙️ Studio Admin
+            </button>
+          )}
           <button
             type="button"
             className="mobile-drawer-theme"
