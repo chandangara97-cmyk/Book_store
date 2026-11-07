@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useStore } from '../context/StoreContext';
+import { asset } from '../utils/images';
 
 export const AuthView: React.FC = () => {
   const { user, login, signup, logout, orders, setView } = useStore();
@@ -91,9 +92,14 @@ export const AuthView: React.FC = () => {
               <button
                 type="button"
                 className="btn sm gold"
-                onClick={() => setView('admin')}
+                onClick={() => { window.location.href = asset('/upload-pdf.html'); }}
               >
                 Go to Studio Admin
+              </button>
+            )}
+            {user.isAdmin && (
+              <button type="button" className="btn sm alt" onClick={() => setView('admin')}>
+                Catalog admin
               </button>
             )}
             <button

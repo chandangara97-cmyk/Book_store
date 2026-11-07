@@ -13,6 +13,11 @@ export const Header: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const openUploadPage = () => {
+    setMobileMenuOpen(false);
+    window.location.href = asset('/upload-pdf.html');
+  };
+
   const scrollToSection = (id: string) => {
     if (view !== 'home') {
       setView('home');
@@ -65,8 +70,8 @@ export const Header: React.FC = () => {
             <button
               type="button"
               className="admin-tag-btn mobile-hide"
-              title="Studio Admin"
-              onClick={() => navigateTo('admin')}
+              title="Upload PDF"
+              onClick={openUploadPage}
             >
               Studio Admin
             </button>
@@ -109,7 +114,7 @@ export const Header: React.FC = () => {
         <div className="mobile-drawer" role="navigation" aria-label="Mobile menu">
           <button type="button" className="mobile-drawer-link" onClick={() => navigateTo('printables')}>🖍️ Printables: Worksheets & Activities</button>
           {user?.isAdmin && (
-            <button type="button" className="mobile-drawer-link" onClick={() => navigateTo('admin')}>
+            <button type="button" className="mobile-drawer-link" onClick={openUploadPage}>
               ⚙️ Studio Admin
             </button>
           )}
