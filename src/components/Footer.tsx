@@ -19,9 +19,12 @@ export const Footer: React.FC = () => {
           <span>&copy; {new Date().getFullYear()} <strong>Kiddie Bloom</strong>. All rights reserved.</span>
         </div>
         <div className="footer-links">
-          <button type="button" onClick={() => navigateTo('printables')}>All printables</button>
-          <button type="button" onClick={() => navigateTo('auth')}>Account</button>
-          <button type="button" onClick={() => navigateTo('admin')}>Studio Admin</button>
+          <button type="button" onClick={() => navigateTo('home')}>Home</button>
+          <button type="button" onClick={() => navigateTo('library')}>Books</button>
+          <button type="button" onClick={() => navigateTo('toys')}>Toys & Play</button>
+          <button type="button" onClick={() => navigateTo('printables')}>Learning Studio</button>
+          <button type="button" onClick={() => navigateTo('gifts')}>Gift Finder</button>
+          <button type="button" onClick={() => navigateTo('auth')}>My Account</button>
         </div>
       </div>
     </footer>

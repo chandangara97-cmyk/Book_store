@@ -131,7 +131,7 @@ export const CheckoutView: React.FC = () => {
     const order: Order = {
       orderId,
       createdAt: new Date().toISOString(),
-      status: isPaid ? 'Paid' : 'Demo checkout — order confirmed',
+      status: isPaid ? 'Paid' : 'Payment not verified',
       customer,
       items: cart.map((item) => ({
         id: item.id,
@@ -161,7 +161,7 @@ export const CheckoutView: React.FC = () => {
         paymentMethod === 'card'
           ? 'Credit / Debit Card'
           : 'UPI (India)',
-      paymentId: paymentId || undefined
+      paymentId
     };
 
     saveOrder(order);

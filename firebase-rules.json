@@ -33,14 +33,10 @@
       },
       "orders": {
         ".read": "auth != null && auth.token.email === 'chandanpanwar001@gmail.com'",
-        ".indexOn": ["razorpayOrderId"],
-        "$orderId": {
-          ".write": "auth != null && !data.exists() && newData.child('uid').val() === auth.uid",
-          ".validate": "newData.hasChildren(['orderId', 'uid', 'items', 'totalsINR', 'createdAt'])",
-          "status": {
-            ".write": "auth != null && auth.token.email === 'chandanpanwar001@gmail.com'"
-          }
-        }
+        ".indexOn": [
+          "razorpayOrderId"
+        ],
+        ".write": false
       },
       "users": {
         ".read": "auth != null && auth.token.email === 'chandanpanwar001@gmail.com'",

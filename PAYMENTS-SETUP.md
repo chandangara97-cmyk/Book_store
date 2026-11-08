@@ -1,21 +1,27 @@
-# Kiddie Bloom — payments
+# Kiddie Bloom — production payments
 
-Payment API = Node server on **Render** (separate private repo `kiddie-bloom-api`). Frontend = GitHub Pages. Data and login = Firebase. The browser now fails closed: there is no simulated payment or fabricated payment ID.
-Full steps and the variable list: the `kiddie-bloom-api` repo's `RENDER-SETUP.md`.
+Payment API = trusted Node server on Render (separate private repo `kiddie-bloom-api`). Frontend = GitHub Pages. Data and login = Firebase.
 
-Routes: `POST /createOrder`, `POST /verifyPayment`, `POST /createPrintableOrder`, `POST /verifyPrintablePayment`, `POST /download`, `GET /downloadOnce?token=...`
+Required routes:
 
-Never put `RAZORPAY_KEY_SECRET` or service-account JSON in Vite variables, source files or git.
+- `POST /createOrder`
+- `POST /verifyPayment`
+- `POST /createPrintableOrder`
+- `POST /verifyPrintablePayment`
+- `POST /download`
+- `GET /downloadOnce?token=...`
 
+The frontend now fails closed: it will not show a pretend checkout or invent a payment ID. It requires a live Razorpay key from the API and a successful server verification response before confirming a paid order or issuing printable download tokens.
 
-## Production checklist
+## Backend must enforce
 
-- Configure `VITE_API_URL` to the deployed HTTPS API base URL.
-- Configure the live Razorpay key ID and secret only on the API server; never put the secret in Vite variables.
-- `/createOrder` must calculate item prices from the trusted server catalogue (never trust browser-supplied prices).
-- `/verifyPayment` must verify the Razorpay signature using the server secret and confirm the order amount, currency, order ID, payment status and capture status before returning success.
-- Make verification idempotent and reject replayed or mismatched payment IDs.
-- Store the verified order from the server using Firebase Admin credentials. Do not let a browser write a `Paid` status or grant a digital entitlement.
-- Test with Razorpay test credentials first; switch to live credentials only after webhook/signature, cancellation, duplicate callback and amount-mismatch tests pass.
+1. Calculate product prices and discounts from trusted server-side catalogue data; never trust browser-supplied totals.
+2. Create Razorpay orders with the secret stored only in backend environment variables.
+3. Verify Razorpay payment signatures on the server, then verify the payment's captured status, amount and currency against the server-created order.
+4. Make payment verification and order creation idempotent.
+5. After verification, write the global admin order ledger and PDF entitlements using Firebase Admin SDK. The browser is deliberately denied write access to the global `/bookstore/orders` ledger and `/bookstore/entitlements`.
+6. Serve paid PDFs only after checking authenticated ownership/entitlement or a short-lived, single-use download token.
 
-**Important Firebase note:** the included `firebase-rules.json` still permits a signed-in customer to create a customer order record. Because the current frontend writes its order history directly to Firebase after checkout, this rule set is not a complete production payment-security boundary. Before accepting live payments, move order creation/status and entitlement writes to the trusted API (Firebase Admin SDK), then deny client writes to `/orders` and `/users/$uid/orders`.
+Never put `RAZORPAY_KEY_SECRET` or service-account JSON in Vite variables, source files or git. `VITE_API_URL` may contain only the public HTTPS API base URL.
+
+The production frontend rejects test Razorpay keys. Test payments only against a separate staging deployment configured for test mode; never enable a client-side payment simulator in production.

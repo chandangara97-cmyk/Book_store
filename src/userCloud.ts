@@ -57,8 +57,8 @@ export const saveWishlist = (uid: string, wishlist: WishlistItem[]) => call(`use
 export async function saveOrderCloud(uid: string, order: Order) {
   const o = clean(order);
   await call(`users/${uid}/orders/${order.orderId}`, 'PUT', o);
-  // Admin-visible copy. Rules allow creating it once; only the admin can change its status later.
-  await call(`orders/${order.orderId}`, 'PUT', { ...o, uid });
+  // Customer-owned history only. The authoritative admin order ledger must be written by
+  // the payment API after server-side Razorpay signature verification (Admin SDK).
 }
 
 /** Admin only: every order from every customer. */

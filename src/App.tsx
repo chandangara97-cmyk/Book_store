@@ -3,62 +3,36 @@ import { useStore } from './context/StoreContext';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { BottomNav } from './components/BottomNav';
-const AuthView = lazy(() => import('./views/AuthView').then(m => ({ default: m.AuthView })));
-const AdminView = lazy(() => import('./views/AdminView').then(m => ({ default: m.AdminView })));
-import { LearningView } from './views/LearningView';
+import { BookDetailModal } from './components/BookDetailModal';
 import { HomeView } from './views/HomeView';
+import { LibraryView } from './views/LibraryView';
 import { ToysView } from './views/ToysView';
+import { LearningView } from './views/LearningView';
+import { GiftFinderView } from './views/GiftFinderView';
 import { CartView } from './views/CartView';
+import { WishlistView } from './views/WishlistView';
 import { CheckoutView } from './views/CheckoutView';
 import { OrderSummaryView } from './views/OrderSummaryView';
-import { WishlistView } from './views/WishlistView';
-import { GiftFinderView } from './views/GiftFinderView';
-import { LibraryView as BooksView } from './views/LibraryView';
+const AuthView = lazy(() => import('./views/AuthView').then(m => ({ default: m.AuthView })));
+const AdminView = lazy(() => import('./views/AdminView').then(m => ({ default: m.AdminView })));
 
 export const AppContent: React.FC = () => {
-  const { view, toastMessage } = useStore();
-
-  const renderView = () => {
-    switch (view) {
-      case 'auth':
-        return <AuthView />;
-      case 'admin':
-        return <AdminView />;
-      case 'home':
-        return <HomeView />;
-      case 'library':
-        return <BooksView />;
-      case 'toys':
-        return <ToysView />;
-      case 'cart':
-        return <CartView />;
-      case 'checkout':
-        return <CheckoutView />;
-      case 'order-summary':
-        return <OrderSummaryView />;
-      case 'wishlist':
-        return <WishlistView />;
-      case 'gifts':
-        return <GiftFinderView />;
-      case 'printables':
-      default:
-        return <LearningView />;
-    }
+  const { view, toastMessage, selectedBook, setSelectedBook } = useStore();
+  const pages: Record<string, React.ReactNode> = {
+    home: <HomeView />, library: <LibraryView />, books: <LibraryView />,
+    toys: <ToysView />, printables: <LearningView />, learning: <LearningView />,
+    gifts: <GiftFinderView />, 'gift-finder': <GiftFinderView />,
+    cart: <CartView />, wishlist: <WishlistView />, checkout: <CheckoutView />,
+    'order-summary': <OrderSummaryView />,
   };
-
-  return (
-    <div className="app-shell" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Header />
-      <div style={{ flex: 1 }}><Suspense fallback={<div style={{ padding: 40, textAlign: 'center' }}>Loading…</div>}>{renderView()}</Suspense></div>
-      <Footer />
-      <BottomNav />
-
-      {/* Toast popup */}
-      {toastMessage && (
-        <div className="rn-toast" role="status" aria-live="polite">
-          <span>{toastMessage}</span>
-        </div>
-      )}
-    </div>
-  );
+  const page = view === 'auth' ? <AuthView /> : view === 'admin' ? <AdminView /> : (pages[view] || <HomeView />);
+  const minimal = view === 'checkout' || view === 'order-summary';
+  return <div className="app-shell kb-app-shell">
+    <Header />
+    <div className="kb-page-content"><Suspense fallback={<div className="kb-loading">Preparing your little world…</div>}>{page}</Suspense></div>
+    {!minimal && <Footer />}
+    {!minimal && <BottomNav />}
+    {selectedBook && <BookDetailModal book={selectedBook} onClose={() => setSelectedBook(null)} />}
+    {toastMessage && <div className="rn-toast" role="status" aria-live="polite">{toastMessage}</div>}
+  </div>;
 };
