@@ -36,16 +36,15 @@ export const LearningView: React.FC = () => {
   const [basketIds, setBasketIds] = useState<string[]>(() => { try { return JSON.parse(localStorage.getItem('kbPrintableBasket') || '[]'); } catch { return []; } });
   useEffect(() => { try { localStorage.setItem('kbPrintableBasket', JSON.stringify(basketIds)); } catch { /* ignore */ } }, [basketIds]);
   const [busy, setBusy] = useState('');
-  const [mineOnly, setMineOnly] = useState(false);
   useEffect(() => { if (user) loadOwnedPrintables().then(setOwned); else setOwned([]); }, [user?.email]);
   const needLogin = () => { showToast('Please sign in to buy or download printables.'); setView('auth'); };
   const download = async (r: LearningResource) => { if (r.pdfUrl && r.price <= 0) { window.open(r.pdfUrl, '_blank', 'noopener'); return; } if (!user) return needLogin(); setBusy(r.id); try { await downloadPrintable(r.id, r.title); } catch (e) { showToast(e instanceof Error ? e.message : 'Download failed'); } setBusy(''); };
 
   // Guided questions: nothing is listed until the questions are answered.
   const [step, setStep] = useState(0);
-  const [done, setDone] = useState(true); // show printables straight away; the quiz is optional
-  const [ageIdx, setAgeIdx] = useState<number | null>(null); // null = any age
-  const [section, setSection] = useState<LearningSection | 'all'>('all');
+  const [done, setDone] = useState(false); // PDFs remain hidden until both age and category are selected
+  const [ageIdx, setAgeIdx] = useState<number | null>(null);
+  const [section, setSection] = useState<LearningSection | null>(null);
   const [priceChoice, setPriceChoice] = useState<PriceChoice>('any');
   const [query, setQuery] = useState('');
   const resultsRef = useRef<HTMLDivElement>(null);
@@ -56,23 +55,21 @@ export const LearningView: React.FC = () => {
   const basket = useMemo(() => basketIds.map(id => active.find(r => r.id === id)).filter((r): r is LearningResource => !!r && r.price > 0 && !owned.includes(r.id)), [basketIds, active, owned]);
   const basketTotal = basket.reduce((n, r) => n + r.price, 0);
   const askPrice = hasFree && hasPaid;
-  const totalSteps = askPrice ? 3 : 2;
-  const fitsAge = (r: LearningResource, i: number | null) => i === null || (r.minAge <= ageBands[i].max && r.maxAge >= ageBands[i].min);
+  const totalSteps = 2;
+  const fitsAge = (r: LearningResource, i: number | null) => i !== null && (r.minAge <= ageBands[i].max && r.maxAge >= ageBands[i].min);
   const fitsPrice = (r: LearningResource, c: PriceChoice) => c === 'any' || (c === 'free' ? r.price <= 0 : r.price > 0);
   const countFor = (sec: LearningSection) => active.filter(r => r.section === sec && fitsAge(r, ageIdx)).length;
 
-  const visible = useMemo(() => active.filter(r =>
-    (!mineOnly || owned.includes(r.id)) && fitsAge(r, ageIdx) && (section === 'all' || r.section === section) && fitsPrice(r, priceChoice) &&
-    `${r.title} ${r.description}`.toLowerCase().includes(query.toLowerCase())), [active, mineOnly, owned, ageIdx, section, priceChoice, query]);
+  const visible = useMemo(() => {
+    if (!done || ageIdx === null || section === null) return [];
+    return active.filter(r => fitsAge(r, ageIdx) && r.section === section && fitsPrice(r, priceChoice) &&
+      `${r.title} ${r.description}`.toLowerCase().includes(query.toLowerCase()));
+  }, [active, done, ageIdx, section, priceChoice, query]);
 
   const firstRun = useRef(true);
-  useEffect(() => { if (firstRun.current) { firstRun.current = false; return; } if (done) resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, [done, mineOnly]);
-  const finish = () => { setQuery(''); setDone(true); };
-  const next = () => { if (step + 1 >= totalSteps) finish(); else setStep(step + 1); };
-  const restart = () => { setDone(true); setMineOnly(false); setStep(0); setAgeIdx(null); setSection('all'); setPriceChoice('any'); setQuery(''); };
-  const startQuiz = () => { setMineOnly(false); setStep(0); setAgeIdx(null); setSection('all'); setPriceChoice('any'); setQuery(''); setDone(false); };
-  const editStep = (n: number) => { setMineOnly(false); setDone(false); setStep(n); };
-  const showMine = () => { setMineOnly(true); setAgeIdx(null); setSection('all'); setPriceChoice('any'); setQuery(''); setDone(true); };
+  useEffect(() => { if (firstRun.current) { firstRun.current = false; return; } if (done) resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, [done]);
+  const restart = () => { setDone(false); setStep(0); setAgeIdx(null); setSection(null); setPriceChoice('any'); setQuery(''); };
+  const editStep = (n: number) => { setDone(false); setStep(n); };
 
   const optionBtn = (key: string, label: string, sub: string | undefined, onClick: () => void, disabled = false, selected = false) =>
     <button key={key} type="button" disabled={disabled} onClick={onClick} className={`btn ${selected ? 'gold' : 'alt'}`} style={{ minHeight: 64, borderRadius: 16, fontWeight: 800, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2, opacity: disabled ? .45 : 1 }}>
@@ -81,28 +78,26 @@ export const LearningView: React.FC = () => {
 
   const filterChip = (key: string, label: string, on: boolean, onClick: () => void) =>
     <button key={key} type="button" aria-pressed={on} className={`pr-filter${on ? ' on' : ''}`} onClick={onClick}>{label}</button>;
-  const hasFilters = ageIdx !== null || section !== 'all' || priceChoice !== 'any' || query !== '';
-  const answerChips = mineOnly
-    ? <div className="pr-chips"><span className="pr-filter on">📥 My purchases</span><button type="button" className="btn alt pr-restart" onClick={restart}>← All printables</button></div>
-    : <div className="pr-filters">
-        <div className="pr-chips" role="group" aria-label="Filter by age">
-          {filterChip('age-any', '🌈 All ages', ageIdx === null, () => setAgeIdx(null))}
-          {ageBands.map((a, i) => filterChip(a.label, `${a.emoji} ${a.label}`, ageIdx === i, () => setAgeIdx(ageIdx === i ? null : i)))}
-        </div>
-        <div className="pr-chips" role="group" aria-label="Filter by type">
-          {filterChip('sec-all', '✨ Everything', section === 'all', () => setSection('all'))}
-          {sections.map(sc => filterChip(sc.id, `${sc.emoji} ${sc.label}`, section === sc.id, () => setSection(section === sc.id ? 'all' : sc.id)))}
-        </div>
-        {askPrice && <div className="pr-chips" role="group" aria-label="Filter by price">
-          {filterChip('p-any', '💛 Free & paid', priceChoice === 'any', () => setPriceChoice('any'))}
-          {filterChip('p-free', '🎁 Free', priceChoice === 'free', () => setPriceChoice('free'))}
-          {filterChip('p-paid', '⭐ Premium', priceChoice === 'paid', () => setPriceChoice('paid'))}
-        </div>}
-        <div className="pr-actions">
-          <button type="button" className="btn gold pr-restart" onClick={startQuiz}>🎯 Help me choose</button>
-          {hasFilters && <button type="button" className="btn alt pr-restart" onClick={restart}>↺ Clear filters</button>}
-        </div>
-      </div>;
+  const hasFilters = priceChoice !== 'any' || query !== '';
+  const answerChips = <div className="pr-filters">
+    <div className="pr-chips" role="group" aria-label="Selected age">
+      <span className="pr-filter on">{ageIdx !== null ? `${ageBands[ageIdx].emoji} ${ageBands[ageIdx].label}` : 'Age not selected'}</span>
+      <button type="button" className="btn alt pr-restart" onClick={() => editStep(0)}>Change age</button>
+    </div>
+    <div className="pr-chips" role="group" aria-label="Selected category">
+      <span className="pr-filter on">{section ? `${sections.find(s => s.id === section)?.emoji} ${sections.find(s => s.id === section)?.label}` : 'Category not selected'}</span>
+      <button type="button" className="btn alt pr-restart" onClick={() => editStep(1)}>Change category</button>
+    </div>
+    {askPrice && <div className="pr-chips" role="group" aria-label="Filter by price">
+      {filterChip('p-any', '💛 Free & paid', priceChoice === 'any', () => setPriceChoice('any'))}
+      {filterChip('p-free', '🎁 Free', priceChoice === 'free', () => setPriceChoice('free'))}
+      {filterChip('p-paid', '⭐ Premium', priceChoice === 'paid', () => setPriceChoice('paid'))}
+    </div>}
+    <div className="pr-actions">
+      <button type="button" className="btn alt pr-restart" onClick={restart}>↺ Choose again</button>
+      {hasFilters && <button type="button" className="btn alt pr-restart" onClick={() => { setPriceChoice('any'); setQuery(''); }}>Clear search/price</button>}
+    </div>
+  </div>;
 
   return <main className="wrap printables-page" style={{ paddingTop: 20, paddingBottom: basket.length > 0 ? 150 : 64 }}>
     <section className="printables-hero" style={{ borderRadius: 28, padding: 0, background: '#fff', marginBottom: 30 }}>
@@ -137,29 +132,19 @@ export const LearningView: React.FC = () => {
       {step === 0 && <>
         <h2 className="sec-title">How old is your little learner?</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(130px,1fr))', gap: 12, marginTop: 18 }}>
-          {ageBands.map((a, i) => optionBtn(a.label, `${a.emoji} ${a.label}`, `${active.filter(r => fitsAge(r, i)).length} printables`, () => { setAgeIdx(i); next(); }, !active.some(r => fitsAge(r, i)), ageIdx === i))}
-          {optionBtn('any-age', '🌈 Any age', 'Show me all ages', () => { setAgeIdx(null); next(); }, false, false)}
+          {ageBands.map((a, i) => optionBtn(a.label, `${a.emoji} ${a.label}`, `${active.filter(r => fitsAge(r, i)).length} matching PDFs`, () => { setAgeIdx(i); setSection(null); setStep(1); }, !active.some(r => fitsAge(r, i)), ageIdx === i))}
         </div></>}
       {step === 1 && <>
         <h2 className="sec-title">What would you like to do today?</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(130px,1fr))', gap: 12, marginTop: 18 }}>
-          {sections.map(sc => optionBtn(sc.id, `${sc.emoji} ${sc.label}`, countFor(sc.id) ? sc.text : 'Coming soon', () => { setSection(sc.id); next(); }, countFor(sc.id) === 0, section === sc.id))}
-          {optionBtn('all', '✨ Surprise me', 'Show everything', () => { setSection('all'); next(); })}
-        </div></>}
-      {step === 2 && <>
-        <h2 className="sec-title">Free downloads or premium packs?</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(130px,1fr))', gap: 12, marginTop: 18 }}>
-          {optionBtn('free', '🎁 Free', 'Download right away', () => { setPriceChoice('free'); finish(); })}
-          {optionBtn('paid', '⭐ Premium', 'Complete packs', () => { setPriceChoice('paid'); finish(); })}
-          {optionBtn('both', '💛 Show both', undefined, () => { setPriceChoice('any'); finish(); })}
+          {sections.map(sc => optionBtn(sc.id, `${sc.emoji} ${sc.label}`, countFor(sc.id) ? `${countFor(sc.id)} matching PDFs · ${sc.text}` : 'No PDFs for this age yet', () => { setSection(sc.id); setQuery(''); setDone(true); }, countFor(sc.id) === 0, section === sc.id))}
         </div></>}
       <div style={{ display: 'flex', justifyContent: 'center', gap: 10, flexWrap: 'wrap', marginTop: 20 }}>
         {step > 0 && <button type="button" className="btn alt" onClick={() => setStep(step - 1)}>← Back</button>}
-        {user && owned.length > 0 && <button type="button" className="btn alt" onClick={showMine}>📥 My purchases</button>}
       </div>
     </section> :
     <div ref={resultsRef} style={{ scrollMarginTop: 80 }}>
-      <div className="printables-section-heading" style={{ marginBottom: 12 }}><span className="eyebrow">{mineOnly ? 'YOUR LIBRARY' : hasFilters ? 'PICKED FOR YOU' : 'ALL PRINTABLES'}</span><h2 className="sec-title">{visible.length} printable{visible.length === 1 ? '' : 's'} {mineOnly ? 'purchased' : hasFilters ? 'ready for you' : 'to explore'}</h2></div>
+      <div className="printables-section-heading" style={{ marginBottom: 12 }}><span className="eyebrow">MATCHING PRINTABLES</span><h2 className="sec-title">{visible.length} matching PDF{visible.length === 1 ? '' : 's'}</h2></div>
       <div className="pr-toolbar">
         {answerChips}
         <input className="pr-search" type="search" aria-label="Search these printables" placeholder="Search within results…" value={query} onChange={e => setQuery(e.target.value)} />
