@@ -19,7 +19,6 @@ const ageBands = [
   { label: 'Ages 9–12', emoji: '🔬', min: 9, max: 12 },
   { label: 'Ages 13–15', emoji: '🚀', min: 13, max: 15 },
 ];
-type PriceChoice = 'any' | 'free' | 'paid';
 
 /** Cover = saved thumbnail, else /img/printables/covers/<id>.jpg (page 1 of the PDF committed to the repo), else the emoji. */
 const CoverArt: React.FC<{ r: LearningResource; emoji: string }> = ({ r, emoji }) => {
@@ -45,40 +44,30 @@ export const LearningView: React.FC = () => {
   const [done, setDone] = useState(false); // PDFs remain hidden until both age and category are selected
   const [ageIdx, setAgeIdx] = useState<number | null>(null);
   const [section, setSection] = useState<LearningSection | null>(null);
-  const [priceChoice, setPriceChoice] = useState<PriceChoice>('any');
   const [query, setQuery] = useState('');
   const resultsRef = useRef<HTMLDivElement>(null);
   const toggleBasket = (r: LearningResource) => { const has = basketIds.includes(r.id); setBasketIds(b => has ? b.filter(x => x !== r.id) : [...b, r.id]); showToast(has ? `${r.title} removed from basket` : `${r.title} added to basket`); };
 
   const active = useMemo(() => learningResources.filter(r => r.active !== false), [learningResources]);
-  const hasFree = active.some(r => r.price <= 0), hasPaid = active.some(r => r.price > 0);
   const basket = useMemo(() => basketIds.map(id => active.find(r => r.id === id)).filter((r): r is LearningResource => !!r && r.price > 0 && !owned.includes(r.id)), [basketIds, active, owned]);
   const basketTotal = basket.reduce((n, r) => n + r.price, 0);
-  const askPrice = hasFree && hasPaid;
   const totalSteps = 2;
   const fitsAge = (r: LearningResource, i: number | null) => i !== null && (r.minAge <= ageBands[i].max && r.maxAge >= ageBands[i].min);
-  const fitsPrice = (r: LearningResource, c: PriceChoice) => c === 'any' || (c === 'free' ? r.price <= 0 : r.price > 0);
   const countFor = (sec: LearningSection) => active.filter(r => r.section === sec && fitsAge(r, ageIdx)).length;
 
   const visible = useMemo(() => {
     if (!done || ageIdx === null || section === null) return [];
-    return active.filter(r => fitsAge(r, ageIdx) && r.section === section && fitsPrice(r, priceChoice) &&
+    return active.filter(r => fitsAge(r, ageIdx) && r.section === section &&
       `${r.title} ${r.description}`.toLowerCase().includes(query.toLowerCase()));
-  }, [active, done, ageIdx, section, priceChoice, query]);
+  }, [active, done, ageIdx, section, query]);
 
   const firstRun = useRef(true);
   useEffect(() => { if (firstRun.current) { firstRun.current = false; return; } if (done) resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, [done]);
-  const restart = () => { setDone(false); setStep(0); setAgeIdx(null); setSection(null); setPriceChoice('any'); setQuery(''); };
+  const restart = () => { setDone(false); setStep(0); setAgeIdx(null); setSection(null); setQuery(''); };
   const editStep = (n: number) => { setDone(false); setStep(n); };
 
-  const optionBtn = (key: string, label: string, sub: string | undefined, onClick: () => void, disabled = false, selected = false) =>
-    <button key={key} type="button" disabled={disabled} onClick={onClick} className={`btn ${selected ? 'gold' : 'alt'}`} style={{ minHeight: 64, borderRadius: 16, fontWeight: 800, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2, opacity: disabled ? .45 : 1 }}>
-      <span>{label}</span>{sub && <small style={{ fontWeight: 600, opacity: .8 }}>{sub}</small>}
-    </button>;
 
-  const filterChip = (key: string, label: string, on: boolean, onClick: () => void) =>
-    <button key={key} type="button" aria-pressed={on} className={`pr-filter${on ? ' on' : ''}`} onClick={onClick}>{label}</button>;
-  const hasFilters = priceChoice !== 'any' || query !== '';
+  const hasFilters = query !== '';
   const answerChips = <div className="pr-filters">
     <div className="pr-chips" role="group" aria-label="Selected age">
       <span className="pr-filter on">{ageIdx !== null ? `${ageBands[ageIdx].emoji} ${ageBands[ageIdx].label}` : 'Age not selected'}</span>
@@ -88,60 +77,84 @@ export const LearningView: React.FC = () => {
       <span className="pr-filter on">{section ? `${sections.find(s => s.id === section)?.emoji} ${sections.find(s => s.id === section)?.label}` : 'Category not selected'}</span>
       <button type="button" className="btn alt pr-restart" onClick={() => editStep(1)}>Change category</button>
     </div>
-    {askPrice && <div className="pr-chips" role="group" aria-label="Filter by price">
-      {filterChip('p-any', '💛 Free & paid', priceChoice === 'any', () => setPriceChoice('any'))}
-      {filterChip('p-free', '🎁 Free', priceChoice === 'free', () => setPriceChoice('free'))}
-      {filterChip('p-paid', '⭐ Premium', priceChoice === 'paid', () => setPriceChoice('paid'))}
-    </div>}
     <div className="pr-actions">
       <button type="button" className="btn alt pr-restart" onClick={restart}>↺ Choose again</button>
-      {hasFilters && <button type="button" className="btn alt pr-restart" onClick={() => { setPriceChoice('any'); setQuery(''); }}>Clear search/price</button>}
+      {hasFilters && <button type="button" className="btn alt pr-restart" onClick={() => setQuery('')}>Clear search</button>}
     </div>
   </div>;
 
-  return <main className="wrap printables-page" style={{ paddingTop: 20, paddingBottom: basket.length > 0 ? 150 : 64 }}>
-    <section className="printables-hero" style={{ borderRadius: 28, padding: 0, background: '#fff', marginBottom: 30 }}>
-      <img fetchPriority="high" decoding="async" src={asset('/img/kiddie-bloom-hero.jpg')} alt="Kiddie Bloom – a giraffe, bunny, panda, bear and squirrel with books, crayons and an open storybook" width={1600} height={593} style={{ display: 'block', width: '100%', height: 'auto' }} />
-      <div style={{ padding: 'clamp(18px,3.5vw,34px)', textAlign: 'center', background: 'linear-gradient(120deg,#fff4e6,#f2f8ee 65%,#e8f4ff)' }}>
-        <h1 style={{ fontFamily: 'var(--serif)', color: '#214c3d', fontSize: 'clamp(26px,4vw,40px)', margin: '0 auto 8px' }}>Little hands. Big discoveries.</h1>
-        <p style={{ maxWidth: 620, margin: '0 auto', lineHeight: 1.6 }}>Answer a few quick questions and we’ll show the printable worksheets, activities, puzzles and colouring pages that fit your child.</p>
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center', marginTop: 14 }}><span className="pill">📄 Instant printable PDFs</span><span className="pill">🌱 Age-friendly learning</span><span className="pill">💛 Learn through play</span></div>
-      </div>
-    </section>
-
-    <section className="welcome-note" id="welcome" aria-labelledby="welcome-title">
-      <div className="welcome-card">
-        <span className="welcome-kicker">A warm welcome</span>
-        <h2 id="welcome-title" className="sec-title">Welcome to Kiddie Bloom!</h2>
-        <p>We are so happy you are here. Every worksheet and little activity in our shop is chosen with care, to make learning feel like play for your child.</p>
-        <p>Take your time, explore by age, and tell us if you cannot find what you are looking for. We would love to help your little learner bloom.</p>
-        <div className="welcome-sign">
-          <span aria-hidden="true">💛</span>
-          <div>
-            <b>Pulkit Sharma &amp; Tanuja Sharma</b>
-            <small>With love, from our family to yours</small>
-          </div>
+  return <main className="wrap printables-page kb-index" style={{ paddingTop: 18, paddingBottom: basket.length > 0 ? 150 : 64 }}>
+    <style>{`
+      .kb-index{max-width:1240px!important;color:#263b32}
+      .kb-index .kb-hero{position:relative;display:grid;grid-template-columns:1.08fr .92fr;align-items:center;gap:24px;overflow:hidden;min-height:330px;padding:clamp(24px,5vw,58px);border-radius:30px;background:linear-gradient(125deg,#fff5e9 0%,#f4f8ef 54%,#eaf4f5 100%);border:1px solid #e8eee5;box-shadow:0 18px 48px rgba(42,75,56,.08);margin-bottom:26px}
+      .kb-index .kb-hero:before,.kb-index .kb-hero:after{content:"";position:absolute;border-radius:50%;pointer-events:none;background:rgba(255,255,255,.42)}
+      .kb-index .kb-hero:before{width:220px;height:220px;right:32%;top:-145px}.kb-index .kb-hero:after{width:150px;height:150px;left:-95px;bottom:-95px}
+      .kb-index .kb-hero-copy,.kb-index .kb-hero-art{position:relative;z-index:1}
+      .kb-index .kb-kicker{display:inline-flex;align-items:center;gap:8px;padding:8px 13px;border-radius:999px;background:#fff;border:1px solid #e5eadf;color:#55715e;font-size:12px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
+      .kb-index .kb-hero h1{font-family:var(--serif,Georgia,serif);font-size:clamp(34px,5vw,58px);line-height:1.04;letter-spacing:-.035em;color:#244b3a;margin:18px 0 14px;max-width:620px}
+      .kb-index .kb-hero p{font-size:clamp(15px,1.5vw,18px);line-height:1.7;color:#617268;max-width:560px;margin:0}
+      .kb-index .kb-hero-art{display:flex;justify-content:center;align-items:center;min-width:0}
+      .kb-index .kb-hero-art img{display:block;width:min(100%,430px);max-height:265px;object-fit:contain;filter:drop-shadow(0 18px 20px rgba(58,79,61,.12));border-radius:22px}
+      .kb-index .kb-flow{display:flex;gap:9px;flex-wrap:wrap;margin-top:24px}
+      .kb-index .kb-flow span{display:inline-flex;align-items:center;gap:7px;padding:9px 12px;border-radius:12px;background:rgba(255,255,255,.78);border:1px solid #e6ece2;color:#526b5a;font-size:12px;font-weight:800}
+      .kb-index .kb-picker{max-width:1000px;margin:0 auto 26px;padding:clamp(22px,4vw,38px);border-radius:26px;background:#fff;border:1px solid #e8ede6;box-shadow:0 14px 42px rgba(37,67,48,.07);text-align:center}
+      .kb-index .kb-step-label{font-size:11px;font-weight:900;letter-spacing:.16em;color:#a07856;text-transform:uppercase}
+      .kb-index .kb-step-track{display:flex;align-items:center;justify-content:center;gap:8px;margin:13px 0 18px}
+      .kb-index .kb-step-track span{width:34px;height:5px;border-radius:9px;background:#e8eee7}.kb-index .kb-step-track span.on{background:#d88c79;width:52px}
+      .kb-index .kb-picker h2{font-family:var(--serif,Georgia,serif);font-size:clamp(25px,3vw,36px);color:#294d3c;margin:0 0 8px}
+      .kb-index .kb-picker-sub{color:#77867b;margin:0 auto 22px;max-width:620px;line-height:1.6;font-size:14px}
+      .kb-index .kb-choice-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px}
+      .kb-index .kb-choice-card{position:relative;min-height:122px;padding:18px 12px;border:1px solid #e6ece4;border-radius:18px;background:linear-gradient(180deg,#fff 0%,#fbfcf8 100%);color:#355442;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font:inherit;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+      .kb-index .kb-choice-card:hover:not(:disabled){transform:translateY(-4px);border-color:#d7b49c;box-shadow:0 12px 24px rgba(51,82,58,.1)}
+      .kb-index .kb-choice-card:focus-visible{outline:3px solid #d88c79;outline-offset:3px}
+      .kb-index .kb-choice-card:disabled{opacity:.42;cursor:not-allowed}
+      .kb-index .kb-choice-emoji{font-size:30px;line-height:1}.kb-index .kb-choice-title{font-size:15px;font-weight:900}.kb-index .kb-choice-sub{font-size:11px;color:#819087;font-weight:700}
+      .kb-index .kb-back{margin-top:18px;border:0;background:transparent;color:#6e7f73;font-weight:800;cursor:pointer;padding:9px 14px}
+      .kb-index .printables-section-heading{text-align:center;margin:32px 0 18px}
+      .kb-index .printables-section-heading .sec-title{color:#294d3c}
+      @media(max-width:720px){.kb-index .kb-hero{grid-template-columns:1fr;text-align:center;gap:14px;padding:25px 20px;min-height:0}.kb-index .kb-hero-copy{display:flex;flex-direction:column;align-items:center}.kb-index .kb-hero h1{font-size:clamp(32px,9vw,44px);margin:14px 0 10px}.kb-index .kb-hero-art img{max-height:185px;width:min(78%,320px)}.kb-index .kb-flow{justify-content:center;margin-top:16px}.kb-index .kb-picker{padding:22px 15px}.kb-index .kb-choice-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.kb-index .kb-choice-card{min-height:112px}}
+    `}</style>
+    <section className="kb-hero" aria-labelledby="kb-home-title">
+      <div className="kb-hero-copy">
+        <span className="kb-kicker">Kiddie Bloom · Learning printables</span>
+        <h1 id="kb-home-title">Little steps. Lovely discoveries.</h1>
+        <p>Find the right printable for your child in two simple steps. Choose an age, pick a learning category, and explore only the PDFs that match.</p>
+        <div className="kb-flow" aria-label="How it works">
+          <span>① Choose age</span><span>② Choose category</span><span>③ View matching PDFs</span>
         </div>
+      </div>
+      <div className="kb-hero-art">
+        <img fetchPriority="high" decoding="async" src={asset('/img/kiddie-bloom-hero.jpg')} alt="Kiddie Bloom friendly learning characters with books and crayons" width={720} height={460} />
       </div>
     </section>
 
     {!active.length ? <div style={{ textAlign: 'center', padding: '48px 20px', borderRadius: 20, background: '#f7f8f3' }}><div style={{ fontSize: 42 }}>🌼</div><h3>New discoveries are on the way</h3><p>Our printables are being prepared. Please check back soon.</p></div> :
-    !done ? <section aria-live="polite" style={{ maxWidth: 760, margin: '0 auto', padding: 'clamp(18px,4vw,32px)', borderRadius: 24, background: 'white', border: '1px solid #e5e9e1', boxShadow: '0 10px 30px #264b3712', textAlign: 'center' }}>
-      <span className="eyebrow">QUESTION {step + 1} OF {totalSteps}</span>
-      <div aria-hidden style={{ display: 'flex', gap: 6, justifyContent: 'center', margin: '10px 0 14px' }}>{Array.from({ length: totalSteps }, (_, i) => <span key={i} style={{ width: i === step ? 28 : 10, height: 10, borderRadius: 99, background: i <= step ? '#ff7aa2' : '#e5e9e1', transition: 'width .2s' }} />)}</div>
+    !done ? <section className="kb-picker" aria-live="polite">
+      <span className="kb-step-label">STEP {step + 1} OF {totalSteps}</span>
+      <div className="kb-step-track" aria-hidden="true">{Array.from({ length: totalSteps }, (_, i) => <span key={i} className={i <= step ? 'on' : ''} />)}</div>
       {step === 0 && <>
-        <h2 className="sec-title">How old is your little learner?</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(130px,1fr))', gap: 12, marginTop: 18 }}>
-          {ageBands.map((a, i) => optionBtn(a.label, `${a.emoji} ${a.label}`, `${active.filter(r => fitsAge(r, i)).length} matching PDFs`, () => { setAgeIdx(i); setSection(null); setStep(1); }, !active.some(r => fitsAge(r, i)), ageIdx === i))}
-        </div></>}
+        <h2>How old is your little learner?</h2>
+        <p className="kb-picker-sub">Select your child's age group. We will use it to find suitable learning PDFs.</p>
+        <div className="kb-choice-grid">
+          {ageBands.map((a, i) => {
+            const count = active.filter(r => fitsAge(r, i)).length;
+            return <button key={a.label} type="button" className="kb-choice-card" disabled={count === 0} onClick={() => { setAgeIdx(i); setSection(null); setStep(1); }}>
+              <span className="kb-choice-emoji">{a.emoji}</span><span className="kb-choice-title">{a.label}</span><span className="kb-choice-sub">{count} matching PDFs</span>
+            </button>;
+          })}
+        </div>
+      </>}
       {step === 1 && <>
-        <h2 className="sec-title">What would you like to do today?</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(130px,1fr))', gap: 12, marginTop: 18 }}>
-          {sections.map(sc => optionBtn(sc.id, `${sc.emoji} ${sc.label}`, countFor(sc.id) ? `${countFor(sc.id)} matching PDFs · ${sc.text}` : 'No PDFs for this age yet', () => { setSection(sc.id); setQuery(''); setDone(true); }, countFor(sc.id) === 0, section === sc.id))}
-        </div></>}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 10, flexWrap: 'wrap', marginTop: 20 }}>
-        {step > 0 && <button type="button" className="btn alt" onClick={() => setStep(step - 1)}>← Back</button>}
-      </div>
+        <h2>Choose a learning category</h2>
+        <p className="kb-picker-sub">Showing only categories that have PDFs for {ageIdx !== null ? ageBands[ageIdx].label : 'the selected age group'}.</p>
+        <div className="kb-choice-grid">
+          {sections.filter(sc => countFor(sc.id) > 0).map(sc => <button key={sc.id} type="button" className="kb-choice-card" onClick={() => { setSection(sc.id); setQuery(''); setDone(true); }}>
+            <span className="kb-choice-emoji">{sc.emoji}</span><span className="kb-choice-title">{sc.label}</span><span className="kb-choice-sub">{countFor(sc.id)} matching PDFs</span>
+          </button>)}
+        </div>
+        {!sections.some(sc => countFor(sc.id) > 0) && <p className="kb-picker-sub">No categories have PDFs for this age group yet. Please choose another age.</p>}
+        <button type="button" className="kb-back" onClick={() => setStep(0)}>← Change age group</button>
+      </>}
     </section> :
     <div ref={resultsRef} style={{ scrollMarginTop: 80 }}>
       <div className="printables-section-heading" style={{ marginBottom: 12 }}><span className="eyebrow">MATCHING PRINTABLES</span><h2 className="sec-title">{visible.length} matching PDF{visible.length === 1 ? '' : 's'}</h2></div>
