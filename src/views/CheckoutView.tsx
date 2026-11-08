@@ -161,7 +161,7 @@ export const CheckoutView: React.FC = () => {
         paymentMethod === 'card'
           ? 'Credit / Debit Card'
           : 'UPI (India)',
-      paymentId: paymentId || (isPaid ? 'PAY-' + Math.random().toString(36).substring(2, 9).toUpperCase() : undefined)
+      paymentId: paymentId || undefined
     };
 
     saveOrder(order);

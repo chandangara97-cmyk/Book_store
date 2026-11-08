@@ -3044,3 +3044,82 @@ img { max-width: 100%; }
 .pr-filter.on { background: #ffd66b; border-color: #e0b13a; }
 .pr-filter:focus-visible { outline: 3px solid #ff7aa2; outline-offset: 2px; }
 .pr-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+
+/* Kiddie Bloom storefront refresh — clearer hierarchy, premium pastel finish */
+:root {
+  --bg: #fffaf6;
+  --card-bg: #ffffff;
+  --border: #f2dce5;
+  --shadow: 0 12px 34px rgba(89, 48, 73, .09);
+  --radius: 24px;
+  --pink: #e95b96;
+  --ink: #29304f;
+  --mut: #72758c;
+}
+body { background: #fffaf6; }
+header.header {
+  background: rgba(255,250,246,.94);
+  border-bottom: 1px solid rgba(233,91,150,.16);
+  box-shadow: 0 5px 22px rgba(63,43,57,.045);
+}
+.header-inner { max-width: 1440px; min-height: 78px; gap: 22px; }
+.brand { flex-shrink: 0; }
+.brand-logo { filter: drop-shadow(0 5px 8px rgba(233,91,150,.12)); }
+.brand-text h1 { letter-spacing: -.7px; }
+.brand-text > span { letter-spacing: 1.05px; color: #8b7180; }
+.nav-links { gap: clamp(8px, 1.2vw, 20px); }
+.nav-links button, .nav-links a {
+  border-radius: 999px;
+  padding: 9px 12px;
+  font-size: 14px;
+  white-space: nowrap;
+  transition: background .18s ease, color .18s ease, transform .18s ease;
+}
+.nav-links button:hover, .nav-links a:hover,
+.nav-links button.active {
+  color: #b83f75;
+  background: #ffedf4;
+  text-decoration: none;
+}
+.header-actions .icon-btn {
+  border: 1px solid #f1d9e4;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(63,43,57,.05);
+}
+.hero { padding-top: 18px; }
+.hero-banner img { border-radius: 26px; box-shadow: 0 18px 42px rgba(73,45,63,.12); }
+.hg { padding-top: 34px; padding-bottom: 28px; }
+.sec-title { letter-spacing: -.5px; }
+.book-card, .product-card, .learning-card, .resource-card {
+  border-radius: 20px;
+  border-color: #f1dce5;
+  box-shadow: 0 8px 26px rgba(72,48,65,.055);
+}
+.btn { border-radius: 999px; font-weight: 800; }
+.btn.gold { box-shadow: 0 8px 18px rgba(233,91,150,.18); }
+.page-header { background: linear-gradient(115deg,#fff0f5,#fff8ed 72%,#eff8ff); }
+.gift-rewards { border: 1px solid #f3d8a8; border-radius: 22px; background: linear-gradient(120deg,#fff9e9,#fff1f6); }
+.mobile-drawer { border-top: 1px solid var(--border); box-shadow: 0 18px 30px rgba(60,38,54,.12); }
+.mobile-drawer-link { padding: 14px 18px; border-radius: 12px; }
+@media (min-width: 721px) {
+  .nav-links button:focus-visible, .header-actions button:focus-visible { outline: 3px solid rgba(233,91,150,.35); outline-offset: 3px; }
+}
+@media (max-width: 1100px) and (min-width: 721px) {
+  .header-inner { padding: 0 14px; gap: 8px; }
+  .brand-logo { width: 46px; height: 46px; }
+  .nav-links { gap: 2px; }
+  .nav-links button { padding: 8px 7px; font-size: 12px; }
+}
+@media (max-width: 720px) {
+  .header-inner { min-height: 62px; }
+  .brand-logo { width: 42px; height: 42px; }
+  .brand-text h1 { font-size: 22px; }
+  .brand-text > span { font-size: 9px; letter-spacing: .65px; }
+  .bottom-nav { grid-template-columns: repeat(5, minmax(0,1fr)); }
+  .bn-label { font-size: 10px; }
+  .bn-icon { font-size: 19px; }
+  .hero { padding-top: 8px; }
+  .hero-banner img { border-radius: 16px; }
+}

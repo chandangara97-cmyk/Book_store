@@ -51,17 +51,18 @@ export const Header: React.FC = () => {
               ))}{' '}
               <span className="wm-bloom">Bloom</span>
             </h1>
-            <span>Digital Printables</span>
+            <span>Books · Play · Learn · Bloom</span>
           </div>
         </a>
 
         <nav aria-label="Main Navigation">
           <ul className="nav-links">
-            <li>
-              <button type="button" className={view === 'printables' || view === 'home' ? 'active' : ''} onClick={() => navigateTo('printables')}>
-                All printables
-              </button>
-            </li>
+            <li><button type="button" className={view === 'home' ? 'active' : ''} onClick={() => navigateTo('home')}>Home</button></li>
+            <li><button type="button" className={view === 'library' ? 'active' : ''} onClick={() => navigateTo('library')}>Books</button></li>
+            <li><button type="button" className={view === 'toys' ? 'active' : ''} onClick={() => navigateTo('toys')}>Toys & gifts</button></li>
+            <li><button type="button" className={view === 'printables' ? 'active' : ''} onClick={() => navigateTo('printables')}>Learning studio</button></li>
+            <li><button type="button" className={view === 'gifts' ? 'active' : ''} onClick={() => navigateTo('gifts')}>Gift finder</button></li>
+            <li><button type="button" className={view === 'cart' ? 'active' : ''} onClick={() => navigateTo('cart')}>Cart ({cartCount})</button></li>
           </ul>
         </nav>
 
@@ -112,7 +113,12 @@ export const Header: React.FC = () => {
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
         <div className="mobile-drawer" role="navigation" aria-label="Mobile menu">
-          <button type="button" className="mobile-drawer-link" onClick={() => navigateTo('printables')}>🖍️ Printables: Worksheets & Activities</button>
+          <button type="button" className="mobile-drawer-link" onClick={() => navigateTo('home')}>🏡 Home</button>
+          <button type="button" className="mobile-drawer-link" onClick={() => navigateTo('library')}>📚 Books</button>
+          <button type="button" className="mobile-drawer-link" onClick={() => navigateTo('toys')}>🧸 Toys & gifts</button>
+          <button type="button" className="mobile-drawer-link" onClick={() => navigateTo('printables')}>🖍️ Learning studio</button>
+          <button type="button" className="mobile-drawer-link" onClick={() => navigateTo('gifts')}>🎁 Gift finder</button>
+          <button type="button" className="mobile-drawer-link" onClick={() => navigateTo('cart')}>🛒 Cart ({cartCount})</button>
           {user?.isAdmin && (
             <button type="button" className="mobile-drawer-link" onClick={openUploadPage}>
               ⚙️ Studio Admin

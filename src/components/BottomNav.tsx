@@ -2,7 +2,10 @@ import React from 'react';
 import { useStore } from '../context/StoreContext';
 
 const TABS = [
-  { view: 'printables', icon: '🖍️', label: 'Printables' },
+  { view: 'home', icon: '🏡', label: 'Home' },
+  { view: 'library', icon: '📚', label: 'Books' },
+  { view: 'toys', icon: '🧸', label: 'Toys' },
+  { view: 'cart', icon: '🛒', label: 'Cart' },
   { view: 'auth', icon: '👤', label: 'Account' },
 ];
 
@@ -23,9 +26,9 @@ export const BottomNav: React.FC = () => {
         <button
           key={t.view}
           type="button"
-          className={`bn-tab ${(view === t.view || (t.view === 'printables' && view === 'home')) ? 'active' : ''}`}
+          className={`bn-tab ${(view === t.view || (t.view === 'home' && view === 'printables')) ? 'active' : ''}`}
           onClick={() => go(t.view)}
-          aria-current={(view === t.view || (t.view === 'printables' && view === 'home')) ? 'page' : undefined}
+          aria-current={(view === t.view || (t.view === 'home' && view === 'printables')) ? 'page' : undefined}
         >
           <span className="bn-icon">
             {t.icon}
