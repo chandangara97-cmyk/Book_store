@@ -58,6 +58,7 @@ export const PrintablesHome: React.FC = () => {
   const [ageIdx, setAgeIdx] = useState<number | null>(null);
   const [sectionFilter, setSectionFilter] = useState<LearningSection | null>(null);
   const [sort, setSort] = useState<SortKey>('featured');
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const base = preview ? REPO_PREVIEW : live;
   const fitsAge = (r: LearningResource, i: number | null) => i === null || (r.minAge <= AGE_BANDS[i].max && r.maxAge >= AGE_BANDS[i].min);
   const items = useMemo(() => {
@@ -101,19 +102,14 @@ export const PrintablesHome: React.FC = () => {
   const goPrintables = () => document.getElementById('printables')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   return <main className="kb-home">
-    <section className="kb-hero-wrap">
-      <div className="kb-home-hero">
-        <div className="kb-hero-copy">
-          <span className="kb-eyebrow"><Sparkles size={15} /> A little wonder in every page</span>
-          <h1>Printables that make learning <em>feel like play.</em></h1>
-          <p>Worksheets, activities, puzzles, cut-and-paste projects and colouring pages — lovingly made to help little learners grow, one joyful page at a time.</p>
-          <div className="kb-hero-buttons"><button className="kb-primary-btn" onClick={goPrintables}>Explore printables <ArrowRight size={17} /></button></div>
-          <div className="kb-hero-proof"><span><Heart size={15} /> Made for little learners</span><span><FileText size={15} /> Print-ready PDFs</span></div>
-        </div>
-        <div className="kb-hero-art">
-          <img src={asset('/img/kiddie-bloom-hero.jpg')} alt="Kiddie Bloom's friendly animal characters surrounded by books and art supplies" />
-          <div className="kb-floating-note"><span>✦</span><strong>Read. Play. Bloom.</strong><small>Little moments matter.</small></div>
-        </div>
+    <section className="kb-fw-hero">
+      <img className="kb-fw-hero-img" src={asset('/img/kiddie-bloom-hero.jpg')} alt="Kiddie Bloom's friendly animal characters surrounded by books and art supplies" fetchPriority="high" />
+      <div className="kb-fw-hero-copy">
+        <span className="kb-eyebrow"><Sparkles size={15} /> A little wonder in every page</span>
+        <h1>Printables that make learning <em>feel like play.</em></h1>
+        <p>Worksheets, activities, puzzles, cut-and-paste projects and colouring pages — lovingly made to help little learners grow, one joyful page at a time.</p>
+        <div className="kb-hero-buttons"><button className="kb-primary-btn" onClick={goPrintables}>Explore printables <ArrowRight size={17} /></button></div>
+        <div className="kb-hero-proof"><span><Heart size={15} /> Made for little learners</span><span><FileText size={15} /> Print-ready PDFs</span></div>
       </div>
     </section>
 
@@ -124,31 +120,29 @@ export const PrintablesHome: React.FC = () => {
           <h2>Printables they'll ask for again</h2>
           <p>Lovely pages for rainy days, quiet time and everything in between.</p>
         </div>
-        <div className="kb-pr-toolbar">
-          <div className="kb-pr-filter-group" role="group" aria-label="Filter by age">
-            <span className="kb-pr-filter-label">Age</span>
-            <button type="button" className={`kb-pr-chipbtn${ageIdx === null ? ' on' : ''}`} onClick={() => setAgeIdx(null)}>All ages</button>
-            {AGE_BANDS.map((a, i) => <button key={a.label} type="button" disabled={ageCount(i) === 0 && ageIdx !== i} className={`kb-pr-chipbtn${ageIdx === i ? ' on' : ''}`} onClick={() => setAgeIdx(ageIdx === i ? null : i)}>{a.label} <small>{ageCount(i)}</small></button>)}
-          </div>
-          <div className="kb-pr-filter-group" role="group" aria-label="Filter by activity type">
-            <span className="kb-pr-filter-label">Type</span>
-            <button type="button" className={`kb-pr-chipbtn${sectionFilter === null ? ' on' : ''}`} onClick={() => setSectionFilter(null)}>All types</button>
-            {typesPresent.map(sec => <button key={sec} type="button" disabled={typeCount(sec) === 0 && sectionFilter !== sec} className={`kb-pr-chipbtn${sectionFilter === sec ? ' on' : ''}`} onClick={() => setSectionFilter(sectionFilter === sec ? null : sec)}>{SECTIONS[sec].emoji} {SECTIONS[sec].label} <small>{typeCount(sec)}</small></button>)}
-          </div>
-          <div className="kb-pr-sortrow">
-            <span className="kb-pr-count">{items.length} printable{items.length === 1 ? '' : 's'}</span>
+        <div className="kb-pr-layout">
+          <button type="button" className="kb-pr-filter-toggle" aria-expanded={filtersOpen} onClick={() => setFiltersOpen(o => !o)}>⚙️ Filter & sort{hasFilters || sort !== 'featured' ? ' • on' : ''}</button>
+          <aside className={`kb-pr-side${filtersOpen ? ' open' : ''}`} aria-label="Filter and sort printables">
+            <div className="kb-pr-side-block">
+              <h3>Sort by</h3>
+              {([['featured', 'Featured'], ['price-asc', 'Price: low to high'], ['price-desc', 'Price: high to low'], ['rating', anyRated ? 'Top rated' : 'Top rated (no reviews yet)']] as [SortKey, string][]).map(([k, label]) =>
+                <label key={k} className={`kb-pr-opt${sort === k ? ' on' : ''}`}><input type="radio" name="kb-sort" checked={sort === k} onChange={() => setSort(k)} /><span>{label}</span></label>)}
+            </div>
+            <div className="kb-pr-side-block">
+              <h3>Age</h3>
+              <button type="button" className={`kb-pr-opt${ageIdx === null ? ' on' : ''}`} onClick={() => setAgeIdx(null)}><span>All ages</span></button>
+              {AGE_BANDS.map((a, i) => <button key={a.label} type="button" disabled={ageCount(i) === 0 && ageIdx !== i} className={`kb-pr-opt${ageIdx === i ? ' on' : ''}`} onClick={() => setAgeIdx(ageIdx === i ? null : i)}><span>{a.label}</span><small>{ageCount(i)}</small></button>)}
+            </div>
+            <div className="kb-pr-side-block">
+              <h3>Type of activity</h3>
+              <button type="button" className={`kb-pr-opt${sectionFilter === null ? ' on' : ''}`} onClick={() => setSectionFilter(null)}><span>All types</span></button>
+              {typesPresent.map(sec => <button key={sec} type="button" disabled={typeCount(sec) === 0 && sectionFilter !== sec} className={`kb-pr-opt${sectionFilter === sec ? ' on' : ''}`} onClick={() => setSectionFilter(sectionFilter === sec ? null : sec)}><span>{SECTIONS[sec].emoji} {SECTIONS[sec].label}</span><small>{typeCount(sec)}</small></button>)}
+            </div>
             {hasFilters && <button type="button" className="kb-pr-clear" onClick={() => { setAgeIdx(null); setSectionFilter(null); }}>Clear filters</button>}
-            <label className="kb-pr-sort">Sort by
-              <select value={sort} onChange={e => setSort(e.target.value as SortKey)}>
-                <option value="featured">Featured</option>
-                <option value="price-asc">Price: low to high</option>
-                <option value="price-desc">Price: high to low</option>
-                <option value="rating">Top rated{anyRated ? '' : ' (no reviews yet)'}</option>
-              </select>
-            </label>
-          </div>
-        </div>
-        {items.length === 0 && <div className="kb-pr-empty"><div style={{ fontSize: 42 }}>🌼</div><h3>Nothing matches just yet</h3><p>Try a different age or activity — new printables are added regularly.</p><button type="button" className="btn btn-sm" onClick={() => { setAgeIdx(null); setSectionFilter(null); }}>Show all printables</button></div>}
+          </aside>
+          <div className="kb-pr-main">
+            <div className="kb-pr-count">{items.length} printable{items.length === 1 ? '' : 's'}</div>
+            {items.length === 0 && <div className="kb-pr-empty"><div style={{ fontSize: 42 }}>🌼</div><h3>Nothing matches just yet</h3><p>Try a different age or activity — new printables are added regularly.</p><button type="button" className="btn btn-sm" onClick={() => { setAgeIdx(null); setSectionFilter(null); }}>Show all printables</button></div>}
         <div className="kb-featured-grid">
           {items.map(r => {
             const meta = SECTIONS[r.section];
@@ -170,6 +164,8 @@ export const PrintablesHome: React.FC = () => {
               </div>
             </article>;
           })}
+        </div>
+          </div>
         </div>
       </div>
     </section>

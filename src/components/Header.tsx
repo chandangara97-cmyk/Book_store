@@ -1,7 +1,7 @@
 import React from 'react';
 import { asset } from '../utils/images';
 import { useStore } from '../context/StoreContext';
-import { UserRound, Sparkles, Sun, Moon, LayoutDashboard } from 'lucide-react';
+import { UserRound, Sparkles, Sun, Moon, LayoutDashboard, UploadCloud } from 'lucide-react';
 
 export const Header: React.FC = () => {
   const { setView, user, theme, toggleTheme } = useStore();
@@ -17,6 +17,7 @@ export const Header: React.FC = () => {
         <div className="kb-header-actions">
           <button className="kb-action" aria-label="My account" title={user ? 'My account' : 'Sign in'} onClick={() => go('auth')}><UserRound size={19}/></button>
           <button className="kb-action kb-theme-action" aria-label="Toggle theme" onClick={toggleTheme}>{theme === 'dark' ? <Sun size={18}/> : <Moon size={18}/>}</button>
+          {user?.isAdmin && <button className="kb-admin-shortcut" title="Upload PDFs and publish everywhere in one click" onClick={() => { window.location.href = asset('/upload-pdf.html'); }}><UploadCloud size={16}/> Upload PDFs</button>}
           {user?.isAdmin && <button className="kb-admin-shortcut" onClick={() => go('admin')}><LayoutDashboard size={16}/> Admin</button>}
         </div>
       </div>
