@@ -3091,3 +3091,37 @@ footer.footer.kb-love-footer{display:block!important;margin-top:0;padding:0;bord
 .kb-love-sign{font:800 18px 'Baloo 2',sans-serif;color:#f5b6c9;margin:0 0 30px}
 .kb-love-bottom{width:100%;display:flex;justify-content:space-between;gap:10px 20px;flex-wrap:wrap;justify-content:center;padding-top:20px;border-top:1px dashed rgba(255,255,255,.2);font-size:12px;color:#c9c3b6}
 .kb-love-bottom span:first-child{letter-spacing:.2em;font-weight:900;color:#e6dfd3}
+
+/* ===== Filters, sorting & responsive grid ===== */
+.kb-pr-toolbar{display:grid;gap:12px;margin:0 0 26px;padding:16px 18px;background:#fff;border:1px dashed #f3b9cd;border-radius:20px}
+.kb-pr-filter-group{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.kb-pr-filter-label{min-width:44px;font:900 11px 'Nunito',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#c16c89}
+.kb-pr-chipbtn{border:1px solid #eadfd6;background:#fffaf3;color:#52665a;border-radius:999px;padding:8px 14px;font:800 12px 'Nunito',sans-serif;cursor:pointer;transition:.15s}
+.kb-pr-chipbtn small{opacity:.6;font-weight:800;margin-left:2px}
+.kb-pr-chipbtn:hover:not(:disabled){border-color:#d97998}
+.kb-pr-chipbtn.on{background:#344b41;border-color:#344b41;color:#fff}
+.kb-pr-chipbtn:disabled{opacity:.4;cursor:not-allowed}
+.kb-pr-sortrow{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding-top:12px;border-top:1px dashed #efe3da}
+.kb-pr-count{font:800 13px 'Nunito',sans-serif;color:#6d7b72}
+.kb-pr-clear{border:0;background:none;color:#c15f82;font:900 12px 'Nunito',sans-serif;cursor:pointer;text-decoration:underline}
+.kb-pr-sort{margin-left:auto;display:flex;align-items:center;gap:8px;font:800 12px 'Nunito',sans-serif;color:#52665a}
+.kb-pr-sort select{border:1px solid #eadfd6;border-radius:12px;background:#fffaf3;padding:9px 12px;font:800 12px 'Nunito',sans-serif;color:#344b41}
+.kb-pr-stars{color:#e0a01b;font-weight:900;font-size:13px;margin-bottom:6px}.kb-pr-stars small{color:#8a948d;font-weight:700}
+.kb-pr-empty{text-align:center;padding:48px 20px;border-radius:20px;background:#fff;margin-bottom:20px}
+/* Desktop: grid. */
+.kb-featured-section .kb-featured-grid{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+/* Mobile: single column, full card with description. */
+@media(max-width:650px){
+  .kb-featured-section .kb-featured-grid{grid-template-columns:1fr!important;gap:16px}
+  .kb-featured-section .kb-pr-card{padding:16px!important}
+  .kb-featured-section .kb-pr-card .book-cover{height:260px}
+  .kb-featured-section .kb-pr-card .book-info .desc{display:block!important;font-size:13px}
+  .kb-featured-section .kb-pr-card .book-info h3{font-size:19px}
+  .kb-featured-section .kb-pr-card .book-actions-row{flex-wrap:nowrap}
+  .kb-featured-section .kb-pr-card .book-actions-row .btn{width:auto;flex:1;font-size:13px;padding:10px}
+  .kb-pr-toolbar{padding:14px}
+  .kb-pr-filter-group{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+  .kb-pr-filter-group::-webkit-scrollbar{display:none}
+  .kb-pr-chipbtn,.kb-pr-filter-label{flex:none;white-space:nowrap}
+  .kb-pr-sort{margin-left:0;width:100%;justify-content:space-between}.kb-pr-sort select{flex:1;max-width:60%}
+}

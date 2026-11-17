@@ -113,4 +113,6 @@ export interface LearningResource {
   id: string; title: string; section: LearningSection; minAge: number; maxAge: number;
   description: string; pdfUrl?: string; thumbnailUrl?: string; price: number;
   featured?: boolean; active: boolean; createdAt: string;
+  /** Optional: average rating (0-5) and number of reviews, set in Firebase. Used for the "Top rated" sort and the star line on cards. */
+  rating?: number; reviewCount?: number;
 }

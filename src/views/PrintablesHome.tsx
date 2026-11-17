@@ -13,6 +13,14 @@ const SECTIONS: Record<LearningSection, { label: string; emoji: string; cover: s
   'cut-and-paste': { label: 'Cut & Paste', emoji: '✂️', cover: '/img/printables/04_cut_and_paste.jpg' },
   coloring: { label: 'Coloring', emoji: '🖍️', cover: '/img/printables/05_coloring.jpg' },
 };
+const AGE_BANDS = [
+  { label: 'Ages 2–3', min: 2, max: 3 },
+  { label: 'Ages 4–5', min: 4, max: 5 },
+  { label: 'Ages 6–8', min: 6, max: 8 },
+  { label: 'Ages 9–12', min: 9, max: 12 },
+  { label: 'Ages 13–15', min: 13, max: 15 },
+];
+type SortKey = 'featured' | 'price-asc' | 'price-desc' | 'rating';
 const ORDER: LearningSection[] = ['worksheet', 'activity', 'puzzle', 'cut-and-paste', 'coloring'];
 
 /** Shown only until the first printables are published to Firebase, using the cover art that ships in the repo. */
@@ -47,10 +55,28 @@ export const PrintablesHome: React.FC = () => {
 
   const live = useMemo(() => learningResources.filter(r => r.active !== false), [learningResources]);
   const preview = live.length === 0;
+  const [ageIdx, setAgeIdx] = useState<number | null>(null);
+  const [sectionFilter, setSectionFilter] = useState<LearningSection | null>(null);
+  const [sort, setSort] = useState<SortKey>('featured');
+  const base = preview ? REPO_PREVIEW : live;
+  const fitsAge = (r: LearningResource, i: number | null) => i === null || (r.minAge <= AGE_BANDS[i].max && r.maxAge >= AGE_BANDS[i].min);
   const items = useMemo(() => {
-    const list = preview ? REPO_PREVIEW : live;
-    return [...list].sort((a, b) => (Number(!!b.featured) - Number(!!a.featured)) || (ORDER.indexOf(a.section) - ORDER.indexOf(b.section)) || a.title.localeCompare(b.title));
-  }, [live, preview]);
+    const list = base.filter(r => fitsAge(r, ageIdx) && (!sectionFilter || r.section === sectionFilter));
+    const byDefault = (a: LearningResource, b: LearningResource) => (Number(!!b.featured) - Number(!!a.featured)) || (ORDER.indexOf(a.section) - ORDER.indexOf(b.section)) || a.title.localeCompare(b.title);
+    const cmp: Record<SortKey, (a: LearningResource, b: LearningResource) => number> = {
+      featured: byDefault,
+      'price-asc': (a, b) => (a.price - b.price) || byDefault(a, b),
+      'price-desc': (a, b) => (b.price - a.price) || byDefault(a, b),
+      // Best rated first; ties by number of reviews; unrated items last.
+      rating: (a, b) => ((b.rating ?? -1) - (a.rating ?? -1)) || ((b.reviewCount ?? 0) - (a.reviewCount ?? 0)) || byDefault(a, b),
+    };
+    return [...list].sort(cmp[sort]);
+  }, [base, ageIdx, sectionFilter, sort]);
+  const hasFilters = ageIdx !== null || sectionFilter !== null;
+  const typeCount = (sec: LearningSection) => base.filter(r => r.section === sec && fitsAge(r, ageIdx)).length;
+  const ageCount = (i: number) => base.filter(r => fitsAge(r, i) && (!sectionFilter || r.section === sectionFilter)).length;
+  const typesPresent = ORDER.filter(sec => base.some(r => r.section === sec));
+  const anyRated = base.some(r => (r.reviewCount ?? 0) > 0 && r.rating !== undefined);
 
   const basket = useMemo(() => basketIds.map(id => live.find(r => r.id === id)).filter((r): r is LearningResource => !!r && r.price > 0 && !owned.includes(r.id)), [basketIds, live, owned]);
   const basketTotal = basket.reduce((n, r) => n + r.price, 0);
@@ -98,6 +124,31 @@ export const PrintablesHome: React.FC = () => {
           <h2>Printables they'll ask for again</h2>
           <p>Lovely pages for rainy days, quiet time and everything in between.</p>
         </div>
+        <div className="kb-pr-toolbar">
+          <div className="kb-pr-filter-group" role="group" aria-label="Filter by age">
+            <span className="kb-pr-filter-label">Age</span>
+            <button type="button" className={`kb-pr-chipbtn${ageIdx === null ? ' on' : ''}`} onClick={() => setAgeIdx(null)}>All ages</button>
+            {AGE_BANDS.map((a, i) => <button key={a.label} type="button" disabled={ageCount(i) === 0 && ageIdx !== i} className={`kb-pr-chipbtn${ageIdx === i ? ' on' : ''}`} onClick={() => setAgeIdx(ageIdx === i ? null : i)}>{a.label} <small>{ageCount(i)}</small></button>)}
+          </div>
+          <div className="kb-pr-filter-group" role="group" aria-label="Filter by activity type">
+            <span className="kb-pr-filter-label">Type</span>
+            <button type="button" className={`kb-pr-chipbtn${sectionFilter === null ? ' on' : ''}`} onClick={() => setSectionFilter(null)}>All types</button>
+            {typesPresent.map(sec => <button key={sec} type="button" disabled={typeCount(sec) === 0 && sectionFilter !== sec} className={`kb-pr-chipbtn${sectionFilter === sec ? ' on' : ''}`} onClick={() => setSectionFilter(sectionFilter === sec ? null : sec)}>{SECTIONS[sec].emoji} {SECTIONS[sec].label} <small>{typeCount(sec)}</small></button>)}
+          </div>
+          <div className="kb-pr-sortrow">
+            <span className="kb-pr-count">{items.length} printable{items.length === 1 ? '' : 's'}</span>
+            {hasFilters && <button type="button" className="kb-pr-clear" onClick={() => { setAgeIdx(null); setSectionFilter(null); }}>Clear filters</button>}
+            <label className="kb-pr-sort">Sort by
+              <select value={sort} onChange={e => setSort(e.target.value as SortKey)}>
+                <option value="featured">Featured</option>
+                <option value="price-asc">Price: low to high</option>
+                <option value="price-desc">Price: high to low</option>
+                <option value="rating">Top rated{anyRated ? '' : ' (no reviews yet)'}</option>
+              </select>
+            </label>
+          </div>
+        </div>
+        {items.length === 0 && <div className="kb-pr-empty"><div style={{ fontSize: 42 }}>🌼</div><h3>Nothing matches just yet</h3><p>Try a different age or activity — new printables are added regularly.</p><button type="button" className="btn btn-sm" onClick={() => { setAgeIdx(null); setSectionFilter(null); }}>Show all printables</button></div>}
         <div className="kb-featured-grid">
           {items.map(r => {
             const meta = SECTIONS[r.section];
@@ -110,6 +161,7 @@ export const PrintablesHome: React.FC = () => {
                 <h3 onClick={() => setDetail(r)} style={{ cursor: 'pointer' }}>{r.title}</h3>
                 <div className="author">{meta?.label ?? 'Printable'} · Ages {r.minAge}–{r.maxAge}</div>
                 <p className="desc">{clip(r.description)}</p>
+                {(r.reviewCount ?? 0) > 0 && r.rating !== undefined && <div className="kb-pr-stars" aria-label={`Rated ${r.rating} out of 5`}>★ {r.rating.toFixed(1)} <small>({r.reviewCount})</small></div>}
                 <div className="price">{priceLabel(r) || '\u00A0'}</div>
                 <div className="book-actions-row">
                   <button type="button" className="btn btn-sm alt" onClick={() => setDetail(r)}>View details</button>
