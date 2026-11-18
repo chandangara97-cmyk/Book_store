@@ -3165,3 +3165,19 @@ label.kb-pr-opt{position:relative}
 .kb-pr-side{gap:14px;padding:16px}
 .kb-pr-side-block{gap:4px}
 .kb-pr-opt{padding:7px 11px;font-size:12.5px}
+
+/* Printable details popup: long descriptions scroll inside the popup; cover, title and the price/buy row stay in view */
+.modal-content.kb-pr-detail{overflow:hidden;max-height:min(88dvh,720px);grid-template-rows:minmax(0,1fr);align-items:stretch}
+.kb-pr-detail-cover{align-self:start}
+.kb-pr-detail-body{display:flex;flex-direction:column;min-height:0;min-width:0}
+.kb-pr-detail-body h2{flex:none;overflow-wrap:anywhere;padding-right:28px}
+.kb-pr-detail-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding-right:8px;margin-bottom:12px;scrollbar-width:thin;scrollbar-color:#e7a9c0 transparent}
+.kb-pr-detail-scroll::-webkit-scrollbar{width:7px}
+.kb-pr-detail-scroll::-webkit-scrollbar-thumb{background:#e7a9c0;border-radius:99px}
+.kb-pr-detail-scroll:focus-visible{outline:2px solid #e7a9c0;outline-offset:2px;border-radius:8px}
+.kb-pr-detail-scroll p{margin:0;white-space:pre-line;overflow-wrap:anywhere}
+.kb-pr-detail-foot{flex:none;border-top:1px dashed #f3b9cd;padding-top:14px}
+@media(max-width:650px){
+  .modal-content.kb-pr-detail{max-height:92dvh;grid-template-rows:auto minmax(0,1fr);gap:14px;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px))}
+  .kb-pr-detail-cover{height:150px;max-height:150px}
+}

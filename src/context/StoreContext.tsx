@@ -213,7 +213,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         ]);
         if (remoteBooks) { const list = Array.isArray(remoteBooks) ? remoteBooks : Object.values(remoteBooks); if (list.length) setBooks(withAges(list)); }
         if (remoteToys) { const list = Array.isArray(remoteToys) ? remoteToys : Object.values(remoteToys); if (list.length) setToys(list); }
-        if (remoteResources) { const list = Array.isArray(remoteResources) ? remoteResources : Object.values(remoteResources); setLearningResources(list); localStorage.setItem('kbLearningResources', JSON.stringify(list)); }
+        // An empty/removed Firebase list must also clear what this browser remembered, otherwise deleted printables keep showing.
+        { const list = remoteResources ? (Array.isArray(remoteResources) ? remoteResources : Object.values(remoteResources)).filter(Boolean) : []; setLearningResources(list); localStorage.setItem('kbLearningResources', JSON.stringify(list)); }
       } catch (error) { console.warn('Firebase catalog fetch failed; using local catalog.', error); }
     })();
   }, []);

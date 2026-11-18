@@ -53,6 +53,15 @@ export const PrintablesHome: React.FC = () => {
   useEffect(() => { try { localStorage.setItem('kbPrintableBasket', JSON.stringify(basketIds)); } catch { /* ignore */ } }, [basketIds]);
   useEffect(() => { if (user) loadOwnedPrintables().then(setOwned); else setOwned([]); }, [user?.email]);
 
+  useEffect(() => {
+    if (!detail) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setDetail(null); };
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', onKey);
+    return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = prev; };
+  }, [detail]);
+
   const live = useMemo(() => learningResources.filter(r => r.active !== false), [learningResources]);
   const preview = live.length === 0;
   const [ageIdx, setAgeIdx] = useState<number | null>(null);
@@ -177,7 +186,7 @@ export const PrintablesHome: React.FC = () => {
         <div className="kb-pr-detail-body">
           <span className="kb-eyebrow">{SECTIONS[detail.section]?.label} · Ages {detail.minAge}–{detail.maxAge}</span>
           <h2>{detail.title}</h2>
-          <p>{detail.description}</p>
+          <div className="kb-pr-detail-scroll" tabIndex={0} aria-label="Full description"><p>{detail.description}</p></div>
           <div className="kb-pr-detail-foot"><strong>{priceLabel(detail)}</strong>{action(detail)}</div>
         </div>
       </div>

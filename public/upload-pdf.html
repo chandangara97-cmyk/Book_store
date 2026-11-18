@@ -26,6 +26,8 @@
   button.alt{background:var(--card);color:var(--ink)}
   button.big{width:100%;font-size:17px;padding:14px;background:var(--pink);color:#fff;margin-top:14px}
   button.sm{padding:6px 12px;font-size:13px;min-height:34px}
+  button.danger{background:#ffe1e1;color:#a11;border-color:#a11}
+  @media (prefers-color-scheme:dark){button.danger{background:#4a1f26;color:#ff9a9a;border-color:#ff9a9a}}
   button:disabled{opacity:.5;cursor:not-allowed}
   .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center}
   .hidden{display:none!important}
@@ -107,7 +109,7 @@
   <!-- CHECK -->
   <section class="card" id="chkCard">
     <h2>2. Is everything sellable?</h2>
-    <p class="hint">Compares the GitHub PDF folder with the Firebase shop list. Anything wrong gets a one-tap fix.</p>
+    <p class="hint">Compares the GitHub PDF folder with the Firebase shop list. Anything wrong gets a one-tap fix, and 🗑 Remove deletes a PDF together with its shop details.</p>
     <div class="actions"><button type="button" class="alt" id="refresh">↻ Check now</button></div>
     <div class="status" id="chkStatus"></div>
     <div id="rows"></div>
@@ -347,12 +349,14 @@ function rowHtml(r) {
   if (m && !r.file && !r.bad) btns += b('up', 'Upload PDF');
   if (m && r.file) btns += b('meta', 'Edit details', 'alt') + b('up', 'Replace PDF', 'alt');
   if (m) btns += b('toggle', hidden ? 'Show in shop' : 'Hide', 'alt');
+  if (m || r.file || r.bad) btns += b('del', '🗑 Remove', 'danger');
   return `<div class="it"><b>${esc(m && m.title || r.id)}</b><code>${esc(r.id)}.pdf${r.bad ? ' · found as “' + esc(r.bad.name) + '”' : ''}</code>
     <div class="chips">${chips}${m ? `<span class="chip">₹${esc(m.price)} · ages ${esc(m.minAge)}–${esc(m.maxAge)}</span>` : ''}</div><div class="actions" style="margin-top:4px">${btns}</div></div>`;
 }
 $('rows').addEventListener('click', async e => {
   const btn = e.target.closest('[data-act]'); if (!btn) return;
   const id = btn.dataset.id, act = btn.dataset.act, r = rowsById.get(id), m = (r && r.meta) || {};
+  if (act === 'del') { btn.disabled = true; await removeItem(id); return; }
   if (act === 'up') { pendingUp = id; return $('replaceIn').click(); }
   if (act === 'toggle') { btn.disabled = true; try { await fb('learningResources/' + id, 'PATCH', {active: m.active === false}); } catch (er) { say('chkStatus', er.message, 'err'); } return check(); }
   if (queue.some(q => idOf(q) === id)) return $('upCard').scrollIntoView({behavior:'smooth'});
@@ -360,6 +364,30 @@ $('rows').addEventListener('click', async e => {
   queue.push(mkItem({kind:act, forceId:id, old: act === 'rename' ? r.bad : null, title:t, section:m.section || guessSection(t), min:m.minAge ?? 3, max:m.maxAge ?? 6, price:m.price ?? 99, desc:m.description || '', existing:m}));
   renderQueue(); $('upCard').scrollIntoView({behavior:'smooth'});
 });
+/* Remove = Firebase listing (incl. its cover picture) first, then the PDF on GitHub.
+   Firebase goes first on purpose: if the second step fails you are left with an unlisted PDF (harmless, can retry),
+   never a listed product whose PDF is gone. */
+async function removeItem(id) {
+  const r = rowsById.get(id); if (!r) return;
+  const m = r.meta, f = r.file || r.bad, title = (m && m.title) || id;
+  const what = [m && 'the shop listing and cover picture (Firebase)', f && 'the PDF file ' + f.name + ' (GitHub)'].filter(Boolean);
+  if (!confirm('Permanently remove “' + title + '”?\n\nThis deletes:\n• ' + what.join('\n• ') + '\n\nPeople who already bought it will no longer be able to download it. This cannot be undone.')) return check();
+  say('chkStatus', 'Removing “' + title + '” …');
+  let msg = '', cls = 'ok';
+  try {
+    if (m) {
+      await fb('learningResources/' + id, 'DELETE');
+      if (await fb('learningResources/' + id)) throw new Error('Firebase still shows the listing – the PDF was not touched.');
+    }
+    if (f) {
+      try { await ghDelete(f.name, f.sha, 'Remove ' + f.name); }
+      catch (e) { if (e.status !== 404) throw new Error('Listing removed from Firebase, but the PDF could not be deleted from GitHub: ' + e.message + ' Tap Remove again to retry.'); }
+    }
+    queue = queue.filter(q => idOf(q) !== id); renderQueue();
+    msg = '“' + title + '” removed from ' + [m && 'Firebase', f && 'GitHub'].filter(Boolean).join(' and ') + ' ✓';
+  } catch (e) { msg = e.message; cls = 'err'; }
+  await check(); say('chkStatus', msg, cls);
+}
 $('refresh').onclick = check;
 
 /* ---------- Settings ---------- */
