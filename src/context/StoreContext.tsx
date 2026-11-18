@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
+import { silentBack, whenHistorySettled } from '../utils/historyNav';
 import { Book, CartItem, WishlistItem, Order, User, LearningResource } from '../types';
 import { INITIAL_BOOKS, INITIAL_TOYS } from '../data/initialData';
 import { cloudUid, loadAllOrders, loadUserData, mergeById, mergeOrders, saveCart, saveOrderCloud, saveProfile, saveWishlist } from '../userCloud';
@@ -101,7 +102,33 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   });
 
   // View Routing
-  const [view, setView] = useState<string>('home');
+  const [view, setViewState] = useState<string>('home');
+  const viewRef = useRef<string>('home');
+
+  // Pages (sign-in, admin…) get a history entry, so the browser Back button returns to the home page
+  // instead of leaving the website.
+  const setView = useCallback((next: string) => {
+    if (next === viewRef.current) return;
+    viewRef.current = next;
+    setViewState(next);
+    whenHistorySettled(() => {
+      const st = history.state || {};
+      if (next === 'home') { if (st.kbView) silentBack(); }
+      else if (st.kbView || st.kbPopup) history.replaceState({ kbView: next }, '');
+      else history.pushState({ kbView: next }, '');
+    });
+  }, []);
+
+  useEffect(() => {
+    if (history.state?.kbView || history.state?.kbPopup) history.replaceState({}, ''); // reload always starts on home
+    const onPop = () => {
+      const v = history.state?.kbView || 'home';
+      viewRef.current = v;
+      setViewState(v);
+    };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [ageFilter, setAgeFilter] = useState<number | null>(null);

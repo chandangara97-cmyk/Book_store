@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { useBackClose } from '../utils/historyNav';
 import { useStore } from '../context/StoreContext';
 import { LearningResource, LearningSection } from '../types';
 import { PrintablePayModal } from '../components/PrintablePayModal';
@@ -72,6 +74,9 @@ export const PrintablesHome: React.FC = () => {
   const [sectionFilter, setSectionFilter] = useState<LearningSection | null>(null);
   const [sort, setSort] = useState<SortKey>('featured');
   const [filtersOpen, setFiltersOpen] = useState(false);
+  useBackClose(!!detail, () => setDetail(null));
+  useBackClose(basketOpen, () => setBasketOpen(false));
+  useBackClose(filtersOpen, () => setFiltersOpen(false));
   const base = preview ? REPO_PREVIEW : live;
   const fitsAge = (r: LearningResource, i: number | null) => i === null || (r.minAge <= AGE_BANDS[i].max && r.maxAge >= AGE_BANDS[i].min);
   const items = useMemo(() => {
@@ -206,7 +211,7 @@ export const PrintablesHome: React.FC = () => {
       </div>
     </section>
 
-    {detail && <div className="modal-overlay" onClick={() => setDetail(null)}>
+    {detail && createPortal(<div className="modal-overlay" onClick={() => setDetail(null)}>
       <div className="modal-content kb-pr-detail" role="dialog" aria-label={detail.title} onClick={e => e.stopPropagation()}>
         <button className="close-modal-btn" onClick={() => setDetail(null)} aria-label="Close">✕</button>
         <div className="kb-pr-detail-cover"><CoverArt r={detail} /></div>
@@ -217,12 +222,12 @@ export const PrintablesHome: React.FC = () => {
           <div className="kb-pr-detail-foot"><strong>{priceLabel(detail)}</strong>{action(detail)}</div>
         </div>
       </div>
-    </div>}
+    </div>, document.body)}
 
     {basket.length > 0 && !basketOpen && <div className="kb-basket-bar-wrap">
       <button type="button" className="btn gold pr-basket-bar" onClick={() => setBasketOpen(true)}>🧺 Cart ({basket.length}) · ₹{basketTotal.toFixed(0)} — Review & checkout</button>
     </div>}
-    {basketOpen && <PrintablePayModal
+    {basketOpen && createPortal(<PrintablePayModal
       resources={basket}
       isLoggedIn={!!user}
       onNeedLogin={() => { setBasketOpen(false); needLogin(); }}
@@ -231,6 +236,6 @@ export const PrintablesHome: React.FC = () => {
       renderThumb={r => <CoverArt r={r} />}
       getSubtitle={r => `${SECTIONS[r.section]?.label ?? ''} · Ages ${r.minAge}–${r.maxAge}`}
       onPaid={ids => { const paid = basket.filter(b => ids.includes(b.id)); track('purchase', { currency: 'INR', value: paid.reduce((n, b) => n + b.price, 0), items: paid.map(gaItem) }); setOwned(o => [...new Set([...o, ...ids])]); setBasketIds(b => b.filter(x => !ids.includes(x))); }}
-    />}
+    />, document.body)}
   </main>;
 };
