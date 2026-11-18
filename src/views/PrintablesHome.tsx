@@ -4,6 +4,7 @@ import { LearningResource, LearningSection } from '../types';
 import { PrintablePayModal } from '../components/PrintablePayModal';
 import { downloadPrintable, loadOwnedPrintables } from '../printablesApi';
 import { asset } from '../utils/images';
+import { track, gaItem } from '../analytics';
 import { ArrowRight, Sparkles, Heart, FileText } from 'lucide-react';
 
 const SECTIONS: Record<LearningSection, { label: string; emoji: string; cover: string }> = {
@@ -62,6 +63,9 @@ export const PrintablesHome: React.FC = () => {
     return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = prev; };
   }, [detail]);
 
+  useEffect(() => { if (detail && !detail.id.startsWith('preview-')) track('view_item', { currency: 'INR', value: detail.price, items: [gaItem(detail)] }); }, [detail?.id]);
+  useEffect(() => { if (basketOpen) track('begin_checkout', { currency: 'INR' }); }, [basketOpen]);
+
   const live = useMemo(() => learningResources.filter(r => r.active !== false), [learningResources]);
   const preview = live.length === 0;
   const [ageIdx, setAgeIdx] = useState<number | null>(null);
@@ -91,13 +95,36 @@ export const PrintablesHome: React.FC = () => {
   const basket = useMemo(() => basketIds.map(id => live.find(r => r.id === id)).filter((r): r is LearningResource => !!r && r.price > 0 && !owned.includes(r.id)), [basketIds, live, owned]);
   const basketTotal = basket.reduce((n, r) => n + r.price, 0);
 
+  // Product structured data for Google (rich results). Only real, published printables; added/removed as the list changes.
+  useEffect(() => {
+    const id = 'kb-ld-printables';
+    document.getElementById(id)?.remove();
+    if (!live.length) return;
+    const el = document.createElement('script');
+    el.id = id; el.type = 'application/ld+json';
+    el.text = JSON.stringify({
+      '@context': 'https://schema.org', '@type': 'ItemList', name: 'Kiddie Bloom printables',
+      itemListElement: live.map((r, i) => ({
+        '@type': 'ListItem', position: i + 1,
+        item: {
+          '@type': 'Product', name: r.title, description: r.description, category: SECTIONS[r.section]?.label ?? 'Printable',
+          image: `https://kiddiebloom.in${SECTIONS[r.section]?.cover ?? '/img/kiddie-bloom-hero.jpg'}`, brand: { '@type': 'Brand', name: 'Kiddie Bloom' },
+          offers: { '@type': 'Offer', price: r.price, priceCurrency: 'INR', availability: 'https://schema.org/InStock', url: 'https://kiddiebloom.in/#printables' },
+          ...((r.reviewCount ?? 0) > 0 && r.rating !== undefined ? { aggregateRating: { '@type': 'AggregateRating', ratingValue: r.rating, reviewCount: r.reviewCount } } : {}),
+        },
+      })),
+    });
+    document.head.appendChild(el);
+    return () => el.remove();
+  }, [live]);
+
   const needLogin = () => { showToast('Please sign in to buy or download printables.'); setView('auth'); };
-  const toggleBasket = (r: LearningResource) => { const has = basketIds.includes(r.id); setBasketIds(b => has ? b.filter(x => x !== r.id) : [...b, r.id]); showToast(has ? `${r.title} removed from cart` : `${r.title} added to cart`); };
+  const toggleBasket = (r: LearningResource) => { const has = basketIds.includes(r.id); setBasketIds(b => has ? b.filter(x => x !== r.id) : [...b, r.id]); if (!has) track('add_to_cart', { currency: 'INR', value: r.price, items: [gaItem(r)] }); showToast(has ? `${r.title} removed from cart` : `${r.title} added to cart`); };
   const download = async (r: LearningResource) => {
-    if (r.pdfUrl && r.price <= 0) { window.open(r.pdfUrl, '_blank', 'noopener'); return; }
+    if (r.pdfUrl && r.price <= 0) { track('download_printable', { item_id: r.id, item_name: r.title }); window.open(r.pdfUrl, '_blank', 'noopener'); return; }
     if (!user) return needLogin();
     setBusy(r.id);
-    try { await downloadPrintable(r.id, r.title); } catch (e) { showToast(e instanceof Error ? e.message : 'Download failed'); }
+    try { await downloadPrintable(r.id, r.title); track('download_printable', { item_id: r.id, item_name: r.title }); } catch (e) { showToast(e instanceof Error ? e.message : 'Download failed'); }
     setBusy('');
   };
 
@@ -203,7 +230,7 @@ export const PrintablesHome: React.FC = () => {
       onRemove={id => setBasketIds(b => b.filter(x => x !== id))}
       renderThumb={r => <CoverArt r={r} />}
       getSubtitle={r => `${SECTIONS[r.section]?.label ?? ''} · Ages ${r.minAge}–${r.maxAge}`}
-      onPaid={ids => { setOwned(o => [...new Set([...o, ...ids])]); setBasketIds(b => b.filter(x => !ids.includes(x))); }}
+      onPaid={ids => { const paid = basket.filter(b => ids.includes(b.id)); track('purchase', { currency: 'INR', value: paid.reduce((n, b) => n + b.price, 0), items: paid.map(gaItem) }); setOwned(o => [...new Set([...o, ...ids])]); setBasketIds(b => b.filter(x => !ids.includes(x))); }}
     />}
   </main>;
 };
